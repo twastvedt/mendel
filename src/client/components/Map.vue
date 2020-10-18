@@ -28,6 +28,11 @@ export default class Map extends Vue {
   mounted(): void {
     var map = L.map("map").setView([51.505, -0.09], 13);
 
+    map.pm.addControls({
+      position: "topleft",
+      drawCircle: false,
+    });
+
     L.tileLayer("http://{s}.tile.osm.org/{z}/{x}/{y}.png", {
       attribution:
         '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors',
