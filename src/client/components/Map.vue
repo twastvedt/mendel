@@ -1,7 +1,5 @@
 <template>
-  <div class="map">
-    <h1>{{ msg }}</h1>
-  </div>
+  <div id="map"></div>
 </template>
 
 <script lang="ts">
@@ -9,6 +7,15 @@ import { Options, Vue } from "vue-class-component";
 import * as L from "leaflet";
 import "@geoman-io/leaflet-geoman-free";
 import "@geoman-io/leaflet-geoman-free/dist/leaflet-geoman.css";
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+delete (L.Icon.Default.prototype as any)._getIconUrl;
+
+L.Icon.Default.mergeOptions({
+  iconRetinaUrl: require("leaflet/dist/images/marker-icon-2x.png"),
+  iconUrl: require("leaflet/dist/images/marker-icon.png"),
+  shadowUrl: require("leaflet/dist/images/marker-shadow.png"),
+});
 
 @Options({
   props: {
@@ -35,6 +42,13 @@ export default class Map extends Vue {
 </script>
 
 <style scoped lang="scss">
+@import "~leaflet/dist/leaflet.css";
+
+#map {
+  width: 100%;
+  height: 100%;
+}
+
 h3 {
   margin: 40px 0 0;
 }
