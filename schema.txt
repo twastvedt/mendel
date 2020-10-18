@@ -1,0 +1,42 @@
+bed
+  shape
+  startDate
+  endDate
+  
+planting
+  shape
+  plantDate
+  quantity
+  seedlings (boolean)
+  germinationRank
+  growthRank
+  healthRank
+  yeildRank
+  ->plant
+  
+plant
+  locaion
+  plantDate
+  ->variety
+  ->planting
+  
+seed
+  date
+  variety
+  ->plant?
+  source?
+  
+type
+  name
+  color
+  nitrogen (-/0/+)
+  
+variety
+  name
+  ->type
+  image
+  color
+  
+plan
+  date
+  

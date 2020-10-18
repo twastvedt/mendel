@@ -1,0 +1,47 @@
+# -- DEV DOCKER-COMPOSE --
+# -- DO NOT USE IN PRODUCTION! --
+
+version: "3"
+services:
+  db:
+    image: postgres:11-alpine
+    environment:
+      POSTGRES_DB: mendel
+      POSTGRES_PASSWORD: mendel
+      POSTGRES_USER: mendel
+    logging:
+      driver: "none"
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    networks:
+      - mendelnet
+    ports:
+      - "15432:5432"
+
+  adminer:
+    image: adminer:latest
+    logging:
+      driver: "none"
+    networks:
+      - mendelnet
+    ports:
+      - "3001:8080"
+  app:
+    build:
+      context: ../
+      dockerfile: dev/Dockerfile
+    depends_on:
+      - db
+    networks:
+      - mendelnet
+    ports:
+      - "3000:3000"
+    volumes:
+      - ../:/mendel
+      - /mendel/node_modules
+
+networks:
+  mendelnet:
+
+volumes:
+  db-data:
