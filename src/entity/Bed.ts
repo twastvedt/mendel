@@ -14,6 +14,6 @@ export class Bed implements Model {
   @Column()
   startDate!: Date;
 
-  @Column()
-  endDate!: Date;
+  @Column({ nullable: true })
+  endDate?: Date;
 }

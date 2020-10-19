@@ -9,6 +9,8 @@ import Beds from "./controller/Beds";
 
 createConnection()
   .then(async (connection) => {
+    connection.runMigrations();
+
     const app = express();
 
     app.use(bodyParser.json());
