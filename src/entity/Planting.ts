@@ -1,3 +1,4 @@
+import { Polygon } from "geojson";
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from "typeorm";
 import { Plant } from "./Plant";
 
@@ -6,8 +7,8 @@ export class Planting {
   @PrimaryGeneratedColumn()
   id!: number;
 
-  @Column({ spatialFeatureType: "Polygon" })
-  shape!: string;
+  @Column("geometry", { spatialFeatureType: "Polygon", srid: 26915 })
+  shape!: Polygon;
 
   @Column()
   plantDate!: Date;

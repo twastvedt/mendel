@@ -14,5 +14,5 @@ export class Endpoint<
   Data extends Record<string, unknown> | undefined = undefined,
   Params extends Record<string, string> | undefined = undefined
 > {
-  constructor(public method: Method, public resource: string) {}
+  constructor(public method: Method, public resource: string = "") {}
 }

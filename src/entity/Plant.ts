@@ -1,3 +1,4 @@
+import { Point } from "geojson";
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from "typeorm";
 import { Planting } from "./Planting";
 
@@ -6,8 +7,8 @@ export class Plant {
   @PrimaryGeneratedColumn()
   id!: number;
 
-  @Column({ spatialFeatureType: "Point" })
-  location!: string;
+  @Column("geometry", { spatialFeatureType: "Point", srid: 26915 })
+  location!: Point;
 
   @Column()
   plantDate?: Date;

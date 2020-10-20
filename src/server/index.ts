@@ -3,9 +3,7 @@ import { createConnection } from "typeorm";
 import express from "express";
 import * as bodyParser from "body-parser";
 
-import { Bed } from "../entity/Bed";
-
-import Beds from "./controller/Beds";
+import BedRoutes from "./controller/Beds";
 
 createConnection()
   .then(async (connection) => {
@@ -13,9 +11,22 @@ createConnection()
 
     const app = express();
 
+    app.use((req, res, next) => {
+      res.setHeader("Access-Control-Allow-Origin", "*");
+      res.setHeader(
+        "Access-Control-Allow-Methods",
+        "OPTIONS, GET, POST, PUT, PATCH, DELETE"
+      );
+      res.setHeader(
+        "Access-Control-Allow-Headers",
+        "Content-Type, Authorization"
+      );
+      next();
+    });
+
     app.use(bodyParser.json());
 
-    app.use(`/${Bed}`, Beds);
+    app.use(BedRoutes);
 
     // Run app
     app.listen(3000);

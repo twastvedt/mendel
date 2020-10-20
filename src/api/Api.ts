@@ -2,19 +2,24 @@ import { Bed } from "@/entity/Bed";
 import { Endpoint } from "./Endpoint";
 
 export class Beds {
-  static one = new Endpoint<Bed, undefined, { id: string }>("get", `/beds/:id`);
+  static base = "/beds/";
 
-  static all = new Endpoint<Bed[]>("get", "/beds");
+  static one = new Endpoint<Bed, undefined, { id: string }>(
+    "get",
+    `${Beds.base}:id`
+  );
 
-  static create = new Endpoint<Bed, Partial<Bed>>("post", "/beds");
+  static all = new Endpoint<Bed[]>("get", Beds.base);
+
+  static create = new Endpoint<Bed, Partial<Bed>>("post", `${Beds.base}`);
 
   static update = new Endpoint<Bed, Partial<Bed>, { id: string }>(
     "put",
-    `/beds/:id`
+    `${Beds.base}:id`
   );
 
   static delete = new Endpoint<Bed, undefined, { id: string }>(
     "delete",
-    `/beds/:id`
+    `${Beds.base}:id`
   );
 }

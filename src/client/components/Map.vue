@@ -6,7 +6,12 @@
 import { Options, Vue } from "vue-class-component";
 import * as L from "leaflet";
 import "@geoman-io/leaflet-geoman-free";
-import "@geoman-io/leaflet-geoman-free/dist/leaflet-geoman.css";
+import "proj4leaflet";
+import proj4 from "proj4";
+
+import { Bed } from "../../entity/Bed";
+import { request } from "../ApiRequest";
+import { Beds } from "../../api/Api";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -17,55 +22,94 @@ L.Icon.Default.mergeOptions({
   shadowUrl: require("leaflet/dist/images/marker-shadow.png"),
 });
 
+// import * as geojson from "geojson";
+
+// declare module "leaflet" {
+//   namespace Proj {
+//     const geoJson: (geojson?: Proj4GeoJSONFeature[], options?: L.GeoJSONOptions) => geojson.GeoJSON;
+//   }
+
+//   export function geoJSON<P = any>(
+//     geojson?: geojson.GeoJsonObject[] | geojson.GeoJSON,
+//     options?: L.GeoJSONOptions<P>
+//   ): L.GeoJSON<P>;
+// }
+
 @Options({
   props: {
     msg: String,
   },
 })
 export default class Map extends Vue {
-  msg!: string;
+  loading = false;
+  error = "";
+  beds!: Bed[];
+  map!: L.Map;
 
   mounted(): void {
-    var map = L.map("map").setView([51.505, -0.09], 13);
+    this.map = L.map("map", { minZoom: 0, maxZoom: 28 }).setView(
+      [44.968726, -93.003271],
+      21
+    );
 
-    map.pm.addControls({
+    proj4.defs(
+      "EPSG:26915",
+      "+proj=utm +zone=15 +ellps=GRS80 +datum=NAD83 +units=m +no_defs"
+    );
+
+    this.fetchData();
+
+    this.map.pm.addControls({
       position: "topleft",
       drawCircle: false,
+      drawRectangle: false,
+      drawCircleMarker: false,
+      cutPolygon: false,
+      drawPolyline: false,
     });
 
     L.tileLayer("http://{s}.tile.osm.org/{z}/{x}/{y}.png", {
       attribution:
         '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors',
-    }).addTo(map);
+    }).addTo(this.map);
+  }
 
-    L.marker([51.5, -0.09])
-      .addTo(map)
-      .bindPopup("A pretty CSS3 popup.<br> Easily customizable.")
-      .openPopup();
+  async fetchData(): Promise<void> {
+    this.error = "";
+    this.beds = [];
+    this.loading = true;
+
+    try {
+      this.beds = await request(Beds.all, undefined, undefined);
+
+      this.beds.forEach((b) =>
+        L.Proj.geoJson({
+          type: "Feature",
+          geometry: b.shape,
+          properties: null,
+          crs: {
+            type: "name",
+            properties: { name: "EPSG:26915" },
+          },
+        }).addTo(this.map)
+      );
+    } catch (error) {
+      this.error = error;
+    }
+
+    console.log(JSON.stringify(this.beds));
+
+    this.loading = false;
   }
 }
 </script>
 
 <style scoped lang="scss">
 @import "~leaflet/dist/leaflet.css";
+@import "~@geoman-io/leaflet-geoman-free/dist/leaflet-geoman.css";
 
 #map {
   width: 100%;
   height: 100%;
-}
-
-h3 {
-  margin: 40px 0 0;
-}
-ul {
-  list-style-type: none;
-  padding: 0;
-}
-li {
-  display: inline-block;
-  margin: 0 10px;
-}
-a {
-  color: #42b983;
 }
 </style>

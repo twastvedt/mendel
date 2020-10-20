@@ -18,7 +18,7 @@ export async function request<
 
   return axios
     .request<Response>({
-      baseURL: "http://localhost:8081/",
+      baseURL: "http://localhost:3000/",
       method: endpoint.method,
       url,
       data,
