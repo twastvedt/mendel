@@ -7,6 +7,7 @@ import { Options, Vue } from "vue-class-component";
 import * as L from "leaflet";
 import "@geoman-io/leaflet-geoman-free";
 import "proj4leaflet";
+
 import proj4 from "proj4";
 
 import { Bed } from "../../entity/Bed";
@@ -34,9 +35,11 @@ export default class Map extends Vue {
   map!: L.Map;
 
   mounted(): void {
-    this.map = L.map("map", { minZoom: 0, maxZoom: 28 }).setView(
+    console.debug("Map mounted");
+
+    this.map = L.map("map", { minZoom: 0, maxZoom: 30 }).setView(
       [44.968726, -93.003271],
-      18
+      20
     );
 
     proj4.defs(
@@ -55,10 +58,12 @@ export default class Map extends Vue {
       drawPolyline: false,
     });
 
-    L.tileLayer("http://{s}.tile.osm.org/{z}/{x}/{y}.png", {
-      attribution:
-        '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors',
-    }).addTo(this.map);
+    L.tileLayer
+      .wms("https://imageserver.gisdata.mn.gov/cgi-bin/mncomp?VERSION=1.3.0", {
+        layers: "mncomp",
+        maxZoom: 30,
+      })
+      .addTo(this.map);
   }
 
   async fetchData(): Promise<void> {
@@ -69,7 +74,9 @@ export default class Map extends Vue {
     try {
       this.beds = await request(Beds.all, undefined, undefined);
 
-      L.Proj.geoJson(this.beds.map((b) => b.shape)).addTo(this.map);
+      setTimeout(() => {
+        L.Proj.geoJson(this.beds.map((b) => b.shape)).addTo(this.map);
+      }, 2000);
     } catch (error) {
       this.error = error;
     }
