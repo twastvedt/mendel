@@ -13,7 +13,7 @@
   "dependencies": {
     "@geoman-io/leaflet-geoman-free": "^2.7.0",
     "@types/geojson": "^7946.0.7",
-    "@types/proj4leaflet": "^1.0.5",
+    "@types/proj4": "^2.5.0",
     "axios": "^0.20.0",
     "body-parser": "^1.19.0",
     "class-validator": "^0.12.2",

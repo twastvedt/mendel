@@ -22,19 +22,6 @@ L.Icon.Default.mergeOptions({
   shadowUrl: require("leaflet/dist/images/marker-shadow.png"),
 });
 
-// import * as geojson from "geojson";
-
-// declare module "leaflet" {
-//   namespace Proj {
-//     const geoJson: (geojson?: Proj4GeoJSONFeature[], options?: L.GeoJSONOptions) => geojson.GeoJSON;
-//   }
-
-//   export function geoJSON<P = any>(
-//     geojson?: geojson.GeoJsonObject[] | geojson.GeoJSON,
-//     options?: L.GeoJSONOptions<P>
-//   ): L.GeoJSON<P>;
-// }
-
 @Options({
   props: {
     msg: String,
@@ -49,7 +36,7 @@ export default class Map extends Vue {
   mounted(): void {
     this.map = L.map("map", { minZoom: 0, maxZoom: 28 }).setView(
       [44.968726, -93.003271],
-      21
+      18
     );
 
     proj4.defs(
@@ -82,22 +69,10 @@ export default class Map extends Vue {
     try {
       this.beds = await request(Beds.all, undefined, undefined);
 
-      this.beds.forEach((b) =>
-        L.Proj.geoJson({
-          type: "Feature",
-          geometry: b.shape,
-          properties: null,
-          crs: {
-            type: "name",
-            properties: { name: "EPSG:26915" },
-          },
-        }).addTo(this.map)
-      );
+      L.Proj.geoJson(this.beds.map((b) => b.shape)).addTo(this.map);
     } catch (error) {
       this.error = error;
     }
-
-    console.log(JSON.stringify(this.beds));
 
     this.loading = false;
   }
