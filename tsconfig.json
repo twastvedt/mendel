@@ -17,10 +17,10 @@
     "sourceMap": true,
     "baseUrl": ".",
     "typeRoots": ["./types", "./node_modules/@types"],
-    "types": ["webpack-env"],
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": ["./src/*"]
     },
+    "plugins": [{ "transform": "ts-nameof", "type": "raw" }],
     "lib": [
       "esnext",
       "dom",
@@ -28,14 +28,5 @@
       "esnext.asynciterable",
       "scripthost"
     ]
-  },
-  "include": [
-    "src/**/*.ts",
-    "src/**/*.tsx",
-    "src/**/*.vue",
-    "tests/**/*.ts",
-    "tests/**/*.tsx",
-    "types/**/*.d.ts"
-  ],
-  "exclude": ["node_modules"]
+  }
 }

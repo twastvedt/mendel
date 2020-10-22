@@ -6,8 +6,8 @@
     "client-serve": "set NODE_ENV=development&& vue-cli-service serve src/client/main.ts",
     "client-build": "vue-cli-service build src/client/main.ts",
     "lint": "vue-cli-service lint",
-    "server-serve": "ts-node src/server/index.ts",
-    "start": "nodemon --legacy-watch src/server/index.ts -- --loader ts-node/esm --ext ts --experimental-specifier-resolution=node",
+    "server-serve": "ts-node -r tsconfig-paths/register --compiler ttypescript src/server/index.ts",
+    "start": "nodemon -r tsconfig-paths/register src/server/index.ts -- --loader ts-node/esm --ext ts --compiler ttypescript --experimental-specifier-resolution=node",
     "typeorm": "typeorm"
   },
   "dependencies": {
@@ -54,6 +54,8 @@
     "sass-loader": "^10.0.3",
     "ts-nameof": "^5.0.0",
     "ts-node": "9.0.0",
+    "tsconfig-paths": "^3.9.0",
+    "ttypescript": "^1.5.12",
     "typescript": "~4.0.3"
   }
 }

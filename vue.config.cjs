@@ -1,5 +1,7 @@
-// eslint-disable-next-line @typescript-eslint/no-var-requires
+/* eslint-disable @typescript-eslint/no-var-requires */
+
 const path = require("path");
+const tsNameof = require("ts-nameof");
 
 module.exports = {
   configureWebpack: {
@@ -13,9 +15,22 @@ module.exports = {
     },
     devServer: {
       historyApiFallback: true,
-      watchOptions: {
-        poll: true,
-      },
+    },
+    module: {
+      rules: [
+        {
+          test: /\.ts$/,
+          exclude: /node_modules/,
+          use: [
+            {
+              loader: "ts-loader",
+              options: {
+                getCustomTransformers: () => ({ before: [tsNameof] }),
+              },
+            },
+          ],
+        },
+      ],
     },
   },
 };

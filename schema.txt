@@ -30,14 +30,14 @@ seed
   ->plant?
   source?
   
-type
+family
   name
   color
   nitrogen (-/0/+)
   
 variety
   name
-  ->type
+  ->family
   image
   color
   

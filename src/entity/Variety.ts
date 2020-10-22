@@ -1,12 +1,12 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from "typeorm";
-import { Type } from "./Type";
+import { Family } from "./Family";
 
 @Entity()
 export class Variety {
-  constructor(name: string, color: string, type: Type) {
+  constructor(name: string, color: string, family: Family) {
     this.name = name;
     this.color = color;
-    this.type = type;
+    this.family = family;
   }
 
   @PrimaryGeneratedColumn()
@@ -18,6 +18,6 @@ export class Variety {
   @Column()
   color!: string;
 
-  @ManyToOne(() => Type, (type) => type.varieties)
-  type!: Type;
+  @ManyToOne(() => Family, (family) => family.varieties)
+  family!: Family;
 }

@@ -1,10 +1,10 @@
 <template class="container">
   <div class="seedPack">
     <h1>{{ variety.name }}</h1>
-    <h2>{{ variety.type.name }}</h2>
+    <h2>{{ variety.family.name }}</h2>
     <div
       :style="`stroke: black; fill: ${variety.color}`"
-      :v-html="variety.type.svg"
+      :v-html="variety.family.svg"
     ></div>
   </div>
 </template>
@@ -12,11 +12,9 @@
 <script lang="ts">
 import { Options, Vue } from "vue-class-component";
 
-import { Variety } from "../../entity/Variety";
-
 @Options({
   props: {
-    variety: Variety,
+    variety: Object,
   },
 })
 export default class SeedPack extends Vue {}

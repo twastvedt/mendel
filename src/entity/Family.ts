@@ -2,7 +2,7 @@ import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from "typeorm";
 import { Variety } from "./Variety";
 
 @Entity()
-export class Type {
+export class Family {
   constructor(name: string, color: string, icon: string, nitrogen = undefined) {
     this.name = name;
     this.icon = icon;
@@ -25,7 +25,7 @@ export class Type {
   @Column({ nullable: true })
   nitrogen?: number;
 
-  @OneToMany(() => Variety, (v) => v.type, {
+  @OneToMany(() => Variety, (v) => v.family, {
     onDelete: "CASCADE",
   })
   varieties!: Variety[];
