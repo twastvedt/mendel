@@ -4,6 +4,7 @@ import express from "express";
 import * as bodyParser from "body-parser";
 
 import BedRoutes from "./controller/Beds";
+import VarietyRoutes from "./controller/Varieties";
 
 createConnection()
   .then(async (connection) => {
@@ -27,6 +28,7 @@ createConnection()
     app.use(bodyParser.json());
 
     app.use(BedRoutes);
+    app.use(VarietyRoutes);
 
     // Run app
     app.listen(3000);

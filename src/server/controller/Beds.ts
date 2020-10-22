@@ -1,42 +1,17 @@
-import { Beds } from "../../api/Api";
+import { bedApi } from "../../api/BedApi";
 import { Bed } from "../../entity/Bed";
 import express from "express";
-import { getManager } from "typeorm";
 
 import { addEndpoint } from "./addEndpoint";
 
+import * as defaultEndpoints from "./defaultEndpoints";
+
 const router = express.Router();
 
-addEndpoint(router, Beds.one, async (request, response) => {
-  const repository = getManager().getRepository(Bed);
+addEndpoint(router, bedApi.one, defaultEndpoints.one(Bed));
 
-  const entity = await repository.findOne(request.params.id);
+addEndpoint(router, bedApi.all, defaultEndpoints.all(Bed));
 
-  if (!entity) {
-    response.status(404);
-    response.end();
-    return;
-  }
-
-  response.send(entity);
-});
-
-addEndpoint(router, Beds.all, async (request, response) => {
-  const repository = getManager().getRepository(Bed);
-
-  const entities = await repository.find();
-
-  response.send(entities);
-});
-
-addEndpoint(router, Beds.create, async (request, response) => {
-  const repository = getManager().getRepository(Bed);
-
-  const newEntity = repository.create(request.body);
-
-  await repository.save(newEntity);
-
-  response.send(newEntity);
-});
+addEndpoint(router, bedApi.create, defaultEndpoints.create(Bed));
 
 export default router;

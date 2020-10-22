@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+
 // Methods supported by both Axios and Express.
 export type Method =
   | "get"

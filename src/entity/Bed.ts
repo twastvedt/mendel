@@ -1,11 +1,8 @@
 import { Polygon } from "geojson";
 import { Entity, PrimaryGeneratedColumn, Column } from "typeorm";
-import { Model } from "./Model";
 
 @Entity()
-export class Bed implements Model {
-  endpoint = "bed";
-
+export class Bed {
   @PrimaryGeneratedColumn()
   id!: number;
 

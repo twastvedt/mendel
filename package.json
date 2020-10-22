@@ -7,7 +7,7 @@
     "client-build": "vue-cli-service build src/client/main.ts",
     "lint": "vue-cli-service lint",
     "server-serve": "ts-node src/server/index.ts",
-    "start": "nodemon src/server/index.ts -- --loader ts-node/esm --ext ts --experimental-specifier-resolution=node",
+    "start": "nodemon --legacy-watch src/server/index.ts -- --loader ts-node/esm --ext ts --experimental-specifier-resolution=node",
     "typeorm": "typeorm"
   },
   "dependencies": {

@@ -4,7 +4,7 @@ import { RequestHandler, Router } from "express";
 export function addEndpoint<
   Result,
   Data extends Record<string, unknown> | undefined,
-  Params extends Record<string, string>
+  Params extends Record<string, string> | undefined
 >(
   router: Router,
   endpoint: Endpoint<Result, Data, Params>,

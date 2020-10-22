@@ -31,7 +31,9 @@ export class Planting {
   @Column()
   yeildRank?: number;
 
-  @OneToMany(() => Plant, (plant) => plant.planting)
+  @OneToMany(() => Plant, (plant) => plant.planting, {
+    onDelete: "CASCADE",
+  })
   plants!: Plant[];
 
   constructor() {

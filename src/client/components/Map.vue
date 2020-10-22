@@ -12,7 +12,7 @@ import proj4 from "proj4";
 
 import { Bed } from "../../entity/Bed";
 import { request } from "../ApiRequest";
-import { Beds } from "../../api/Api";
+import { bedApi } from "../../api/BedApi";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -72,7 +72,7 @@ export default class Map extends Vue {
     this.loading = true;
 
     try {
-      this.beds = await request(Beds.all, undefined, undefined);
+      this.beds = await request(bedApi.all, undefined, undefined);
 
       setTimeout(() => {
         L.Proj.geoJson(this.beds.map((b) => b.shape)).addTo(this.map);
