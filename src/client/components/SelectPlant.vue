@@ -1,8 +1,10 @@
 <template class="container">
   <div class="selectPlant container">
-    <div class="seedPack" v-for="variety in varieties" :key="variety.id">
-      {{ variety.name }}
-    </div>
+    <SeedPack
+      v-for="variety in varieties"
+      :key="variety.id"
+      :variety="variety"
+    />
     <div>+</div>
   </div>
 </template>
@@ -10,11 +12,15 @@
 <script lang="ts">
 import { Options, Vue } from "vue-class-component";
 
+import SeedPack from "./SeedPack";
 import { Variety } from "../../entity/Variety";
 import { request } from "../ApiRequest";
 import { varietyApi } from "../../api/VarietyApi";
 
 @Options({
+  components: {
+    SeedPack,
+  },
   props: {
     msg: String,
   },
