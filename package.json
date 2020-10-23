@@ -7,8 +7,22 @@
     "client-build": "vue-cli-service build src/client/main.ts",
     "lint": "vue-cli-service lint",
     "server-serve": "ts-node -r tsconfig-paths/register --compiler ttypescript src/server/index.ts",
-    "start": "nodemon -r tsconfig-paths/register src/server/index.ts -- --loader ts-node/esm --ext ts --compiler ttypescript --experimental-specifier-resolution=node",
+    "start": "nodemon",
     "typeorm": "typeorm"
+  },
+  "nodemonConfig": {
+    "ignore": [
+      "**/*.test.ts",
+      "**/*.spec.ts",
+      ".git",
+      "node_modules",
+      "src/client"
+    ],
+    "watch": [
+      "src"
+    ],
+    "exec": "npm run server-serve",
+    "ext": "ts, js"
   },
   "dependencies": {
     "@geoman-io/leaflet-geoman-free": "^2.7.0",
