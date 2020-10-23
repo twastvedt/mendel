@@ -21,7 +21,7 @@ export default class SeedPack extends Vue {}
 </script>
 
 <style scoped lang="scss">
-@import "../styles/style.scss";
+@import "../styles/variables.scss";
 
 .seedPack {
   width: 6em;

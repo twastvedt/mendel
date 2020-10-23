@@ -14,6 +14,4 @@ import SelectPlant from "./SelectPlant.vue";
 export default class Sidebar extends Vue {}
 </script>
 
-<style scoped lang="scss">
-@import "../styles/style.scss";
-</style>
+<style scoped lang="scss"></style>

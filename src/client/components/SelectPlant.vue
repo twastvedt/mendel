@@ -58,8 +58,6 @@ export default class SelectPlant extends Vue {
 </script>
 
 <style scoped lang="scss">
-@import "../styles/style.scss";
-
 .selectPlant {
   display: flex;
 }
