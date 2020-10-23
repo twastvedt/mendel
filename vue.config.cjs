@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-var-requires */
 
 const path = require("path");
+const tsNameof = require("ts-nameof");
 
 module.exports = {
   configureWebpack: {
@@ -15,11 +16,23 @@ module.exports = {
     devServer: {
       historyApiFallback: true,
     },
-  },
-  chainWebpack: (config) => {
-    config.plugin("fork-ts-checker").tap((args) => {
-      args[0].typescript.configFile = "./tsconfig.frontend.json";
-      return args;
-    });
+    module: {
+      rules: [
+        {
+          test: /\.ts$/,
+          exclude: /node_modules/,
+          use: [
+            {
+              loader: "ts-loader",
+              options: {
+                getCustomTransformers: () => ({ before: [tsNameof] }),
+                transpileOnly: true,
+                appendTsSuffixTo: ["\\.vue$"],
+              },
+            },
+          ],
+        },
+      ],
+    },
   },
 };

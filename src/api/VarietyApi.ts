@@ -4,8 +4,8 @@ import { baseApi } from "./BaseApi";
 import { Endpoint } from "./Endpoint";
 
 export const varietyApi = Object.assign(baseApi<Variety>("varieties"), {
-  allWithFamilies: new Endpoint<Family[], undefined, undefined>(
+  allByFamily: new Endpoint<Family[], undefined, undefined>(
     "get",
-    "/varieties/allWithFamilies"
+    "/varieties/allByFamily"
   ),
 });

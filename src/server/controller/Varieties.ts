@@ -10,13 +10,7 @@ import { Family } from "@/entity/Family";
 
 const router = express.Router();
 
-addEndpoint(router, varietyApi.one, defaultEndpoints.one(Variety));
-
-addEndpoint(router, varietyApi.all, defaultEndpoints.all(Variety));
-
-addEndpoint(router, varietyApi.create, defaultEndpoints.create(Variety));
-
-addEndpoint(router, varietyApi.allWithFamilies, async (request, response) => {
+addEndpoint(router, varietyApi.allByFamily, async (request, response) => {
   const repository = getManager().getRepository(Family);
 
   const result = await repository.find({
@@ -31,5 +25,11 @@ addEndpoint(router, varietyApi.allWithFamilies, async (request, response) => {
 
   response.send(result);
 });
+
+addEndpoint(router, varietyApi.all, defaultEndpoints.all(Variety));
+
+addEndpoint(router, varietyApi.create, defaultEndpoints.create(Variety));
+
+addEndpoint(router, varietyApi.one, defaultEndpoints.one(Variety));
 
 export default router;

@@ -15,7 +15,6 @@
 import { Options, Vue } from "vue-class-component";
 
 import SeedPack from "./SeedPack.vue";
-import { Variety } from "@/entity/Variety";
 import { request } from "../ApiRequest";
 import { varietyApi } from "@/api/VarietyApi";
 import { Family } from "@/entity/Family";
@@ -43,10 +42,12 @@ export default class SelectPlant extends Vue {
 
     try {
       this.varieties = await request(
-        varietyApi.allWithFamilies,
+        varietyApi.allByFamily,
         undefined,
         undefined
       );
+
+      this.varieties.forEach((f) => f.varieties.forEach((v) => (v.family = f)));
     } catch (error) {
       this.error = error;
     }
