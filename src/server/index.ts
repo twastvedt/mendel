@@ -8,6 +8,9 @@ import VarietyRoutes from "./controller/Varieties";
 
 createConnection()
   .then(async (connection) => {
+    // TODO: Remove for production.
+    await connection.synchronize(true);
+
     connection.runMigrations();
 
     const app = express();
