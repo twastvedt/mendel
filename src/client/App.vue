@@ -42,5 +42,6 @@ main {
 aside {
   height: 100%;
   flex: 0 0 400px;
+  background-color: #e0ded0;
 }
 </style>
