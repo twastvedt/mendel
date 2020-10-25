@@ -1,6 +1,6 @@
-<template class="container">
+<template>
   <div class="selectPlant container">
-    <template v-for="family in varieties" :key="family.id">
+    <template v-for="family in varieties">
       <SeedPack
         v-for="variety in family.varieties"
         :key="variety.id"
@@ -12,14 +12,14 @@
 </template>
 
 <script lang="ts">
-import { Options, Vue } from "vue-class-component";
+import { Component, Vue } from "vue-property-decorator";
 
 import SeedPack from "./SeedPack.vue";
 import { request } from "../ApiRequest";
 import { varietyApi } from "@/api/VarietyApi";
 import { Family } from "@/entity/Family";
 
-@Options({
+@Component({
   components: {
     SeedPack,
   },
@@ -31,6 +31,7 @@ export default class SelectPlant extends Vue {
   loading = false;
   error = "";
   varieties: Family[] = [];
+  showNew = false;
 
   mounted(): void {
     this.fetchData();

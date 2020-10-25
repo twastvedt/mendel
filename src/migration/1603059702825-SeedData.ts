@@ -71,9 +71,9 @@ export class SeedData1603059702825 implements MigrationInterface {
             artboard.remove();
           }
 
-          const result = svg.svg();
+          let result = svg.svg();
 
-          result.replace("fill:none;", "");
+          result = result.replace("fill:none;", "");
 
           svg.remove();
 

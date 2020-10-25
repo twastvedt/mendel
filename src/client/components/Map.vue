@@ -3,7 +3,7 @@
 </template>
 
 <script lang="ts">
-import { Options, Vue } from "vue-class-component";
+import { Component, Vue } from "vue-property-decorator";
 import * as L from "leaflet";
 import "@geoman-io/leaflet-geoman-free";
 import "proj4leaflet";
@@ -23,7 +23,7 @@ L.Icon.Default.mergeOptions({
   shadowUrl: require("leaflet/dist/images/marker-shadow.png"),
 });
 
-@Options({
+@Component({
   props: {
     msg: String,
   },
@@ -74,9 +74,7 @@ export default class Map extends Vue {
     try {
       this.beds = await request(bedApi.all, undefined, undefined);
 
-      setTimeout(() => {
-        L.Proj.geoJson(this.beds.map((b) => b.shape)).addTo(this.map);
-      }, 2000);
+      L.Proj.geoJson(this.beds.map((b) => b.shape)).addTo(this.map);
     } catch (error) {
       this.error = error;
     }

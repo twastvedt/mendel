@@ -1,18 +1,20 @@
 <template>
-  <main>
-    <Map />
-  </main>
-  <aside class="container">
-    <Sidebar />
-  </aside>
+  <div id="app">
+    <main>
+      <Map />
+    </main>
+    <aside class="container">
+      <Sidebar />
+    </aside>
+  </div>
 </template>
 
 <script lang="ts">
-import { Options, Vue } from "vue-class-component";
+import { Component, Vue } from "vue-property-decorator";
 import Map from "./components/Map.vue";
 import Sidebar from "./components/Sidebar.vue";
 
-@Options({
+@Component({
   components: {
     Map,
     Sidebar,
