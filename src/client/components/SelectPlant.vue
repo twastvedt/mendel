@@ -1,14 +1,18 @@
 <template>
-  <div class="selectPlant container">
-    <template v-for="family in varieties">
-      <SeedPack
-        v-for="variety in family.varieties"
-        :key="variety.id"
-        :variety="variety"
-      />
-    </template>
-    <div class="seedPack new"><h1>+</h1></div>
-  </div>
+  <v-item-group>
+    <v-container>
+      <v-row align="stretch">
+        <template v-for="family in varieties">
+          <v-col cols="6" v-for="variety in family.varieties" :key="variety.id">
+            <SeedPack :variety="variety" />
+          </v-col>
+        </template>
+        <v-col cols="6">
+          <v-card class="seedPack new"><h1>+</h1></v-card>
+        </v-col>
+      </v-row>
+    </v-container>
+  </v-item-group>
 </template>
 
 <script lang="ts">
@@ -61,27 +65,16 @@ export default class SelectPlant extends Vue {
 <style scoped lang="scss">
 @import "../styles/variables.scss";
 
-.selectPlant {
-  display: flex;
+.new {
+  h1 {
+    text-align: center;
+    font-size: 3em;
+    font-family: sans-serif;
+    font-weight: bold;
+  }
 }
 
-.seedPack {
-  margin: $s;
-  width: 6em;
-  height: 9em;
-  box-sizing: border-box;
-  box-shadow: 0 0 3px 1px rgba(0, 0, 0, 0.25);
-  border-radius: 1px;
-
-  &.new {
-    background-color: white;
-
-    h1 {
-      text-align: center;
-      font-size: 3em;
-      font-family: sans-serif;
-      font-weight: bold;
-    }
-  }
+.v-card {
+  height: 100%;
 }
 </style>

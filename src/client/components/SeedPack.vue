@@ -1,13 +1,13 @@
-<template class="container">
-  <div class="seedPack">
-    <h1>{{ variety.name }}</h1>
-    <h2>{{ variety.family.name }}</h2>
-    <div
-      class="icon"
+<template>
+  <v-card class="seedPack d-flex flex-column">
+    <v-card-title>{{ variety.name }}</v-card-title>
+    <v-card-subtitle>{{ variety.family.name }}</v-card-subtitle>
+    <v-card-text
+      class="icon flex-grow-1"
       :style="`fill: ${variety.color}`"
       v-html="variety.family.icon"
-    ></div>
-  </div>
+    ></v-card-text>
+  </v-card>
 </template>
 
 <script lang="ts">
@@ -23,31 +23,7 @@ export default class SeedPack extends Vue {}
 
 <style scoped lang="scss">
 @import "../styles/variables.scss";
-
-.seedPack {
-  display: flex;
-  flex-direction: column;
-  background: white;
-  flex: 0 0 auto;
-  padding: 0.25em;
-}
-
-h1 {
-  margin: 0 0 0.25em 0;
-  font-size: 1em;
-  height: 2.5em;
-  flex: 0 0 auto;
-  border-bottom: 1px dashed #7d4e3f;
-}
-
-h2 {
-  font-size: 0.6em;
-  font-family: sans-serif;
-  flex: 0 0 auto;
-}
-
 .icon {
-  flex: 1 0 0;
   min-height: 0;
   stroke: black;
   text-align: center;

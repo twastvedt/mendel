@@ -4,6 +4,7 @@ const path = require("path");
 const tsNameof = require("ts-nameof");
 
 module.exports = {
+  transpileDependencies: ["vuetify"],
   configureWebpack: {
     resolve: {
       alias: {
