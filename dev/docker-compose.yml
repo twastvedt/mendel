@@ -39,6 +39,7 @@ services:
     volumes:
       - ../:/mendel
       - /mendel/node_modules
+      - ~/.gitconfig:/etc/gitconfig
 
 networks:
   mendelnet:
