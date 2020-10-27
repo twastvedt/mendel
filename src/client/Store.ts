@@ -2,12 +2,13 @@ import { Family } from "@/entity/Family";
 
 import { request } from "./ApiRequest";
 import { varietyApi } from "@/api/VarietyApi";
-import { Variety } from "@/entity/Variety";
+import { Bed } from "@/entity/Bed";
+import { bedApi } from "@/api/BedApi";
 
 export default class Store {
-  public static state: Store;
+  static state: Store;
 
-  public static initialize(): Store {
+  static initialize(): Store {
     Store.state = new Store();
 
     return Store.state;
@@ -17,7 +18,20 @@ export default class Store {
   error = "";
 
   varieties: Family[] = [];
+  beds: Bed[] = [];
 
+  async loadBeds(): Promise<void> {
+    this.error = "";
+    this.loading = true;
+
+    try {
+      this.beds = await request(bedApi.all, undefined, undefined);
+    } catch (error) {
+      this.error = error;
+    }
+
+    this.loading = false;
+  }
   async loadVarieties(): Promise<void> {
     this.error = "";
     this.loading = true;

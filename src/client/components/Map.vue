@@ -1,18 +1,16 @@
 <template>
-  <div id="map"></div>
+  <div id="map" ref="map"></div>
 </template>
 
 <script lang="ts">
 import { Component, Vue } from "vue-property-decorator";
 import * as L from "leaflet";
 import "@geoman-io/leaflet-geoman-free";
-import "proj4leaflet";
-
 import proj4 from "proj4";
 
-import { Bed } from "../../entity/Bed";
-import { request } from "../ApiRequest";
-import { bedApi } from "../../api/BedApi";
+(L as any).Proj = require("proj4leaflet");
+
+import Store from "../Store";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -29,15 +27,18 @@ L.Icon.Default.mergeOptions({
   },
 })
 export default class Map extends Vue {
-  loading = false;
-  error = "";
-  beds!: Bed[];
+  $refs!: {
+    map: HTMLDivElement;
+  };
+
+  state = Store.state;
+
   map!: L.Map;
 
-  mounted(): void {
+  async mounted(): Promise<void> {
     console.debug("Map mounted");
 
-    this.map = L.map("map", { minZoom: 0, maxZoom: 30 }).setView(
+    this.map = L.map(this.$refs.map, { minZoom: 0, maxZoom: 30 }).setView(
       [44.968726, -93.003271],
       20
     );
@@ -46,8 +47,6 @@ export default class Map extends Vue {
       "EPSG:26915",
       "+proj=utm +zone=15 +ellps=GRS80 +datum=NAD83 +units=m +no_defs"
     );
-
-    this.fetchData();
 
     this.map.pm.addControls({
       position: "topleft",
@@ -64,22 +63,12 @@ export default class Map extends Vue {
         maxZoom: 30,
       })
       .addTo(this.map);
-  }
 
-  async fetchData(): Promise<void> {
-    this.error = "";
-    this.beds = [];
-    this.loading = true;
+    await this.state.loadBeds();
 
-    try {
-      this.beds = await request(bedApi.all, undefined, undefined);
+    const layer = L.Proj.geoJson(this.state.beds.map((b) => b.shape));
 
-      L.Proj.geoJson(this.beds.map((b) => b.shape)).addTo(this.map);
-    } catch (error) {
-      this.error = error;
-    }
-
-    this.loading = false;
+    layer.addTo(this.map);
   }
 }
 </script>

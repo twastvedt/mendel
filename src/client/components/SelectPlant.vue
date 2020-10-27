@@ -18,7 +18,7 @@
       </template>
     </v-list-item-group>
 
-    <v-list-item class="new">
+    <v-list-item>
       <v-list-item-content>
         <AddNewVariety v-show="!showNewForm" @blur="showNewForm = false" />
         <v-btn @click="showNewForm = true" v-show="showNewForm"> + </v-btn>
@@ -38,10 +38,6 @@ import AddNewVariety from "./AddNewVariety.vue";
   },
 })
 export default class SelectPlant extends Vue {
-  $refs!: {
-    form: HTMLFormElement;
-  };
-
   state = Store.state;
 
   showNewForm = false;
@@ -57,15 +53,6 @@ export default class SelectPlant extends Vue {
 
 .icon {
   stroke: black;
-}
-
-.new {
-  h1 {
-    text-align: center;
-    font-size: 3em;
-    font-family: sans-serif;
-    font-weight: bold;
-  }
 }
 
 .v-card {

@@ -28,7 +28,7 @@
                   v-on="on"
                   v-show="newFamily"
                   v-bind="attrs"
-                  class="swatch"
+                  class="icon"
                   :style="`fill: ${newColor}`"
                   v-html="newFamily ? newFamily.icon : ''"
                 ></v-btn>
@@ -90,4 +90,8 @@ export default class AddNewVariety extends Vue {
 }
 </script>
 
-<style scoped lang="scss"></style>
+<style scoped lang="scss">
+.icon {
+  stroke: black;
+}
+</style>
