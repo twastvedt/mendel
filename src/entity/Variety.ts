@@ -1,4 +1,10 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from "typeorm";
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  ManyToOne,
+  JoinColumn,
+} from "typeorm";
 import { Family } from "./Family";
 
 @Entity()
@@ -7,6 +13,10 @@ export class Variety {
     this.name = name;
     this.color = color;
     this.family = family;
+
+    if (family?.id != null) {
+      this.familyId = family.id;
+    }
   }
 
   @PrimaryGeneratedColumn()
@@ -18,6 +28,10 @@ export class Variety {
   @Column()
   color!: string;
 
+  @Column()
+  familyId?: number;
+
   @ManyToOne(() => Family, (family) => family.varieties)
+  @JoinColumn({ name: nameof(Variety.prototype.familyId) })
   family!: Family;
 }

@@ -1,121 +1,63 @@
 <template>
-  <v-item-group>
-    <v-container>
-      <v-row align="stretch">
-        <template v-for="family in varieties">
-          <v-col cols="6" v-for="variety in family.varieties" :key="variety.id">
-            <SeedPack :variety="variety" />
-          </v-col>
-        </template>
-        <v-col cols="6">
-          <v-card class="seedPack new">
-            <h1
-              class="newButton"
-              :hidden="showNewForm"
-              @click="showNewForm = true"
-            >
-              +
-            </h1>
-            <v-card-text :hidden="!showNewForm" @blur="showNewForm = false">
-              <v-text-field v-model="newName" label="Name" dense></v-text-field>
-              <v-select
-                v-model="newFamily"
-                :items="varieties"
-                item-text="name"
-                item-value="id"
-                label="Family"
-                persistent-hint
-                return-object
-                dense
-              ></v-select>
-              <v-text-field
-                v-model="newColor"
-                label="Color"
-                mask="!#XXXXXXXX"
-                dense
-              ></v-text-field>
-              <v-menu :close-on-content-click="false">
-                <template v-slot:activator="{ on, attrs }">
-                  <v-responsive aspect-ratio="1/1">
-                    <v-btn
-                      :color="newColor"
-                      small
-                      v-on="on"
-                      v-bind="attrs"
-                    ></v-btn>
-                  </v-responsive>
-                </template>
-                <v-card>
-                  <v-color-picker
-                    dot-size="25"
-                    hide-inputs
-                    mode="hexa"
-                    swatches-max-height="200"
-                    v-model="newColor"
-                  ></v-color-picker>
-                </v-card>
-              </v-menu>
-            </v-card-text>
-          </v-card>
-        </v-col>
-      </v-row>
-    </v-container>
-  </v-item-group>
+  <v-list dense>
+    <v-list-item-group>
+      <template v-for="family in state.varieties">
+        <v-list-item v-for="variety in family.varieties" :key="variety.id">
+          <v-list-item-icon>
+            <v-list-item-avatar
+              class="icon"
+              :style="`fill: ${variety.color}`"
+              v-html="family.icon"
+            ></v-list-item-avatar>
+          </v-list-item-icon>
+          <v-list-item-content>
+            <v-list-item-title v-text="variety.name"></v-list-item-title>
+            <v-list-item-subtitle v-text="family.name"></v-list-item-subtitle>
+          </v-list-item-content>
+        </v-list-item>
+      </template>
+    </v-list-item-group>
+
+    <v-list-item class="new">
+      <v-list-item-content>
+        <AddNewVariety v-show="!showNewForm" @blur="showNewForm = false" />
+        <v-btn @click="showNewForm = true" v-show="showNewForm"> + </v-btn>
+      </v-list-item-content>
+    </v-list-item>
+  </v-list>
 </template>
 
 <script lang="ts">
 import { Component, Vue } from "vue-property-decorator";
-
-import SeedPack from "./SeedPack.vue";
-import { request } from "../ApiRequest";
-import { varietyApi } from "@/api/VarietyApi";
-import { Family } from "@/entity/Family";
-import { Variety } from "@/entity/Variety";
+import Store from "../Store";
+import AddNewVariety from "./AddNewVariety.vue";
 
 @Component({
   components: {
-    SeedPack,
-  },
-  props: {
-    msg: String,
+    AddNewVariety,
   },
 })
 export default class SelectPlant extends Vue {
-  loading = false;
-  error = "";
-  varieties: Family[] = [];
+  $refs!: {
+    form: HTMLFormElement;
+  };
+
+  state = Store.state;
+
   showNewForm = false;
-  newName = "";
-  newColor = "#FFFFFF";
-  newFamily: Family | null = null;
 
   mounted(): void {
-    this.fetchData();
-  }
-
-  async fetchData(): Promise<void> {
-    this.error = "";
-    this.loading = true;
-
-    try {
-      this.varieties = await request(
-        varietyApi.allByFamily,
-        undefined,
-        undefined
-      );
-
-      this.varieties.forEach((f) => f.varieties.forEach((v) => (v.family = f)));
-    } catch (error) {
-      this.error = error;
-    }
-
-    this.loading = false;
+    this.state.loadVarieties();
   }
 }
 </script>
 
 <style scoped lang="scss">
 @import "../styles/variables.scss";
+
+.icon {
+  stroke: black;
+}
 
 .new {
   h1 {
