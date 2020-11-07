@@ -2,38 +2,25 @@
 
 const path = require("path");
 const tsNameof = require("ts-nameof");
+var merge = require("webpack-merge");
 
 module.exports = {
   transpileDependencies: ["vuetify"],
-  configureWebpack: {
-    resolve: {
-      alias: {
-        typeorm: path.resolve(
-          __dirname,
-          "../node_modules/typeorm/typeorm-model-shim"
-        ),
-      },
-    },
-    devServer: {
-      historyApiFallback: true,
-    },
-    module: {
-      rules: [
-        {
-          test: /\.ts$/,
-          exclude: /node_modules/,
-          use: [
-            {
-              loader: "ts-loader",
-              options: {
-                getCustomTransformers: () => ({ before: [tsNameof] }),
-                transpileOnly: true,
-                appendTsSuffixTo: ["\\.vue$"],
-              },
-            },
-          ],
-        },
-      ],
-    },
+  chainWebpack: (config) => {
+    config.module
+      .rule("ts")
+      .use("ts-loader")
+      .tap((options) =>
+        merge(options, {
+          getCustomTransformers: () => ({ before: [tsNameof] }),
+        })
+      );
+
+    config.devServer.historyApiFallback(true);
+
+    config.resolve.alias.set(
+      "typeorm",
+      path.resolve(__dirname, "../node_modules/typeorm/typeorm-model-shim")
+    );
   },
 };
