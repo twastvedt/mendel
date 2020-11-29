@@ -9,7 +9,7 @@ import fs from "fs";
 import path from "path";
 
 declare module "@svgdotjs/svg.js" {
-  const registerWindow: Function;
+  const registerWindow: (window: Window, document: HTMLDocument) => void;
 }
 import { SVG, Container, registerWindow } from "@svgdotjs/svg.js";
 const { createSVGWindow } = require("svgdom");
@@ -25,7 +25,7 @@ export class SeedData1603059702825 implements MigrationInterface {
         }))
     );
 
-    const window = createSVGWindow();
+    const window: Window = createSVGWindow();
     const document = window.document;
     registerWindow(window, document);
 
@@ -37,11 +37,11 @@ export class SeedData1603059702825 implements MigrationInterface {
       this.loadSvg(draw, "potato"),
     ]);
 
-    const tomato = new Family("Tomato", "#ff4518", svgs[0]);
+    const tomato = new Family("Tomato", "#ff4518", svgs[0], 10);
 
-    const cherry = new Family("Cherry Tomato", "#ff4518", svgs[1]);
+    const cherry = new Family("Cherry Tomato", "#ff4518", svgs[1], 8);
 
-    const potato = new Family("Potato", "#d9cbaf", svgs[2]);
+    const potato = new Family("Potato", "#d9cbaf", svgs[2], 4);
 
     await getRepository(Family).save([tomato, cherry, potato]);
 

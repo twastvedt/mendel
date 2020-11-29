@@ -3,10 +3,17 @@ import { Variety } from "./Variety";
 
 @Entity()
 export class Family {
-  constructor(name: string, color: string, icon: string, nitrogen = undefined) {
+  constructor(
+    name: string,
+    color: string,
+    icon: string,
+    spacing: number,
+    nitrogen = undefined
+  ) {
     this.name = name;
     this.icon = icon;
     this.color = color;
+    this.spacing = spacing;
     this.nitrogen = nitrogen;
   }
 
@@ -24,6 +31,12 @@ export class Family {
 
   @Column({ nullable: true })
   nitrogen?: number;
+
+  /**
+   * Space between plants, in inches.
+   */
+  @Column()
+  spacing!: number;
 
   @OneToMany(() => Variety, (v) => v.family, {
     onDelete: "CASCADE",
