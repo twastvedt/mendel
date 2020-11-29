@@ -11,7 +11,7 @@
     "typeorm": "typeorm"
   },
   "dependencies": {
-    "@geoman-io/leaflet-geoman-free": "^2.7.0",
+    "@geoman-io/leaflet-geoman-free": "^2.8.0",
     "@svgdotjs/svg.js": "^3.0.16",
     "@types/geojson": "^7946.0.7",
     "@types/proj4": "^2.5.0",
