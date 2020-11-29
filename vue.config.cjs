@@ -5,6 +5,9 @@ const tsNameof = require("ts-nameof");
 var merge = require("webpack-merge");
 
 module.exports = {
+  configureWebpack: {
+    devtool: "source-map",
+  },
   transpileDependencies: ["vuetify"],
   chainWebpack: (config) => {
     config.module
