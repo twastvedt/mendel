@@ -10,7 +10,7 @@
         ></v-text-field>
         <v-select
           v-model="newFamily"
-          :items="state.varieties"
+          :items="state.varietiesByFamily"
           item-text="name"
           item-value="id"
           label="Family"
@@ -20,26 +20,26 @@
           required
         ></v-select>
         <v-text-field v-model="newColor" label="Color" dense required>
-          <template v-slot:append
+          <template #append
             ><v-menu :close-on-content-click="false" :offset-y="true">
-              <template v-slot:activator="{ on, attrs }">
+              <template #activator="{ on, attrs }">
                 <v-btn
-                  small
-                  v-on="on"
                   v-show="newFamily"
+                  small
                   v-bind="attrs"
                   class="icon"
                   :style="`fill: ${newColor}`"
+                  v-on="on"
                   v-html="newFamily ? newFamily.icon : ''"
                 ></v-btn>
               </template>
               <v-card>
                 <v-color-picker
+                  v-model="newColor"
                   dot-size="25"
                   hide-inputs
                   mode="hexa"
                   swatches-max-height="200"
-                  v-model="newColor"
                 ></v-color-picker>
               </v-card> </v-menu></template
         ></v-text-field>

@@ -26,7 +26,7 @@
     <v-list-item>
       <v-list-item-content>
         <AddNewVariety v-show="!showNewForm" @blur="showNewForm = false" />
-        <v-btn @click="showNewForm = true" v-show="showNewForm"> + </v-btn>
+        <v-btn v-show="showNewForm" @click="showNewForm = true"> + </v-btn>
       </v-list-item-content>
     </v-list-item>
   </v-list>
