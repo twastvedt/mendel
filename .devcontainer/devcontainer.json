@@ -16,7 +16,8 @@
     "dbaeumer.vscode-eslint",
     "octref.vetur",
     "visualstudioexptteam.vscodeintellicode",
-    "esbenp.prettier-vscode"
+    "esbenp.prettier-vscode",
+    "ms-azuretools.vscode-docker"
   ],
   "postCreateCommand": ["npm", "install"]
 }

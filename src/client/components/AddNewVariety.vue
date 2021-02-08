@@ -71,7 +71,7 @@ export default class AddNewVariety extends Vue {
   newFamily: Family | null = null;
 
   @Watch("newFamily")
-  onNewFamilyChanged(val: any): void {
+  onNewFamilyChanged(val: { color: string }): void {
     this.newColor = val.color;
   }
 

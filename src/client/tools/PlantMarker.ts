@@ -23,6 +23,7 @@ declare module "leaflet" {
 
     export interface MapDrawOptions {
       variety?: Variety;
+      continueDrawing?: boolean;
     }
   }
 }
