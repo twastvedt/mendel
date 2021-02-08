@@ -7,10 +7,10 @@ module.exports = {
     nameof: "readonly",
   },
   extends: [
-    "plugin:vue/vue3-essential",
     "eslint:recommended",
+    "plugin:vue/recommended",
+    "prettier/vue",
     "@vue/typescript/recommended",
-    "@vue/prettier",
     "@vue/prettier/@typescript-eslint",
   ],
   parserOptions: {
