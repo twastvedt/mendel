@@ -1,6 +1,7 @@
 import * as L from "leaflet";
 import "@geoman-io/leaflet-geoman-free";
 import { Variety } from "@/entity/Variety";
+import { CircleMarkerScaled } from "./CircleMarkerScaled";
 
 declare module "leaflet" {
   // eslint-disable-next-line @typescript-eslint/no-namespace
@@ -35,7 +36,7 @@ export class PlantMarker extends L.PM.Draw.Marker {
   _hintMarker?: L.Marker;
   _layer?: L.Layer;
 
-  spacingCircle?: L.Circle<null>;
+  spacingCircle?: CircleMarkerScaled<null>;
 
   initialize(map: L.Map): void {
     super.initialize(map);
@@ -77,14 +78,21 @@ export class PlantMarker extends L.PM.Draw.Marker {
     this.spacingCircle?.remove();
   }
 
-  makeSpacingCircle(latlng: L.LatLngExpression, variety: Variety): L.Circle {
-    return new L.Circle(latlng, variety.family.spacing * 0.0254, {
-      fill: false,
-      color: "#000000",
-      dashArray: [4, 4],
-      weight: 1,
-      className: "plantMarkerCircle",
-    });
+  makeSpacingCircle(
+    latlng: L.LatLngExpression,
+    variety: Variety
+  ): CircleMarkerScaled<null> {
+    return new CircleMarkerScaled<null>(
+      latlng,
+      variety.family.spacing * 0.0254,
+      {
+        fill: false,
+        color: "#000000",
+        dashArray: [4, 4],
+        weight: 1,
+        className: "plantMarkerCircle",
+      }
+    );
   }
 
   _createMarker(e: L.LeafletMouseEvent): void {
