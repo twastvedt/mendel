@@ -1,28 +1,21 @@
 <template>
-  <div id="map" ref="map"></div>
+  <svg id="map" ref="map">
+    <g ref="content" class="content">
+      <g id="beds" ref="beds" />
+    </g>
+  </svg>
 </template>
 
 <script lang="ts">
 import { Component, Vue, Watch } from "vue-property-decorator";
-import * as L from "leaflet";
-import "@geoman-io/leaflet-geoman-free";
-import proj4 from "proj4";
-
-import { PlantMarker } from "../tools/PlantMarker";
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-(L as any).Proj = require("proj4leaflet");
 
 import Store, { Action } from "../Store";
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-delete (L.Icon.Default.prototype as any)._getIconUrl;
+import * as d3 from "d3";
 
-L.Icon.Default.mergeOptions({
-  iconRetinaUrl: require("leaflet/dist/images/marker-icon-2x.png"),
-  iconUrl: require("leaflet/dist/images/marker-icon.png"),
-  shadowUrl: require("leaflet/dist/images/marker-shadow.png"),
-});
+import { geoPath, geoTransform } from "d3-geo";
+
+import { zoom, D3ZoomEvent } from "d3-zoom";
 
 @Component({
   props: {
@@ -31,76 +24,123 @@ L.Icon.Default.mergeOptions({
 })
 export default class Map extends Vue {
   $refs!: {
-    map: HTMLDivElement;
+    map: SVGSVGElement;
+    beds: SVGGElement;
+    content: SVGGElement;
   };
 
   state = Store.state;
+  zoom!: d3.ZoomBehavior<SVGSVGElement, unknown>;
 
-  map!: L.Map;
+  zoomed(e: D3ZoomEvent<SVGSVGElement, unknown>): void {
+    this.content.attr("transform", e.transform as any);
+  }
+
+  content!: d3.Selection<SVGGElement, unknown, null, undefined>;
+  svg!: d3.Selection<SVGSVGElement, unknown, null, undefined>;
 
   async mounted(): Promise<void> {
     console.debug("Map mounted");
 
-    this.map = L.map(this.$refs.map, { minZoom: 0, maxZoom: 30 });
+    await this.state.loadGarden();
 
-    this.map
-      .on("zoomend", this.onMapZoomed, this)
-      .on("mouseout", this.onMouseOut, this)
-      .on("mouseover", this.startDraw, this);
+    if (!this.state.garden) {
+      return;
+    }
 
-    this.map.pm.Draw.PlantMarker = new PlantMarker(this.map);
+    const offset = this.state.beds[0].shape.coordinates[0][0];
 
-    // Define projection used in database.
-    proj4.defs(
-      "EPSG:26915",
-      "+proj=utm +zone=15 +ellps=GRS80 +datum=NAD83 +units=m +no_defs"
+    const transform = geoTransform({
+      point: function (x, y) {
+        this.stream.point(x - offset[0], offset[1] - y);
+      },
+    });
+
+    const path = geoPath().projection(transform);
+
+    d3.select(this.$refs.beds)
+      .selectAll("path")
+      .data(this.state.beds.map((b) => b.shape))
+      .enter()
+      .append("path")
+      .attr("d", path);
+
+    this.svg = d3.select(this.$refs.map);
+
+    const width = this.$refs.map.clientWidth,
+      height = this.$refs.map.clientHeight;
+
+    d3.select(this.$refs.map).attr("viewBox", [0, 0, width, height] as any);
+
+    this.content = d3
+      .select(this.$refs.content)
+      .attr("transform", "translate(0,0)");
+
+    this.zoom = zoom<SVGSVGElement, unknown>().on(
+      "zoom",
+      this.zoomed.bind(this)
     );
 
-    L.tileLayer
-      .wms("https://imageserver.gisdata.mn.gov/cgi-bin/mncomp?VERSION=1.3.0", {
-        layers: "mncomp",
-        maxZoom: 30,
-      })
-      .addTo(this.map);
+    this.svg.call(this.zoom);
 
-    await this.state.loadBeds();
+    this.zoomFit();
 
-    const beds = L.Proj.geoJson(
-      this.state.beds.map((b) => b.shape),
-      {
-        style: {
-          fillColor: "#ffffff",
-          fillOpacity: 0.5,
-          color: "#000000",
-          weight: 2,
-        },
-      }
-    ).addTo(this.map);
+    // this.map
+    //   .on("zoomend", this.onMapZoomed, this)
+    //   .on("mouseout", this.onMouseOut, this)
+    //   .on("mouseover", this.startDraw, this);
 
-    this.map.fitBounds(beds.getBounds());
+    // L.tileLayer
+    //   .wms("https://imageserver.gisdata.mn.gov/cgi-bin/mncomp?VERSION=1.3.0", {
+    //     layers: "mncomp",
+    //     maxZoom: 30,
+    //   })
+    //   .addTo(this.map);
   }
 
-  startDraw(): void {
-    if (this.state.action !== Action.None && this.state.actionId) {
-      const variety = this.state.varieties.find(
-        (v) => v.id === this.state.actionId
-      );
+  zoomFit(): void {
+    const bounds = this.content.node()?.getBBox();
 
-      if (variety) {
-        this.map.pm.enableDraw("PlantMarker", {
-          variety: variety,
-          snappable: true,
-          snapDistance: 20,
-          cursorMarker: true,
-          continueDrawing: true,
-          tooltips: false,
-        });
-      }
+    if (bounds) {
+      const width = this.$refs.map.clientWidth,
+        height = this.$refs.map.clientHeight,
+        midX = bounds.x + bounds.width / 2,
+        midY = bounds.y + bounds.height / 2;
+
+      const scale =
+          0.9 / Math.max(bounds.width / width, bounds.height / height),
+        translate = [width / 2 - scale * midX, height / 2 - scale * midY];
+
+      this.svg
+        .transition()
+        .duration(750)
+        .call(
+          this.zoom.transform,
+          d3.zoomIdentity.translate(translate[0], translate[1]).scale(scale)
+        );
     }
   }
 
-  onMouseOut(event: L.LeafletMouseEvent): void {
-    this.map.pm.Draw.PlantMarker.disable();
+  startDraw(): void {
+    // if (this.state.action !== Action.None && this.state.actionId) {
+    //   const variety = this.state.varieties.find(
+    //     (v) => v.id === this.state.actionId
+    //   );
+    //   if (variety) {
+    //     this.map.pm.enableDraw("PlantMarker", {
+    //       variety: variety,
+    //       snappable: true,
+    //       snapDistance: 20,
+    //       cursorMarker: true,
+    //       continueDrawing: true,
+    //       tooltips: false,
+    //     });
+    //   }
+    // }
+  }
+
+  onMouseOut(): void {
+    // this.map.pm.Draw.PlantMarker.disable();
   }
 
   @Watch(nameof.full(Map.prototype.state.action, -2))
@@ -113,7 +153,7 @@ export default class Map extends Vue {
         break;
 
       case Action.None:
-        this.map.pm.Draw.PlantMarker.disable();
+        // this.map.pm.Draw.PlantMarker.disable();
 
         break;
 
@@ -122,45 +162,36 @@ export default class Map extends Vue {
     }
   }
 
-  onMapZoomed(): void {
-    const metersPerPixel = this.getMetersPerPixel();
+  // onMapZoomed(): void {
+  //   const metersPerPixel = this.getMetersPerPixel();
 
-    const classes = this.$el.classList;
+  //   const classes = this.$el.classList;
 
-    classes.remove("zoom1", "zoom2", "zoom3");
+  //   classes.remove("zoom1", "zoom2", "zoom3");
 
-    if (metersPerPixel > 0.1) {
-      classes.add("zoom1");
-    } else if (metersPerPixel > 0.01) {
-      classes.add("zoom2");
-    } else {
-      classes.add("zoom3");
-    }
-  }
-
-  getMetersPerPixel(): number {
-    const y = this.map.getSize().y;
-    const x = this.map.getSize().x;
-
-    // calculate the distance the one side of the map to the other using the haversine formula
-    var maxMeters = this.map
-      .containerPointToLatLng([0, y])
-      .distanceTo(this.map.containerPointToLatLng([x, y]));
-    // calculate how many meters each pixel represents
-    return maxMeters / x;
-  }
+  //   if (metersPerPixel > 0.1) {
+  //     classes.add("zoom1");
+  //   } else if (metersPerPixel > 0.01) {
+  //     classes.add("zoom2");
+  //   } else {
+  //     classes.add("zoom3");
+  //   }
+  // }
 }
 </script>
 
 <style scoped lang="scss">
-@import "~leaflet/dist/leaflet.css";
-@import "~@geoman-io/leaflet-geoman-free/dist/leaflet-geoman.css";
-
 #map {
   width: 100%;
   height: 100%;
-
+  display: block;
   z-index: 0;
+}
+
+::v-deep #beds path {
+  fill: rgba($color: #ffffff, $alpha: 0.5);
+  stroke: #000000;
+  stroke-width: 0.01px;
 }
 
 .zoom1 {

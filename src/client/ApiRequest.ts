@@ -1,19 +1,47 @@
 import axios from "axios";
 import { Endpoint } from "@/api/Endpoint";
 
-export async function request<
+export function request<Response>(
+  endpoint: Endpoint<Response, undefined, undefined>
+): Promise<Response>;
+
+export function request<Response, Data extends Record<string, unknown>>(
+  endpoint: Endpoint<Response, Data, undefined>,
+  params: undefined,
+  data: Data
+): Promise<Response>;
+
+export function request<
   Response,
-  Data extends Record<string, unknown> | undefined,
-  Params extends Record<string, string> | undefined
+  Params extends Record<string, string | number | Date>
+>(
+  endpoint: Endpoint<Response, undefined, Params>,
+  params: Params
+): Promise<Response>;
+
+export function request<
+  Response,
+  Data extends Record<string, unknown>,
+  Params extends Record<string, string | number | Date>
 >(
   endpoint: Endpoint<Response, Data, Params>,
-  data: Data,
-  params: Params
+  params: Params,
+  data: Data
+): Promise<Response>;
+
+export async function request<Response>(
+  endpoint: Endpoint<
+    Response,
+    Record<string, string | number | Date> | undefined,
+    Record<string, string | number | Date> | undefined
+  >,
+  params: Record<string, string | number | Date> | undefined = undefined,
+  data: Record<string, string | number | Date> | undefined = undefined
 ): Promise<Response> {
-  const url = endpoint.resource;
+  let url = endpoint.resource;
 
   for (const param in params) {
-    url.replace(`:${param}`, params[param]);
+    url = url.replace(`:${param}`, params[param].toString());
   }
 
   return axios

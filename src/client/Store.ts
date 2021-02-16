@@ -5,6 +5,8 @@ import { varietyApi } from "@/api/VarietyApi";
 import { Bed } from "@/entity/Bed";
 import { bedApi } from "@/api/BedApi";
 import { Variety } from "@/entity/Variety";
+import { gardenApi } from "@/api/GardenApi";
+import { Garden } from "@/entity/Garden";
 
 export enum Action {
   DrawPlant,
@@ -25,6 +27,7 @@ export default class Store {
   loading = false;
   error = "";
 
+  garden?: Garden;
   varietiesByFamily: Family[] = [];
   varieties: Variety[] = [];
   beds: Bed[] = [];
@@ -32,18 +35,21 @@ export default class Store {
   action?: Action = undefined;
   actionId?: number = undefined;
 
-  async loadBeds(): Promise<void> {
+  async loadGarden(): Promise<void> {
     this.error = "";
     this.loading = true;
 
     try {
-      this.beds = await request(bedApi.all, undefined, undefined);
+      this.garden = await request(gardenApi.one, { id: 1 });
+
+      this.beds = await request(bedApi.garden, { garden: this.garden.id });
     } catch (error) {
       this.error = error;
     }
 
     this.loading = false;
   }
+
   async loadVarieties(): Promise<void> {
     this.error = "";
     this.loading = true;
@@ -51,11 +57,7 @@ export default class Store {
     try {
       this.varieties = [];
 
-      this.varietiesByFamily = await request(
-        varietyApi.allByFamily,
-        undefined,
-        undefined
-      );
+      this.varietiesByFamily = await request(varietyApi.allByFamily);
 
       this.varietiesByFamily.forEach((f) =>
         f.varieties.forEach((v) => {
@@ -75,15 +77,11 @@ export default class Store {
     color: string,
     familyId: number
   ): Promise<void> {
-    const newVariety = await request(
-      varietyApi.create,
-      {
-        name,
-        color,
-        familyId,
-      },
-      undefined
-    );
+    const newVariety = await request(varietyApi.create, {
+      name,
+      color,
+      familyId,
+    });
 
     const family = this.varietiesByFamily.find((f) => f.id === familyId);
 

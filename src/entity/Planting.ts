@@ -1,5 +1,12 @@
 import { Polygon } from "geojson";
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from "typeorm";
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  OneToMany,
+  ManyToOne,
+} from "typeorm";
+import { Garden } from "./Garden";
 import { Plant } from "./Plant";
 
 @Entity()
@@ -35,6 +42,9 @@ export class Planting {
     onDelete: "CASCADE",
   })
   plants!: Plant[];
+
+  @ManyToOne(() => Garden, (garden) => garden.plantings)
+  garden!: Garden;
 
   constructor() {
     this.areSeedlings = false;

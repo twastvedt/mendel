@@ -1,4 +1,4 @@
-import { getRepository, MigrationInterface, QueryRunner } from "typeorm";
+import { getRepository, MigrationInterface } from "typeorm";
 import { features } from "./SeedBeds.json";
 import { Bed } from "@/entity/Bed";
 import { Variety } from "@/entity/Variety";
@@ -12,16 +12,26 @@ declare module "@svgdotjs/svg.js" {
   const registerWindow: (window: Window, document: HTMLDocument) => void;
 }
 import { SVG, Container, registerWindow } from "@svgdotjs/svg.js";
+import { Garden } from "@/entity/Garden";
 const { createSVGWindow } = require("svgdom");
 
 export class SeedData1603059702825 implements MigrationInterface {
-  public async up(queryRunner: QueryRunner): Promise<void> {
+  public async up(): Promise<void> {
+    const garden = await getRepository(Garden).save({
+      name: "2307 Stillwater",
+      location: {
+        type: "Point",
+        coordinates: [-93.003347, 44.968675],
+      },
+    });
+
     await getRepository(Bed).save(
       features
         .filter((f) => f.geometry.type === "Polygon")
         .map((f) => ({
           shape: f.geometry as Polygon,
           startDate: new Date(2019, 5, 15),
+          garden: garden,
         }))
     );
 
@@ -83,7 +93,7 @@ export class SeedData1603059702825 implements MigrationInterface {
     });
   }
 
-  public async down(queryRunner: QueryRunner): Promise<void> {
+  public async down(): Promise<void> {
     // TODO: delete seed data?
   }
 }

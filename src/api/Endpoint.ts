@@ -14,7 +14,7 @@ export type Method =
 export class Endpoint<
   Response,
   Data extends Record<string, unknown> | undefined = undefined,
-  Params extends Record<string, string> | undefined = undefined
+  Params extends Record<string, string | number | Date> | undefined = undefined
 > {
   constructor(public method: Method, public resource: string = "") {}
 }

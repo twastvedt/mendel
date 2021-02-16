@@ -3,7 +3,7 @@ import { Endpoint } from "./Endpoint";
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export function baseApi<T>(endpoint: string) {
   return {
-    one: new Endpoint<T, undefined, { id: string }>("get", `/${endpoint}/:id`),
+    one: new Endpoint<T, undefined, { id: number }>("get", `/${endpoint}/:id`),
 
     all: new Endpoint<T[]>("get", `/${endpoint}/`),
 

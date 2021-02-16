@@ -2,9 +2,8 @@ import { varietyApi } from "@/api/VarietyApi";
 import { Variety } from "@/entity/Variety";
 import express from "express";
 
-import { addEndpoint } from "./addEndpoint";
+import { addEndpoint, one, all, create } from "./handlers";
 
-import * as defaultEndpoints from "./defaultEndpoints";
 import { getManager } from "typeorm";
 import { Family } from "@/entity/Family";
 
@@ -26,10 +25,10 @@ addEndpoint(router, varietyApi.allByFamily, async (request, response) => {
   response.send(result);
 });
 
-addEndpoint(router, varietyApi.all, defaultEndpoints.all(Variety));
+addEndpoint(router, varietyApi.all, all(Variety));
 
-addEndpoint(router, varietyApi.create, defaultEndpoints.create(Variety));
+addEndpoint(router, varietyApi.create, create(Variety));
 
-addEndpoint(router, varietyApi.one, defaultEndpoints.one(Variety));
+addEndpoint(router, varietyApi.one, one(Variety));
 
 export default router;
