@@ -59,12 +59,26 @@ export default class Store {
 
       this.varietiesByFamily = await request(varietyApi.allByFamily);
 
-      this.varietiesByFamily.forEach((f) =>
+      const symbols = document.createElementNS(
+        "http://www.w3.org/2000/svg",
+        "svg"
+      );
+
+      let content = "";
+
+      this.varietiesByFamily.forEach((f) => {
+        content += f.icon.replace("symbol ", `symbol id="family-${f.id}" `);
+
         f.varieties.forEach((v) => {
           v.family = f;
           this.varieties.push(v);
-        })
-      );
+        });
+      });
+
+      symbols.innerHTML = content;
+      symbols.setAttribute("display", "none");
+
+      document.body.prepend(symbols);
     } catch (error) {
       this.error = error;
     }

@@ -31,6 +31,7 @@ export default class Map extends Vue {
 
   state = Store.state;
   zoom!: d3.ZoomBehavior<SVGSVGElement, unknown>;
+  cursor!: d3.Selection<SVGGElement, unknown, null, undefined>;
 
   zoomed(e: D3ZoomEvent<SVGSVGElement, unknown>): void {
     this.content.attr("transform", e.transform as any);
@@ -75,6 +76,16 @@ export default class Map extends Vue {
     this.content = d3
       .select(this.$refs.content)
       .attr("transform", "translate(0,0)");
+
+    this.cursor = this.content.append("g").classed("cursor", true);
+
+    this.cursor.append("use").attr("width", 1).attr("height", 1);
+
+    this.svg.on("mousemove.cursor", (event) => {
+      const [x, y] = d3.pointer(event, this.content.node());
+
+      this.cursor.attr("transform", `translate(${x}, ${y})`);
+    });
 
     this.zoom = zoom<SVGSVGElement, unknown>().on(
       "zoom",
@@ -122,21 +133,23 @@ export default class Map extends Vue {
   }
 
   startDraw(): void {
-    // if (this.state.action !== Action.None && this.state.actionId) {
-    //   const variety = this.state.varieties.find(
-    //     (v) => v.id === this.state.actionId
-    //   );
-    //   if (variety) {
-    //     this.map.pm.enableDraw("PlantMarker", {
-    //       variety: variety,
-    //       snappable: true,
-    //       snapDistance: 20,
-    //       cursorMarker: true,
-    //       continueDrawing: true,
-    //       tooltips: false,
-    //     });
-    //   }
-    // }
+    if (this.state.action !== Action.None && this.state.actionId) {
+      const variety = this.state.varieties.find(
+        (v) => v.id === this.state.actionId
+      );
+
+      if (variety) {
+        this.cursor.select("use").attr("href", `#family-${variety.family.id}`);
+      }
+    }
+  }
+
+  stopDraw(): void {
+    if (this.cursor) {
+      this.cursor.on("mousemove.cursor", null);
+
+      this.cursor.remove();
+    }
   }
 
   onMouseOut(): void {
@@ -153,7 +166,7 @@ export default class Map extends Vue {
         break;
 
       case Action.None:
-        // this.map.pm.Draw.PlantMarker.disable();
+        this.stopDraw();
 
         break;
 

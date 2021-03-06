@@ -9,11 +9,9 @@
           @click="onSelected(variety.id)"
         >
           <v-list-item-icon>
-            <v-list-item-avatar
-              class="icon"
-              :style="`fill: ${variety.color}`"
-              v-html="family.icon"
-            ></v-list-item-avatar>
+            <v-list-item-avatar class="icon" :style="`fill: ${variety.color}`">
+              <svg><use :href="`#family-${family.id}`" /></svg>
+            </v-list-item-avatar>
           </v-list-item-icon>
           <v-list-item-content>
             <v-list-item-title v-text="variety.name"></v-list-item-title>
