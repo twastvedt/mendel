@@ -2,13 +2,13 @@ import { Variety } from "@/entity/Variety";
 import { Tool } from "./Tool";
 import { AddPlantAction } from "../actions/AddPlantAction";
 import { Action } from "../actions/Action";
-import { Garden } from "@/entity/Garden";
 import { Plant } from "@/entity/Plant";
+import Store from "../Store";
 
 export class DrawPlantTool extends Tool {
   public Stop(): void {
-    if (this.plant?.id) {
-      this.garden.removePlant(this.plant.id);
+    if (this.plant) {
+      this.state.removePlant(this.plant);
 
       delete this.plant;
     }
@@ -16,8 +16,8 @@ export class DrawPlantTool extends Tool {
 
   private plant?: Plant;
 
-  public constructor(private variety: Variety, garden: Garden) {
-    super(garden);
+  public constructor(private variety: Variety, state: Store) {
+    super(state);
   }
 
   public OnCursorMove(x: number, y: number): void {
@@ -41,8 +41,8 @@ export class DrawPlantTool extends Tool {
       type: "Point",
       coordinates: [0, 0],
     };
-    this.plant.gardenId = this.garden.id;
+    this.plant.gardenId = this.state.garden?.id;
 
-    this.garden.plants.push(this.plant);
+    this.state.garden?.plants.push(this.plant);
   }
 }

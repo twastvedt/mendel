@@ -32,7 +32,7 @@ export class AddPlantAction extends Action {
         routeParams: { id: this.plant.id.toString() },
       });
 
-      state.garden.removePlant(this.plant.id);
+      state.removePlant(this.plant.id);
 
       delete this.plant.id;
     }

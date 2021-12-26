@@ -1,8 +1,8 @@
-import { Garden } from "@/entity/Garden";
 import { Action } from "../actions/Action";
+import Store from "../Store";
 
 export abstract class Tool {
-  public constructor(protected garden: Garden) {}
+  public constructor(protected state: Store) {}
 
   public abstract OnClick(x: number, y: number): Action;
 

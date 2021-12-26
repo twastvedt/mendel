@@ -30,12 +30,4 @@ export class Garden extends EntityBase {
     onDelete: "CASCADE",
   })
   plantings!: Planting[];
-
-  removePlant(id: number): void {
-    const i = this.plants.findIndex((p) => p.id === id);
-
-    if (i !== -1) {
-      this.plants.splice(i, 1);
-    }
-  }
 }

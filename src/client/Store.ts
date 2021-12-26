@@ -31,10 +31,6 @@ export default class Store {
 
   cursor?: d3.Selection<SVGGElement, unknown, null, undefined>;
 
-  mounted(): void {
-    addEventListener("keyup", (event) => this.keyListener(event));
-  }
-
   async loadGarden(): Promise<void> {
     this.error = "";
     this.loading = true;
@@ -132,6 +128,26 @@ export default class Store {
     }
 
     return plant;
+  }
+
+  removePlant(id: number): void;
+  removePlant(plant: Plant): void;
+  removePlant(idOrPlant: Plant | number): void {
+    if (!this.garden) {
+      return;
+    }
+
+    let i;
+
+    if (typeof idOrPlant === "number") {
+      i = this.garden.plants.findIndex((p) => p.id === idOrPlant);
+    } else {
+      i = this.garden.plants.indexOf(idOrPlant);
+    }
+
+    if (i !== -1) {
+      this.garden.plants.splice(i, 1);
+    }
   }
 
   setTool(tool: Tool): void {

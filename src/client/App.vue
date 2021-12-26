@@ -1,7 +1,7 @@
 <template>
   <v-app>
     <v-main>
-      <Map />
+      <garden-map />
     </v-main>
     <v-navigation-drawer
       absolute
@@ -18,13 +18,13 @@
 
 <script lang="ts">
 import { Component, Vue } from "vue-property-decorator";
-import Map from "./components/Map.vue";
+import gardenMap from "./components/GardenMap.vue";
 import Sidebar from "./components/Sidebar.vue";
 import Store from "./Store";
 
 @Component({
   components: {
-    Map,
+    gardenMap,
     Sidebar,
   },
 })
@@ -32,10 +32,8 @@ export default class App extends Vue {
   constructor() {
     super();
     Store.initialize();
+
+    addEventListener("keyup", (event) => Store.state.keyListener(event));
   }
 }
 </script>
-
-<style lang="scss">
-@import "./styles/style.scss";
-</style>

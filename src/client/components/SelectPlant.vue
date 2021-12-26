@@ -55,7 +55,7 @@ export default class SelectPlant extends Vue {
 
   onSelected(variety: Variety): void {
     if (this.state.garden) {
-      this.state.setTool(new DrawPlantTool(variety, this.state.garden));
+      this.state.setTool(new DrawPlantTool(variety, this.state));
 
       this.selected = variety.id;
     }
@@ -64,8 +64,6 @@ export default class SelectPlant extends Vue {
 </script>
 
 <style scoped lang="scss">
-@import "../styles/variables.scss";
-
 .icon {
   stroke: black;
 }

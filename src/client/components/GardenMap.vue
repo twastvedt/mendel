@@ -37,14 +37,11 @@ import { zoom, D3ZoomEvent } from "d3-zoom";
 import PlantComponent from "./PlantComponent.vue";
 
 @Component({
-  props: {
-    msg: String,
-  },
   components: {
     PlantComponent,
   },
 })
-export default class Map extends Vue {
+export default class GardenMap extends Vue {
   $refs!: {
     map: SVGSVGElement;
     content: SVGGElement;
@@ -52,8 +49,6 @@ export default class Map extends Vue {
 
   state = Store.state;
   zoom!: d3.ZoomBehavior<SVGSVGElement, unknown>;
-  cursorX = 0;
-  cursorY = 0;
   pathGenerator = null as d3.GeoPath<unknown, d3.GeoPermissibleObjects> | null;
   projection?: d3.GeoIdentityTransform;
 
@@ -188,7 +183,7 @@ export default class Map extends Vue {
   display: block;
   z-index: 0;
 
-  ::v-deep * {
+  &::v-deep * {
     vector-effect: non-scaling-stroke;
   }
 }

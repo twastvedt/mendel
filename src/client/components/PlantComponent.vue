@@ -19,8 +19,6 @@ export default class PlantComponent extends Vue {}
 </script>
 
 <style scoped lang="scss">
-@import "../styles/variables.scss";
-
 .spacingCircle {
   fill: none;
   stroke: gray;
