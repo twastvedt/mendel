@@ -13,15 +13,13 @@ export class AddPlantAction extends Action {
   public async Do(state: Store): Promise<void> {
     await super.Do(state);
 
+    state.garden?.plants.push(this.plant as Plant);
+
     const newPlant = await plantApi.create.request({
-      data: this.plant,
+      data: this.plant.cleanCopy(),
     });
 
-    state.inflatePlant(newPlant);
-
     Object.assign(this.plant, newPlant);
-
-    state.garden?.plants.push(this.plant as Plant);
   }
 
   public async Undo(state: Store): Promise<void> {

@@ -43,4 +43,12 @@ export class Plant extends EntityBase {
 
     return newPlant;
   }
+
+  copy(): Plant {
+    const newPlant = new Plant();
+
+    Object.assign(newPlant, this);
+
+    return newPlant;
+  }
 }

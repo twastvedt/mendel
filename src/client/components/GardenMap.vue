@@ -15,8 +15,8 @@
         />
 
         <plant-component
-          v-for="plant in state.garden.plants"
-          :key="`${plant.id}-plant`"
+          v-for="(plant, index) in state.garden.plants"
+          :key="`${index}-plant`"
           :transform="`translate(${projection(plant.location.coordinates).join(
             ' '
           )})`"

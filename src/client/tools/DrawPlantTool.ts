@@ -28,7 +28,7 @@ export class DrawPlantTool extends Tool {
 
   public OnClick(x: number, y: number, plant?: Plant): Action {
     if (this.plant) {
-      return new AddPlantAction(this.plant.cleanCopy());
+      return new AddPlantAction(this.plant.copy());
     }
 
     throw new Error("No action to save?");
