@@ -54,6 +54,8 @@ export default class GardenMap extends Vue {
 
   zoomed(e: D3ZoomEvent<SVGSVGElement, unknown>): void {
     this.content.attr("transform", e.transform as any);
+
+    this.state.scale = e.transform.k;
   }
 
   content!: d3.Selection<SVGGElement, unknown, null, undefined>;
@@ -153,26 +155,6 @@ export default class GardenMap extends Vue {
       }
     }
   }
-
-  onMouseOut(): void {
-    // this.map.pm.Draw.PlantMarker.disable();
-  }
-
-  // onMapZoomed(): void {
-  //   const metersPerPixel = this.getMetersPerPixel();
-
-  //   const classes = this.$el.classList;
-
-  //   classes.remove("zoom1", "zoom2", "zoom3");
-
-  //   if (metersPerPixel > 0.1) {
-  //     classes.add("zoom1");
-  //   } else if (metersPerPixel > 0.01) {
-  //     classes.add("zoom2");
-  //   } else {
-  //     classes.add("zoom3");
-  //   }
-  // }
 }
 </script>
 

@@ -20,6 +20,7 @@ export default class Store {
 
   loading = false;
   error = "";
+  scale = 1;
 
   garden?: Garden = undefined;
   varietiesByFamily: Family[] = [];
@@ -30,6 +31,16 @@ export default class Store {
   tool?: Tool = undefined;
 
   cursor?: d3.Selection<SVGGElement, unknown, null, undefined>;
+
+  get scaleRange() {
+    if (this.scale > 10) {
+      return 3;
+    } else if (this.scale > 1) {
+      return 2;
+    } else {
+      return 1;
+    }
+  }
 
   async loadGarden(): Promise<void> {
     this.error = "";
