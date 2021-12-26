@@ -1,17 +1,28 @@
-import { EntityNoId } from "@/api/BaseApi";
 import { plantApi } from "@/api/PlantApi";
 import { Plant } from "@/entity/Plant";
 import "../apiRequest";
 import Store from "../Store";
 import { Action } from "./Action";
 
-export class AddPlantAction extends Action {
-  public constructor(private plant: EntityNoId<Plant>) {
+export class DeletePlantAction extends Action {
+  public constructor(private plant: Plant) {
     super();
   }
 
   public async Do(state: Store): Promise<void> {
     await super.Do(state);
+
+    if (state.garden) {
+      await plantApi.delete.request({
+        routeParams: { id: this.plant.id },
+      });
+
+      state.removePlant(this.plant.id);
+    }
+  }
+
+  public async Undo(state: Store): Promise<void> {
+    await super.Undo(state);
 
     const newPlant = await plantApi.create.request({
       data: this.plant,
@@ -22,19 +33,5 @@ export class AddPlantAction extends Action {
     Object.assign(this.plant, newPlant);
 
     state.garden?.plants.push(this.plant as Plant);
-  }
-
-  public async Undo(state: Store): Promise<void> {
-    await super.Undo(state);
-
-    if (this.plant.id && state.garden) {
-      await plantApi.delete.request({
-        routeParams: { id: this.plant.id },
-      });
-
-      state.removePlant(this.plant.id);
-
-      delete this.plant.id;
-    }
   }
 }

@@ -28,6 +28,7 @@ export default class Store {
 
   actions: Action[] = [];
 
+  toolName = "";
   tool?: Tool = undefined;
 
   cursor?: d3.Selection<SVGGElement, unknown, null, undefined>;
@@ -93,13 +94,15 @@ export default class Store {
     this.loading = false;
   }
 
-  onClick(x: number, y: number): void {
+  onClick(x: number, y: number, plant?: Plant): void {
     if (this.tool && this.garden) {
-      const action = this.tool.OnClick(x, y);
+      const action = this.tool.OnClick(x, y, plant);
 
-      action.Do(this);
+      if (action) {
+        action.Do(this);
 
-      this.actions.push(action);
+        this.actions.push(action);
+      }
     }
   }
 
@@ -190,6 +193,8 @@ export default class Store {
   keyListener(event: KeyboardEvent): void {
     if (event.key === "Escape" && this.tool) {
       this.clearTool();
+
+      this.toolName = "";
     }
   }
 }

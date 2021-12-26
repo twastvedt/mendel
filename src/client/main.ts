@@ -11,16 +11,16 @@ new Vue({
     theme: {
       themes: {
         light: {
-          primary: { ...colors.green },
-          secondary: { ...colors.brown },
-          accent: { ...colors.orange },
-          error: { ...colors.red },
+          primary: colors.green,
+          secondary: colors.brown,
+          accent: colors.orange,
+          error: colors.red,
         },
         dark: {
-          primary: { ...colors.green },
-          secondary: { ...colors.brown },
-          accent: { ...colors.orange },
-          error: { ...colors.red },
+          primary: colors.green,
+          secondary: colors.brown,
+          accent: colors.orange,
+          error: colors.red,
         },
       },
     },

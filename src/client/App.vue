@@ -9,7 +9,7 @@
       right
       app
       width="300px"
-      class="brown"
+      class="grey lighten-2"
     >
       <Sidebar />
     </v-navigation-drawer>

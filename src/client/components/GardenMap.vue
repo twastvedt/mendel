@@ -6,7 +6,7 @@
     xmlns:xlink="http://www.w3.org/1999/xlink"
     @mousemove="onMouseMove"
   >
-    <g ref="content" class="content" @click="onClick">
+    <g ref="content" class="content">
       <g v-if="pathGenerator && projection && state.garden" id="beds">
         <path
           v-for="bed in state.garden.beds"
@@ -21,6 +21,7 @@
             ' '
           )})`"
           :plant="plant"
+          @click="onClick($event, plant)"
         />
       </g>
     </g>
@@ -35,6 +36,7 @@ import { geoIdentity, geoPath } from "d3-geo";
 import { zoom, D3ZoomEvent } from "d3-zoom";
 
 import PlantComponent from "./PlantComponent.vue";
+import { Plant } from "@/entity/Plant";
 
 @Component({
   components: {
@@ -140,8 +142,8 @@ export default class GardenMap extends Vue {
     }
   }
 
-  onClick(event: MouseEvent): void {
-    this.state.onClick(...d3.pointer(event, this.content.node()));
+  onClick(event: MouseEvent, plant?: Plant): void {
+    this.state.onClick(...d3.pointer(event, this.content.node()), plant);
   }
 
   onMouseMove(event: MouseEvent): void {

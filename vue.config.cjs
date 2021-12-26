@@ -5,6 +5,7 @@ const tsNameof = require("ts-nameof");
 var { merge } = require("webpack-merge");
 
 module.exports = {
+  lintOnSave: "warning",
   configureWebpack: {
     devtool: "source-map",
   },

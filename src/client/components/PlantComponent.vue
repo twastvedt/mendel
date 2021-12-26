@@ -1,21 +1,26 @@
 <template>
-  <g v-if="state.scaleRange > 1">
-    <use
-      :width="iconSize"
-      :height="iconSize"
-      :x="-iconSize / 2"
-      :y="-iconSize / 2"
-      :href="`#family-${family.id}`"
+  <g @click="$emit('click', $event)">
+    <template v-if="state.scaleRange > 1">
+      <circle :r="family.spacing" class="spacingCircle" />
+      <use
+        :width="iconSize"
+        :height="iconSize"
+        :x="-iconSize / 2"
+        :y="-iconSize / 2"
+        :href="`#family-${family.id}`"
+        :fill="variety.color"
+      />
+    </template>
+
+    <circle
+      v-else
+      :r="family.spacing"
       :fill="variety.color"
+      class="solidCircle"
     />
-    <circle :r="family.spacing" class="spacingCircle" />
+
+    <title>{{ title }}</title>
   </g>
-  <circle
-    v-else
-    :r="family.spacing"
-    :fill="variety.color"
-    class="solidCircle"
-  />
 </template>
 
 <script lang="ts">
@@ -50,17 +55,32 @@ export default class PlantComponent extends Vue {
     return Math.min(40 / this.state.scale, this.family.spacing);
   }
 
+  get title(): string {
+    return `${this.variety.name} ${this.family.name}`;
+  }
+
   state = Store.state;
 }
 </script>
 
 <style scoped lang="scss">
 .solidCircle {
+  opacity: 75%;
+  stroke: none;
+}
+
+.solidCircle:hover {
+  opacity: 90%;
 }
 
 .spacingCircle {
-  fill: none;
+  fill: gray;
+  fill-opacity: 0;
   stroke: gray;
   stroke-dasharray: 5 5;
+}
+
+.spacingCircle:hover {
+  fill-opacity: 0.5;
 }
 </style>

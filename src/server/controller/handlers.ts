@@ -22,6 +22,20 @@ export function one<T extends ObjectLiteral>(
   };
 }
 
+export function remove<T extends ObjectLiteral>(
+  entity: EntityTarget<T>
+): SimpleHandler<{ id: number }, void, undefined> {
+  return async (request) => {
+    const repository = getManager().getRepository(entity);
+
+    const result = await repository.delete(request.params.id);
+
+    if (!result) {
+      throw new Error(`Could not find element for id ${request.params.id}.`);
+    }
+  };
+}
+
 export function all<T extends ObjectLiteral>(
   entity: EntityTarget<T>
 ): SimpleHandler<undefined, T[], undefined> {

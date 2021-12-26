@@ -26,7 +26,7 @@ export class DrawPlantTool extends Tool {
     }
   }
 
-  public OnClick(x: number, y: number): Action {
+  public OnClick(x: number, y: number, plant?: Plant): Action {
     if (this.plant) {
       return new AddPlantAction(this.plant.cleanCopy());
     }
