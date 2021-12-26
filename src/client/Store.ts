@@ -152,6 +152,8 @@ export default class Store {
 
   setTool(tool: Tool): void {
     if (this.garden) {
+      this.clearTool();
+
       this.tool = tool;
 
       this.tool.Start();
