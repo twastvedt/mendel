@@ -2,7 +2,7 @@
 
 const path = require("path");
 const tsNameof = require("ts-nameof");
-var merge = require("webpack-merge");
+var { merge } = require("webpack-merge");
 
 module.exports = {
   configureWebpack: {

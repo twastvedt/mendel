@@ -8,12 +8,11 @@ import { Family } from "@/entity/Family";
 import fs from "fs";
 import path from "path";
 
-declare module "@svgdotjs/svg.js" {
-  const registerWindow: (window: Window, document: HTMLDocument) => void;
-}
 import { SVG, Container, registerWindow } from "@svgdotjs/svg.js";
 import { Garden } from "@/entity/Garden";
-const { createSVGWindow } = require("svgdom");
+
+//@ts-ignore
+import { createSVGWindow } from "svgdom";
 
 export class SeedData1603059702825 implements MigrationInterface {
   public async up(): Promise<void> {

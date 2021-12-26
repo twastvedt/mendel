@@ -1,8 +1,9 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from "typeorm";
+import { Entity, Column, OneToMany } from "typeorm";
+import { EntityBase } from "./EntityBase";
 import { Variety } from "./Variety";
 
 @Entity()
-export class Family {
+export class Family extends EntityBase {
   constructor(
     name: string,
     color: string,
@@ -10,15 +11,14 @@ export class Family {
     spacing: number,
     nitrogen = undefined
   ) {
+    super();
+
     this.name = name;
     this.icon = icon;
     this.color = color;
     this.spacing = spacing;
     this.nitrogen = nitrogen;
   }
-
-  @PrimaryGeneratedColumn()
-  id!: number;
 
   @Column()
   name!: string;

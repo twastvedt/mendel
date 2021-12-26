@@ -11,6 +11,7 @@ services:
       POSTGRES_USER: mendel
     logging:
       driver: "none"
+    container_name: db
     volumes:
       - db-data:/var/lib/postgresql/data
     networks:
@@ -20,12 +21,12 @@ services:
 
   adminer:
     image: adminer:latest
-    logging:
-      driver: "none"
     networks:
       - mendelnet
     ports:
       - "3001:8080"
+    depends_on:
+      - db
   app:
     build:
       context: ../
@@ -36,9 +37,9 @@ services:
       - mendelnet
     ports:
       - "3000:3000"
+      - "8080:8080"
     volumes:
-      - ../:/mendel
-      - /mendel/node_modules
+      - ..:/mendel
       - ~/.gitconfig:/etc/gitconfig
 
 networks:

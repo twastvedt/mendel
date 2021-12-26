@@ -1,37 +1,61 @@
 <template>
-  <svg id="map" ref="map">
-    <g ref="content" class="content">
-      <g id="beds" ref="beds" />
+  <svg
+    id="map"
+    ref="map"
+    xmlns="http://www.w3.org/2000/svg"
+    xmlns:xlink="http://www.w3.org/1999/xlink"
+    @mousemove="onMouseMove"
+  >
+    <g ref="content" class="content" @click="onClick">
+      <g v-if="pathGenerator && projection && state.garden" id="beds">
+        <path
+          v-for="bed in state.garden.beds"
+          :key="`${bed.id}-bed`"
+          :d="pathGenerator(bed.shape)"
+        />
+
+        <plant-component
+          v-for="plant in state.garden.plants"
+          :key="`${plant.id}-plant`"
+          :transform="`translate(${projection(plant.location.coordinates).join(
+            ' '
+          )})`"
+          :plant="plant"
+        />
+      </g>
     </g>
   </svg>
 </template>
 
 <script lang="ts">
-import { Component, Vue, Watch } from "vue-property-decorator";
-
-import Store, { Action } from "../Store";
-
+import { Component, Vue } from "vue-property-decorator";
+import Store from "../Store";
 import * as d3 from "d3";
-
-import { geoPath, geoTransform } from "d3-geo";
-
+import { geoIdentity, geoPath } from "d3-geo";
 import { zoom, D3ZoomEvent } from "d3-zoom";
+
+import PlantComponent from "./PlantComponent.vue";
 
 @Component({
   props: {
     msg: String,
   },
+  components: {
+    PlantComponent,
+  },
 })
 export default class Map extends Vue {
   $refs!: {
     map: SVGSVGElement;
-    beds: SVGGElement;
     content: SVGGElement;
   };
 
   state = Store.state;
   zoom!: d3.ZoomBehavior<SVGSVGElement, unknown>;
-  cursor!: d3.Selection<SVGGElement, unknown, null, undefined>;
+  cursorX = 0;
+  cursorY = 0;
+  pathGenerator = null as d3.GeoPath<unknown, d3.GeoPermissibleObjects> | null;
+  projection?: d3.GeoIdentityTransform;
 
   zoomed(e: D3ZoomEvent<SVGSVGElement, unknown>): void {
     this.content.attr("transform", e.transform as any);
@@ -49,22 +73,18 @@ export default class Map extends Vue {
       return;
     }
 
-    const offset = this.state.beds[0].shape.coordinates[0][0];
+    const offset = this.state.garden.beds[0].shape.coordinates[0][0] as [
+      number,
+      number
+    ];
 
-    const transform = geoTransform({
-      point: function (x, y) {
-        this.stream.point(x - offset[0], offset[1] - y);
-      },
-    });
+    // TODO: We assume data is stored in a meters-based projection. Converting to inches:
+    this.projection = geoIdentity()
+      .reflectY(true)
+      .translate([-offset[0] / 0.0254, offset[1] / 0.0254])
+      .scale(1 / 0.0254);
 
-    const path = geoPath().projection(transform);
-
-    d3.select(this.$refs.beds)
-      .selectAll("path")
-      .data(this.state.beds.map((b) => b.shape))
-      .enter()
-      .append("path")
-      .attr("d", path);
+    this.pathGenerator = geoPath(this.projection);
 
     this.svg = d3.select(this.$refs.map);
 
@@ -77,15 +97,7 @@ export default class Map extends Vue {
       .select(this.$refs.content)
       .attr("transform", "translate(0,0)");
 
-    this.cursor = this.content.append("g").classed("cursor", true);
-
-    this.cursor.append("use").attr("width", 1).attr("height", 1);
-
-    this.svg.on("mousemove.cursor", (event) => {
-      const [x, y] = d3.pointer(event, this.content.node());
-
-      this.cursor.attr("transform", `translate(${x}, ${y})`);
-    });
+    this.state.cursor = this.content.append("g").classed("cursor", true);
 
     this.zoom = zoom<SVGSVGElement, unknown>().on(
       "zoom",
@@ -94,12 +106,11 @@ export default class Map extends Vue {
 
     this.svg.call(this.zoom);
 
-    this.zoomFit();
+    Vue.nextTick(() => this.zoomFit());
 
     // this.map
     //   .on("zoomend", this.onMapZoomed, this)
     //   .on("mouseout", this.onMouseOut, this)
-    //   .on("mouseover", this.startDraw, this);
 
     // L.tileLayer
     //   .wms("https://imageserver.gisdata.mn.gov/cgi-bin/mncomp?VERSION=1.3.0", {
@@ -110,7 +121,7 @@ export default class Map extends Vue {
   }
 
   zoomFit(): void {
-    const bounds = this.content.node()?.getBBox();
+    const bounds = this.$refs.content.getBBox();
 
     if (bounds) {
       const width = this.$refs.map.clientWidth,
@@ -132,47 +143,24 @@ export default class Map extends Vue {
     }
   }
 
-  startDraw(): void {
-    if (this.state.action !== Action.None && this.state.actionId) {
-      const variety = this.state.varieties.find(
-        (v) => v.id === this.state.actionId
-      );
-
-      if (variety) {
-        this.cursor.select("use").attr("href", `#family-${variety.family.id}`);
-      }
-    }
+  onClick(event: MouseEvent): void {
+    this.state.onClick(...d3.pointer(event, this.content.node()));
   }
 
-  stopDraw(): void {
-    if (this.cursor) {
-      this.cursor.on("mousemove.cursor", null);
+  onMouseMove(event: MouseEvent): void {
+    if (this.state.tool && this.projection?.invert) {
+      const point = this.projection.invert(
+        d3.pointer(event, this.content.node())
+      );
 
-      this.cursor.remove();
+      if (point) {
+        this.state.updateTool(...point);
+      }
     }
   }
 
   onMouseOut(): void {
     // this.map.pm.Draw.PlantMarker.disable();
-  }
-
-  @Watch(nameof.full(Map.prototype.state.action, -2))
-  @Watch(nameof.full(Map.prototype.state.actionId, -2))
-  newAction(): void {
-    switch (this.state.action) {
-      case Action.DrawPlant:
-        this.startDraw();
-
-        break;
-
-      case Action.None:
-        this.stopDraw();
-
-        break;
-
-      default:
-        break;
-    }
   }
 
   // onMapZoomed(): void {
@@ -199,12 +187,16 @@ export default class Map extends Vue {
   height: 100%;
   display: block;
   z-index: 0;
+
+  ::v-deep * {
+    vector-effect: non-scaling-stroke;
+  }
 }
 
 ::v-deep #beds path {
   fill: rgba($color: #ffffff, $alpha: 0.5);
   stroke: #000000;
-  stroke-width: 0.01px;
+  stroke-width: 1px;
 }
 
 .zoom1 {

@@ -1,15 +1,14 @@
-import {
-  Entity,
-  PrimaryGeneratedColumn,
-  Column,
-  ManyToOne,
-  JoinColumn,
-} from "typeorm";
+import { Entity, Column, ManyToOne, JoinColumn, OneToMany } from "typeorm";
+import { EntityBase } from "./EntityBase";
 import { Family } from "./Family";
+import { Plant } from "./Plant";
+import { Planting } from "./Planting";
 
 @Entity()
-export class Variety {
+export class Variety extends EntityBase {
   constructor(name: string, color: string, family: Family) {
+    super();
+
     this.name = name;
     this.color = color;
     this.family = family;
@@ -18,9 +17,6 @@ export class Variety {
       this.familyId = family.id;
     }
   }
-
-  @PrimaryGeneratedColumn()
-  id!: number;
 
   @Column()
   name!: string;
@@ -31,7 +27,17 @@ export class Variety {
   @Column()
   familyId?: number;
 
+  @OneToMany(() => Plant, (plant) => plant.variety, {
+    onDelete: "CASCADE",
+  })
+  plants?: Plant[];
+
+  @OneToMany(() => Planting, (planting) => planting.variety, {
+    onDelete: "CASCADE",
+  })
+  plantings?: Planting[];
+
   @ManyToOne(() => Family, (family) => family.varieties)
   @JoinColumn({ name: nameof(Variety.prototype.familyId) })
-  family!: Family;
+  family?: Family;
 }

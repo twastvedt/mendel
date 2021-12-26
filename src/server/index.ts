@@ -6,6 +6,7 @@ import * as bodyParser from "body-parser";
 import BedRoutes from "./controller/Beds";
 import VarietyRoutes from "./controller/Varieties";
 import GardenRoutes from "./controller/Gardens";
+import PlantRoutes from "./controller/Plants";
 
 createConnection()
   .then(async (connection) => {
@@ -34,6 +35,7 @@ createConnection()
     app.use(BedRoutes);
     app.use(GardenRoutes);
     app.use(VarietyRoutes);
+    app.use(PlantRoutes);
 
     // Run app
     app.listen(3000);

@@ -6,7 +6,7 @@
           v-for="variety in family.varieties"
           :key="variety.id"
           :value="variety.id"
-          @click="onSelected(variety.id)"
+          @click="onSelected(variety)"
         >
           <v-list-item-icon>
             <v-list-item-avatar class="icon" :style="`fill: ${variety.color}`">
@@ -31,9 +31,11 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue, Watch } from "vue-property-decorator";
-import Store, { Action } from "../Store";
+import { Component, Vue } from "vue-property-decorator";
+import Store from "../Store";
+import { DrawPlantTool } from "../tools/DrawPlantTool";
 import AddNewVariety from "./AddNewVariety.vue";
+import { Variety } from "@/entity/Variety";
 
 @Component({
   components: {
@@ -51,21 +53,11 @@ export default class SelectPlant extends Vue {
     this.state.loadVarieties();
   }
 
-  onSelected(varietyId: number): void {
-    this.state.setAction(Action.DrawPlant, varietyId);
-  }
+  onSelected(variety: Variety): void {
+    if (this.state.garden) {
+      this.state.setTool(new DrawPlantTool(variety, this.state.garden));
 
-  @Watch(nameof.full(SelectPlant.prototype.state.action, -2))
-  @Watch(nameof.full(SelectPlant.prototype.state.actionId, -2))
-  newActionId(): void {
-    if (
-      (this.state.action === Action.DrawPlant ||
-        this.state.action === Action.DrawPlanting) &&
-      this.state.actionId
-    ) {
-      this.selected = this.state.actionId;
-    } else {
-      this.selected = [];
+      this.selected = variety.id;
     }
   }
 }

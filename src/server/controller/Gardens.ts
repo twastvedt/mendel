@@ -1,16 +1,16 @@
 import express from "express";
 
-import { addEndpoint, all, create, one } from "./handlers";
+import { all, create, one } from "./handlers";
 
 import { gardenApi } from "@/api/GardenApi";
 import { Garden } from "@/entity/Garden";
 
 const router = express.Router();
 
-addEndpoint(router, gardenApi.all, all(Garden));
+gardenApi.all.addWrappedHandler(router, all(Garden));
 
-addEndpoint(router, gardenApi.create, create(Garden));
+gardenApi.create.addWrappedHandler(router, create(Garden));
 
-addEndpoint(router, gardenApi.one, one(Garden));
+gardenApi.one.addWrappedHandler(router, one(Garden));
 
 export default router;

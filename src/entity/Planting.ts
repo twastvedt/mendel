@@ -1,19 +1,12 @@
-import { Polygon } from "geojson";
-import {
-  Entity,
-  PrimaryGeneratedColumn,
-  Column,
-  OneToMany,
-  ManyToOne,
-} from "typeorm";
+import type { Polygon } from "geojson";
+import { Entity, Column, OneToMany, ManyToOne } from "typeorm";
+import { EntityBase } from "./EntityBase";
 import { Garden } from "./Garden";
 import { Plant } from "./Plant";
+import { Variety } from "./Variety";
 
 @Entity()
-export class Planting {
-  @PrimaryGeneratedColumn()
-  id!: number;
-
+export class Planting extends EntityBase {
   @Column("geometry", { spatialFeatureType: "Polygon", srid: 26915 })
   shape!: Polygon;
 
@@ -38,6 +31,9 @@ export class Planting {
   @Column()
   yeildRank?: number;
 
+  @ManyToOne(() => Variety, (variety) => variety.plantings)
+  variety!: Variety;
+
   @OneToMany(() => Plant, (plant) => plant.planting, {
     onDelete: "CASCADE",
   })
@@ -47,6 +43,8 @@ export class Planting {
   garden!: Garden;
 
   constructor() {
+    super();
+
     this.areSeedlings = false;
   }
 }

@@ -1,10 +1,10 @@
 # -- DEV DOCKERFILE --
 # -- DO NOT USE IN PRODUCTION! --
 
-FROM node:14-alpine
+FROM node:16-alpine
 
 RUN apk update && \
-    apk add bash curl git python make g++ nano openssh gnupg --no-cache && \
+    apk add bash curl git make g++ nano openssh gnupg --no-cache && \
     mkdir -p /mendel && \
     npm install -g @vue/cli npm-check-updates
 

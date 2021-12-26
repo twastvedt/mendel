@@ -1,19 +1,13 @@
 import { Family } from "@/entity/Family";
 
-import { request } from "./ApiRequest";
+import "./apiRequest";
 import { varietyApi } from "@/api/VarietyApi";
-import { Bed } from "@/entity/Bed";
-import { bedApi } from "@/api/BedApi";
 import { Variety } from "@/entity/Variety";
 import { gardenApi } from "@/api/GardenApi";
 import { Garden } from "@/entity/Garden";
-
-export enum Action {
-  DrawPlant,
-  DrawPlanting,
-  Delete,
-  None,
-}
+import { Tool } from "./tools/Tool";
+import { Action } from "./actions/Action";
+import { Plant } from "@/entity/Plant";
 
 export default class Store {
   static state: Store;
@@ -27,24 +21,30 @@ export default class Store {
   loading = false;
   error = "";
 
-  garden?: Garden;
+  garden?: Garden = undefined;
   varietiesByFamily: Family[] = [];
   varieties: Variety[] = [];
-  beds: Bed[] = [];
 
-  action?: Action = undefined;
-  actionId?: number = undefined;
+  actions: Action[] = [];
+
+  tool?: Tool = undefined;
+
+  cursor?: d3.Selection<SVGGElement, unknown, null, undefined>;
+
+  mounted(): void {
+    addEventListener("keyup", (event) => this.keyListener(event));
+  }
 
   async loadGarden(): Promise<void> {
     this.error = "";
     this.loading = true;
 
     try {
-      this.garden = await request(gardenApi.one, { id: 1 });
+      this.garden = await gardenApi.one.request({ routeParams: { id: 1 } });
 
-      this.beds = await request(bedApi.garden, { garden: this.garden.id });
+      this.garden.plants.forEach((p) => this.inflatePlant(p));
     } catch (error) {
-      this.error = error;
+      this.error = error as string;
     }
 
     this.loading = false;
@@ -57,7 +57,7 @@ export default class Store {
     try {
       this.varieties = [];
 
-      this.varietiesByFamily = await request(varietyApi.allByFamily);
+      this.varietiesByFamily = await varietyApi.allByFamily.request();
 
       const symbols = document.createElementNS(
         "http://www.w3.org/2000/svg",
@@ -80,10 +80,20 @@ export default class Store {
 
       document.body.prepend(symbols);
     } catch (error) {
-      this.error = error;
+      this.error = error as string;
     }
 
     this.loading = false;
+  }
+
+  onClick(x: number, y: number): void {
+    if (this.tool && this.garden) {
+      const action = this.tool.OnClick(x, y);
+
+      action.Do(this);
+
+      this.actions.push(action);
+    }
   }
 
   async addVariety(
@@ -91,10 +101,12 @@ export default class Store {
     color: string,
     familyId: number
   ): Promise<void> {
-    const newVariety = await request(varietyApi.create, {
-      name,
-      color,
-      familyId,
+    const newVariety = await varietyApi.create.request({
+      data: {
+        name,
+        color,
+        familyId,
+      },
     });
 
     const family = this.varietiesByFamily.find((f) => f.id === familyId);
@@ -105,19 +117,50 @@ export default class Store {
     }
   }
 
-  setAction(action: Action, actionId: number): void {
-    this.action = action;
-    this.actionId = actionId;
+  inflatePlant(plant: Plant): Plant {
+    if (plant.varietyId !== undefined) {
+      plant.variety = this.varieties.find((v) => v.id === plant.varietyId);
+    }
 
-    addEventListener("keyup", (event) => this.keyListener(event), {
-      once: true,
-    });
+    if (plant.gardenId === this.garden?.id) {
+      plant.garden === this.garden;
+    }
+
+    if (plant.plantingId !== undefined) {
+      plant.planting ===
+        this.garden?.plantings.find((p) => p.id === plant.plantingId);
+    }
+
+    return plant;
+  }
+
+  setTool(tool: Tool): void {
+    if (this.garden) {
+      this.tool = tool;
+
+      this.tool.Start();
+    }
+  }
+
+  updateTool(x: number, y: number) {
+    if (this.tool && this.garden) {
+      this.tool.OnCursorMove(x, y);
+    }
+  }
+
+  clearTool(): void {
+    if (this.tool) {
+      if (this.garden) {
+        this.tool?.Stop();
+      }
+
+      this.tool = undefined;
+    }
   }
 
   keyListener(event: KeyboardEvent): void {
-    if (event.key === "Escape") {
-      this.action = Action.None;
-      this.actionId = undefined;
+    if (event.key === "Escape" && this.tool) {
+      this.clearTool();
     }
   }
 }
