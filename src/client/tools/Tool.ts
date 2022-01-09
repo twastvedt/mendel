@@ -1,14 +1,15 @@
 import { Plant } from "@/entity/Plant";
+import { VueConstructor } from "vue";
 import { Action } from "../actions/Action";
-import Store from "../Store";
 
-export abstract class Tool {
-  public constructor(protected state: Store) {}
+export interface Tool {
+  OnClick(x: number, y: number, plant?: Plant): Action | void;
 
-  public abstract OnClick(x: number, y: number, plant?: Plant): Action | void;
+  Start(): void;
+  Stop(): void;
 
-  public abstract Start(): void;
-  public abstract Stop(): void;
+  OnCursorMove(x: number, y: number): void;
 
-  public abstract OnCursorMove(x: number, y: number): void;
+  cursorComponent?: VueConstructor;
+  cursorProps?: Record<string, unknown>;
 }

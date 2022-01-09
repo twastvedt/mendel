@@ -1,7 +1,7 @@
 <template>
-  <g @click="$emit('click', $event)">
+  <g :class="classList" @click="$emit('click', $event)">
     <template v-if="state.scaleRange > 1">
-      <circle :r="family.spacing" class="spacingCircle" />
+      <circle :r="family.spacing / 2" class="spacingCircle" />
       <use
         :width="iconSize"
         :height="iconSize"
@@ -9,12 +9,13 @@
         :y="-iconSize / 2"
         :href="`#family-${family.id}`"
         :fill="variety.color"
+        class="icon"
       />
     </template>
 
     <circle
       v-else
-      :r="family.spacing"
+      :r="family.spacing / 2"
       :fill="variety.color"
       class="solidCircle"
     />
@@ -34,6 +35,7 @@ import { Variety } from "@/entity/Variety";
 @Component({})
 export default class PlantComponent extends Vue {
   @Prop() readonly plant!: Plant;
+  @Prop({ default: false }) readonly isCursor!: boolean;
 
   get family(): Family {
     if (this.plant.variety?.family) {
@@ -52,11 +54,15 @@ export default class PlantComponent extends Vue {
   }
 
   get iconSize(): number {
-    return Math.min(40 / this.state.scale, this.family.spacing);
+    return Math.min(40 / this.state.scale, (this.family.spacing * 2) / 3);
   }
 
   get title(): string {
     return `${this.variety.name} ${this.family.name}`;
+  }
+
+  get classList(): Record<string, unknown> {
+    return { cursor: this.isCursor, notCursor: !this.isCursor };
   }
 
   state = Store.state;
@@ -69,7 +75,7 @@ export default class PlantComponent extends Vue {
   stroke: none;
 }
 
-.solidCircle:hover {
+.notCursor .solidCircle:hover {
   opacity: 90%;
 }
 
@@ -80,7 +86,11 @@ export default class PlantComponent extends Vue {
   stroke-dasharray: 5 5;
 }
 
-.spacingCircle:hover {
+.notCursor .spacingCircle:hover {
   fill-opacity: 0.5;
+}
+
+.icon {
+  pointer-events: none;
 }
 </style>

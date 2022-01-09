@@ -13,11 +13,11 @@ export class DeletePlantAction extends Action {
     await super.Do(state);
 
     if (state.garden) {
+      state.removePlant(this.plant.id);
+
       await plantApi.delete.request({
         routeParams: { id: this.plant.id },
       });
-
-      state.removePlant(this.plant.id);
     }
   }
 

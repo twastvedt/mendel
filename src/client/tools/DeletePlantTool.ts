@@ -1,15 +1,10 @@
 import { Tool } from "./Tool";
 import { Action } from "../actions/Action";
-import Store from "../Store";
 import { DeletePlantAction } from "../actions/DeletePlantAction";
 import { Plant } from "@/entity/Plant";
 
-export class DeletePlantTool extends Tool {
+export class DeletePlantTool implements Tool {
   public Stop(): void {}
-
-  public constructor(state: Store) {
-    super(state);
-  }
 
   public OnCursorMove(x: number, y: number): void {}
 

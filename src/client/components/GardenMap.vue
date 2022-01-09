@@ -6,22 +6,28 @@
     xmlns:xlink="http://www.w3.org/1999/xlink"
     @mousemove="onMouseMove"
   >
-    <g ref="content" class="content">
-      <g v-if="pathGenerator && projection && state.garden" id="beds">
+    <g ref="content" class="content" @click="onClick">
+      <g v-if="state.garden" id="beds">
         <path
           v-for="bed in state.garden.beds"
           :key="`${bed.id}-bed`"
-          :d="pathGenerator(bed.shape)"
+          :d="state.pathGenerator(bed.shape)"
         />
 
         <plant-component
           v-for="(plant, index) in state.garden.plants"
           :key="`${index}-plant`"
-          :transform="`translate(${projection(plant.location.coordinates).join(
-            ' '
-          )})`"
+          :transform="`translate(${state
+            .projection(plant.location.coordinates)
+            .join(' ')})`"
           :plant="plant"
           @click="onClick($event, plant)"
+        />
+
+        <dynamic
+          :is="state.tool.cursorComponent"
+          v-if="state.tool && state.tool.cursorComponent"
+          v-bind="state.tool.cursorProps"
         />
       </g>
     </g>
@@ -32,7 +38,6 @@
 import { Component, Vue } from "vue-property-decorator";
 import Store from "../Store";
 import * as d3 from "d3";
-import { geoIdentity, geoPath } from "d3-geo";
 import { zoom, D3ZoomEvent } from "d3-zoom";
 
 import PlantComponent from "./PlantComponent.vue";
@@ -51,8 +56,6 @@ export default class GardenMap extends Vue {
 
   state = Store.state;
   zoom!: d3.ZoomBehavior<SVGSVGElement, unknown>;
-  pathGenerator = null as d3.GeoPath<unknown, d3.GeoPermissibleObjects> | null;
-  projection?: d3.GeoIdentityTransform;
 
   zoomed(e: D3ZoomEvent<SVGSVGElement, unknown>): void {
     this.content.attr("transform", e.transform as any);
@@ -71,19 +74,6 @@ export default class GardenMap extends Vue {
     if (!this.state.garden) {
       return;
     }
-
-    const offset = this.state.garden.beds[0].shape.coordinates[0][0] as [
-      number,
-      number
-    ];
-
-    // TODO: We assume data is stored in a meters-based projection. Converting to inches:
-    this.projection = geoIdentity()
-      .reflectY(true)
-      .translate([-offset[0] / 0.0254, offset[1] / 0.0254])
-      .scale(1 / 0.0254);
-
-    this.pathGenerator = geoPath(this.projection);
 
     this.svg = d3.select(this.$refs.map);
 
@@ -147,14 +137,8 @@ export default class GardenMap extends Vue {
   }
 
   onMouseMove(event: MouseEvent): void {
-    if (this.state.tool && this.projection?.invert) {
-      const point = this.projection.invert(
-        d3.pointer(event, this.content.node())
-      );
-
-      if (point) {
-        this.state.updateTool(...point);
-      }
+    if (this.state.tool) {
+      this.state.updateTool(d3.pointer(event, this.content.node()));
     }
   }
 }
@@ -176,20 +160,5 @@ export default class GardenMap extends Vue {
   fill: rgba($color: #ffffff, $alpha: 0.5);
   stroke: #000000;
   stroke-width: 1px;
-}
-
-.zoom1 {
-  &::v-deep .plantMarkerIcon {
-    display: none;
-  }
-}
-
-.zoom3 {
-  &::v-deep .plantMarkerIcon {
-    width: 24px !important;
-    height: 24px !important;
-    margin-left: -12px !important;
-    margin-top: -12px !important;
-  }
 }
 </style>

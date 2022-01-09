@@ -106,14 +106,14 @@ export default class Sidebar extends Vue {
       switch (newTool) {
         case "drawPlant":
           if (this.variety) {
-            this.state.setTool(new DrawPlantTool(this.variety, this.state));
+            this.state.setTool(new DrawPlantTool(this.variety));
           }
 
           break;
         case "drawBed":
           break;
         case "delete":
-          this.state.setTool(new DeletePlantTool(this.state));
+          this.state.setTool(new DeletePlantTool());
           break;
       }
     }
@@ -124,7 +124,7 @@ export default class Sidebar extends Vue {
       newVariety &&
       (this.state.toolName === "drawPlant" || this.state.toolName === "drawBed")
     ) {
-      this.state.setTool(new DrawPlantTool(newVariety, this.state));
+      this.state.setTool(new DrawPlantTool(newVariety));
     }
   }
 }

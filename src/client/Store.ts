@@ -8,6 +8,8 @@ import { Garden } from "@/entity/Garden";
 import { Tool } from "./tools/Tool";
 import { Action } from "./actions/Action";
 import { Plant } from "@/entity/Plant";
+import { Delaunay } from "d3-delaunay";
+import { geoIdentity, geoPath } from "d3-geo";
 
 export default class Store {
   static state: Store;
@@ -17,6 +19,13 @@ export default class Store {
 
     return Store.state;
   }
+
+  // TODO: We assume data is stored in inches relative to garden origin.
+  projection = geoIdentity().reflectY(true);
+
+  pathGenerator = geoPath(this.projection);
+
+  delaunay?: Delaunay<unknown>;
 
   loading = false;
   error = "";
@@ -29,14 +38,14 @@ export default class Store {
   actions: Action[] = [];
 
   toolName = "";
-  tool?: Tool = undefined;
+  tool: Tool | null = null;
 
   cursor?: d3.Selection<SVGGElement, unknown, null, undefined>;
 
   get scaleRange() {
     if (this.scale > 10) {
       return 3;
-    } else if (this.scale > 1) {
+    } else if (this.scale > 2) {
       return 2;
     } else {
       return 1;
@@ -51,6 +60,8 @@ export default class Store {
       this.garden = await gardenApi.one.request({ routeParams: { id: 1 } });
 
       this.garden.plants.forEach((p) => this.inflatePlant(p));
+
+      this.updateDelaunay();
     } catch (error) {
       this.error = error as string;
     }
@@ -161,6 +172,18 @@ export default class Store {
 
     if (i !== -1) {
       this.garden.plants.splice(i, 1);
+
+      this.updateDelaunay();
+    }
+  }
+
+  updateDelaunay(): void {
+    if (this.garden?.plants.length) {
+      this.delaunay = new Delaunay(
+        this.garden.plants.flatMap((p) => p.location.coordinates)
+      );
+    } else {
+      delete this.delaunay;
     }
   }
 
@@ -168,15 +191,19 @@ export default class Store {
     if (this.garden) {
       this.clearTool();
 
-      this.tool = tool;
+      tool.Start();
 
-      this.tool.Start();
+      this.tool = tool;
     }
   }
 
-  updateTool(x: number, y: number) {
+  updateTool(cursor: [number, number]) {
     if (this.tool && this.garden) {
-      this.tool.OnCursorMove(x, y);
+      const point = this.projection.invert(cursor);
+
+      if (point) {
+        this.tool.OnCursorMove(...point);
+      }
     }
   }
 
@@ -186,7 +213,7 @@ export default class Store {
         this.tool?.Stop();
       }
 
-      this.tool = undefined;
+      this.tool = null;
     }
   }
 
