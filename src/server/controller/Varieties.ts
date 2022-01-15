@@ -2,7 +2,7 @@ import { varietyApi } from "@/api/VarietyApi";
 import { Variety } from "@/entity/Variety";
 import express from "express";
 
-import { one, all, create } from "./handlers";
+import { one, all, create, update, remove } from "./handlers";
 
 import { Family } from "@/entity/Family";
 
@@ -22,5 +22,9 @@ varietyApi.all.addWrappedHandler(router, all(Variety));
 varietyApi.create.addWrappedHandler(router, create(Variety));
 
 varietyApi.one.addWrappedHandler(router, one(Variety));
+
+varietyApi.update.addWrappedHandler(router, update(Variety));
+
+varietyApi.delete.addWrappedHandler(router, remove(Variety));
 
 export default router;

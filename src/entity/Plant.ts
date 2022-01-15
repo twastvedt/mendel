@@ -32,22 +32,22 @@ export class Plant extends EntityBase {
   @ManyToOne(() => Planting, (planting) => planting.plants)
   planting?: Planting;
 
-  cleanCopy(): EntityNoId<Plant> {
+  static cleanCopy(oldPlant: EntityNoId<Plant>): EntityNoId<Plant> {
     const newPlant = new Plant();
 
-    newPlant.location = this.location;
-    newPlant.plantDate = this.plantDate;
-    newPlant.plantingId = this.plantingId || this.planting?.id;
-    newPlant.gardenId = this.gardenId || this.garden?.id;
-    newPlant.varietyId = this.varietyId || this.variety?.id;
+    newPlant.location = oldPlant.location;
+    newPlant.plantDate = oldPlant.plantDate;
+    newPlant.plantingId = oldPlant.plantingId || oldPlant.planting?.id;
+    newPlant.gardenId = oldPlant.gardenId || oldPlant.garden?.id;
+    newPlant.varietyId = oldPlant.varietyId || oldPlant.variety?.id;
 
     return newPlant;
   }
 
-  copy(): Plant {
+  static copy(oldPlant: Plant): Plant {
     const newPlant = new Plant();
 
-    Object.assign(newPlant, this);
+    Object.assign(newPlant, oldPlant);
 
     return newPlant;
   }

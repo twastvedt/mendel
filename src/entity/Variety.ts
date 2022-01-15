@@ -6,15 +6,20 @@ import { Planting } from "./Planting";
 
 @Entity()
 export class Variety extends EntityBase {
-  constructor(name: string, color: string, family: Family) {
+  constructor(name: string, color: string, family?: Family | number) {
     super();
 
     this.name = name;
     this.color = color;
-    this.family = family;
 
-    if (family?.id != null) {
-      this.familyId = family.id;
+    if (typeof family === "number") {
+      this.familyId = family;
+    } else {
+      this.family = family;
+
+      if (family?.id != null) {
+        this.familyId = family.id;
+      }
     }
   }
 
@@ -40,4 +45,18 @@ export class Variety extends EntityBase {
   @ManyToOne(() => Family, (family) => family.varieties)
   @JoinColumn({ name: nameof(Variety.prototype.familyId) })
   family?: Family;
+
+  static clone(variety: Variety): Variety {
+    return Object.assign({}, variety);
+  }
+
+  static cleanClone(variety: Variety): Variety {
+    const newVariety = Object.assign({}, variety);
+
+    delete newVariety.family;
+    delete newVariety.plants;
+    delete newVariety.plantings;
+
+    return newVariety;
+  }
 }

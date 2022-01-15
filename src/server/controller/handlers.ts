@@ -61,3 +61,13 @@ export function create<T extends ObjectLiteral>(
     return newEntity;
   };
 }
+
+export function update<T extends ObjectLiteral & { id: string | number }>(
+  entity: EntityTarget<T>
+): SimpleHandler<{ id: number }, void, Partial<T> & Pick<T, "id">> {
+  return async (request) => {
+    const repository = getManager().getRepository(entity);
+
+    await repository.update(request.body.id, request.body);
+  };
+}

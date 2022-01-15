@@ -1,39 +1,43 @@
 <template>
   <v-app>
-    <v-main>
-      <garden-map />
-    </v-main>
-    <v-navigation-drawer
-      absolute
-      permanent
-      right
-      app
-      width="300px"
-      class="grey lighten-2"
-    >
-      <Sidebar />
+    <toolbar />
+
+    <v-navigation-drawer v-model="state.drawer" app>
+      <v-list-item>
+        <v-list-item-content>
+          <v-list-item-title class="text-h6"> Mendel </v-list-item-title>
+          <v-list-item-subtitle> Garden planner </v-list-item-subtitle>
+        </v-list-item-content>
+      </v-list-item>
+
+      <v-divider></v-divider>
+
+      <router-view name="navigation" />
     </v-navigation-drawer>
+
+    <v-main>
+      <router-view />
+    </v-main>
   </v-app>
 </template>
 
 <script lang="ts">
 import { Component, Vue } from "vue-property-decorator";
-import gardenMap from "./components/GardenMap.vue";
-import Sidebar from "./components/Sidebar.vue";
+import toolbar from "./components/Toolbar.vue";
 import Store from "./Store";
 
 @Component({
   components: {
-    gardenMap,
-    Sidebar,
+    toolbar,
   },
 })
 export default class App extends Vue {
   constructor() {
     super();
-    Store.initialize();
 
-    addEventListener("keyup", (event) => Store.state.keyListener(event));
+    addEventListener("keyup", (event) => this.state.keyListener(event));
   }
+
+  state = Store.state;
 }
 </script>

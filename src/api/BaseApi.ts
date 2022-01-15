@@ -13,7 +13,7 @@ export function baseApi<T extends EntityBase>(endpoint: string) {
 
     create: new Endpoint<T, EntityNoId<T>>("post", `/${endpoint}/`),
 
-    update: new Endpoint<T, Partial<T>, { id: number }>(
+    update: new Endpoint<void, Partial<T> & Pick<T, "id">, { id: number }>(
       "put",
       `/${endpoint}/:id`
     ),

@@ -2,11 +2,13 @@ import Vue from "vue";
 import Vuetify from "vuetify";
 import App from "./App.vue";
 import colors from "vuetify/lib/util/colors";
+import router from "./router";
 
 Vue.use(Vuetify);
 
 new Vue({
   render: (h) => h(App),
+  router,
   vuetify: new Vuetify({
     theme: {
       themes: {

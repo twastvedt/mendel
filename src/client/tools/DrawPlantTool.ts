@@ -129,7 +129,7 @@ export class DrawPlantTool implements Tool {
 
   public OnClick(x: number, y: number, plant?: Plant): Action {
     if (this.plant) {
-      return new AddPlantAction(this.plant.copy());
+      return new AddPlantAction(Plant.copy(this.plant));
     }
 
     throw new Error("No action to save?");

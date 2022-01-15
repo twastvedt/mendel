@@ -12,12 +12,13 @@ import { Delaunay } from "d3-delaunay";
 import { geoIdentity, geoPath } from "d3-geo";
 
 export default class Store {
-  static state: Store;
+  static _state: Store;
 
-  static initialize(): Store {
-    Store.state = new Store();
-
-    return Store.state;
+  static get state(): Store {
+    if (!Store._state) {
+      Store._state = new Store();
+    }
+    return Store._state;
   }
 
   // TODO: We assume data is stored in inches relative to garden origin.
@@ -27,12 +28,14 @@ export default class Store {
 
   delaunay?: Delaunay<unknown>;
 
+  drawer = false;
+
   loading = false;
   error = "";
   scale = 1;
 
   garden?: Garden = undefined;
-  varietiesByFamily: Family[] = [];
+  families: Family[] = [];
   varieties: Variety[] = [];
 
   actions: Action[] = [];
@@ -76,7 +79,7 @@ export default class Store {
     try {
       this.varieties = [];
 
-      this.varietiesByFamily = await varietyApi.allByFamily.request();
+      this.families = await varietyApi.allByFamily.request();
 
       const symbols = document.createElementNS(
         "http://www.w3.org/2000/svg",
@@ -85,7 +88,7 @@ export default class Store {
 
       let content = "";
 
-      this.varietiesByFamily.forEach((f) => {
+      this.families.forEach((f) => {
         content += f.icon.replace("symbol ", `symbol id="family-${f.id}" `);
 
         f.varieties.forEach((v) => {
@@ -117,25 +120,78 @@ export default class Store {
     }
   }
 
-  async addVariety(
-    name: string,
-    color: string,
-    familyId: number
-  ): Promise<void> {
-    const newVariety = await varietyApi.create.request({
-      data: {
-        name,
-        color,
-        familyId,
-      },
-    });
+  async editVariety(item: Variety): Promise<void> {
+    if (item.id) {
+      const index = this.varieties.findIndex((v) => v.id === item.id);
 
-    const family = this.varietiesByFamily.find((f) => f.id === familyId);
+      if (index === -1) {
+        throw new Error(
+          `Could not find matching variety id to edit: ${item.id}`
+        );
+      }
 
-    if (family) {
-      newVariety.family = family;
-      family.varieties.push(newVariety);
+      Object.assign(this.varieties[index], item);
+
+      await varietyApi.update.request({
+        routeParams: { id: item.id },
+        data: Variety.cleanClone(item),
+      });
+    } else {
+      const newVariety = await varietyApi.create.request({
+        data: Variety.cleanClone(item),
+      });
+
+      this.varieties.push(newVariety);
+
+      const family = this.families.find(
+        (f) => f.id === item.familyId ?? item.family?.id
+      );
+
+      if (family) {
+        newVariety.family = family;
+        family.varieties.push(newVariety);
+      } else {
+        throw new Error(`Could not find family for new variety: ${item.id}`);
+      }
     }
+  }
+
+  async deleteVariety(item: Variety): Promise<void> {
+    if (item.id == undefined) {
+      throw new Error("No id on item to delete");
+    }
+
+    let index = this.varieties.findIndex((v) => v.id === item.id);
+
+    if (index === -1) {
+      throw new Error(
+        `Could not find matching variety id to delete: ${item.id}`
+      );
+    }
+
+    this.varieties.splice(index, 1);
+
+    let family = item.family;
+
+    if (!family) {
+      family = this.families.find((f) => f.id === item.familyId);
+    }
+
+    if (!family) {
+      throw new Error(`Could not find family for variety: ${item.id}.`);
+    }
+
+    index = family.varieties.findIndex((v) => v.id === item.id);
+
+    if (index === -1) {
+      throw new Error(
+        `Could not find matching variety id in variety's family: ${item.id}`
+      );
+    }
+
+    family.varieties.splice(index, 1);
+
+    await varietyApi.delete.request({ routeParams: { id: item.id } });
   }
 
   inflatePlant(plant: Plant): Plant {

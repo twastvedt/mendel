@@ -18,7 +18,7 @@ export class AddPlantAction extends Action {
     state.updateDelaunay();
 
     const newPlant = await plantApi.create.request({
-      data: this.plant.cleanCopy(),
+      data: Plant.cleanCopy(this.plant),
     });
 
     Object.assign(this.plant, newPlant);
