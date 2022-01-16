@@ -7,7 +7,7 @@
       @delete="(item) => state.deleteVariety(item)"
     >
       <template #default="props">
-        <AddNewVariety
+        <EditVariety
           :value="props.value"
           @close="props.close"
           @input="(item) => state.editVariety(item)"
@@ -31,17 +31,16 @@
 import { Component, Vue } from "vue-property-decorator";
 import Store from "../Store";
 import type { DataTableHeader } from "vuetify";
-import AddNewVariety from "./AddNewVariety.vue";
+import EditVariety from "./EditVariety.vue";
 import EditDataTable from "./EditDataTable.vue";
-import { Variety } from "@/entity/Variety";
 
 @Component({
   components: {
-    AddNewVariety,
+    EditVariety,
     EditDataTable,
   },
 })
-export default class SettingsPage extends Vue {
+export default class VarietySettings extends Vue {
   state = Store.state;
 
   varietyHeaders: DataTableHeader[] = [

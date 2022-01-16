@@ -9,7 +9,7 @@ export class Family extends EntityBase {
     color: string,
     icon: string,
     spacing: number,
-    nitrogen = undefined
+    nitrogen?: number
   ) {
     super();
 
@@ -42,4 +42,16 @@ export class Family extends EntityBase {
     onDelete: "CASCADE",
   })
   varieties!: Variety[];
+
+  static clone(family: Family): Family {
+    return Object.assign({}, family);
+  }
+
+  static cleanClone(family: Family): Family {
+    const newFamily = Family.clone(family);
+
+    newFamily.varieties = [];
+
+    return newFamily;
+  }
 }

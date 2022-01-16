@@ -10,6 +10,7 @@ import { Action } from "./actions/Action";
 import { Plant } from "@/entity/Plant";
 import { Delaunay } from "d3-delaunay";
 import { geoIdentity, geoPath } from "d3-geo";
+import { familyApi } from "@/api/FamilyApi";
 
 export default class Store {
   static _state: Store;
@@ -192,6 +193,61 @@ export default class Store {
     family.varieties.splice(index, 1);
 
     await varietyApi.delete.request({ routeParams: { id: item.id } });
+  }
+
+  async editFamily(item: Family): Promise<void> {
+    if (item.id) {
+      const index = this.families.findIndex((v) => v.id === item.id);
+
+      if (index === -1) {
+        throw new Error(
+          `Could not find matching family id to edit: ${item.id}`
+        );
+      }
+
+      Object.assign(this.families[index], item);
+
+      const newFamily: Partial<Family> & { id: number } =
+        Family.cleanClone(item);
+
+      delete newFamily.varieties;
+
+      await familyApi.update.request({
+        routeParams: { id: item.id },
+        data: newFamily,
+      });
+    } else {
+      const newFamily = await familyApi.create.request({
+        data: Family.cleanClone(item),
+      });
+
+      this.families.push(newFamily);
+    }
+  }
+
+  async deleteFamily(item: Family): Promise<void> {
+    if (item.id == undefined) {
+      throw new Error("No id on item to delete");
+    }
+
+    if (
+      item.varieties?.length ||
+      this.varieties.some((v) => v.familyId === item.id)
+    ) {
+      throw new Error("Can't delete family with varieties.");
+    }
+
+    const index = this.families.findIndex((v) => v.id === item.id);
+
+    if (index === -1) {
+      throw new Error(
+        `Could not find matching family id to delete: ${item.id}`
+      );
+    }
+
+    this.families.splice(index, 1);
+
+    await familyApi.delete.request({ routeParams: { id: item.id } });
   }
 
   inflatePlant(plant: Plant): Plant {

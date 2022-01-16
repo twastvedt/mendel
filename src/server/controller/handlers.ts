@@ -6,6 +6,24 @@ type SimpleHandler<TParams, TResponse, TData> = (
   request: Request<TParams, TResponse, TData, ParsedQs, Record<string, unknown>>
 ) => Promise<TResponse> | TResponse;
 
+// type ApiHandlers<TApi> = { [K in keyof TApi]: TApi[K] extends Endpoint<infer TResponse, infer TData, infer TParams> ? (
+//       request: Request<
+//         TParams,
+//         TResponse,
+//         TData,
+//         ParsedQs,
+//         Record<string, unknown>
+//       >
+//     ) => Promise<TResponse> | TResponse :
+//   never
+// }
+
+// export function handleApi<TEndpoints extends string, TApi extends  Record<TEndpoints, Endpoint<unknown, unknown, {} | undefined>>>(router: Router, api: TApi, handlers: ApiHandlers<TApi>): void {
+//   for (const endpoint in api) {
+//     api[endpoint].addWrappedHandler(router, handlers[endpoint])
+//   }
+// }
+
 export function one<T extends ObjectLiteral>(
   entity: EntityTarget<T>
 ): SimpleHandler<{ id: number }, T, undefined> {

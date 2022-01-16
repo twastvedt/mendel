@@ -7,6 +7,7 @@ import BedRoutes from "./controller/Beds";
 import VarietyRoutes from "./controller/Varieties";
 import GardenRoutes from "./controller/Gardens";
 import PlantRoutes from "./controller/Plants";
+import FamilyRoutes from "./controller/Families";
 
 createConnection()
   .then(async (connection) => {
@@ -36,6 +37,7 @@ createConnection()
     app.use(GardenRoutes);
     app.use(VarietyRoutes);
     app.use(PlantRoutes);
+    app.use(FamilyRoutes);
 
     // Run app
     app.listen(3000);

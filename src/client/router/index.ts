@@ -1,7 +1,8 @@
 import Vue from "vue";
 import VueRouter, { RouteConfig } from "vue-router";
 import GardenMap from "../components/GardenMap.vue";
-import SettingsPage from "../components/SettingsPage.vue";
+import VarietySettings from "../components/VarietySettings.vue";
+import FamilySettings from "../components/FamilySettings.vue";
 import MainMenu from "../components/MainMenu.vue";
 import SettingsMenu from "../components/SettingsMenu.vue";
 
@@ -20,22 +21,20 @@ const routes: Array<RouteConfig> = [
     path: "/settings",
     name: "Settings",
     components: {
-      default: SettingsPage,
+      default: FamilySettings,
       navigation: SettingsMenu,
     },
-    children: [
-      {
-        path: "families",
-        name: "Families",
-        component: SettingsPage,
-      },
+  },
+  {
+    path: "/settings/families",
+    name: "Families",
+    components: { default: FamilySettings, navigation: SettingsMenu },
+  },
 
-      {
-        path: "varieties",
-        name: "Varieties",
-        component: SettingsPage,
-      },
-    ],
+  {
+    path: "/settings/varieties",
+    name: "Varieties",
+    components: { default: VarietySettings, navigation: SettingsMenu },
   },
 ];
 

@@ -71,7 +71,7 @@ import { Variety } from "@/entity/Variety";
 import type { VueForm } from "../vueTypes";
 
 @Component({})
-export default class AddNewVariety extends Vue {
+export default class EditVariety extends Vue {
   $refs!: {
     form: VueForm;
   };
