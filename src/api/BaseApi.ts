@@ -1,8 +1,7 @@
 import { EntityBase } from "@/entity/EntityBase";
 import { Endpoint } from "./Endpoint";
 
-export type EntityNoId<T extends EntityBase> = Omit<T, "id"> &
-  Partial<Pick<T, "id">>;
+export type EntityId<T extends EntityBase> = T & Required<Pick<T, "id">>;
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export function baseApi<T extends EntityBase>(endpoint: string) {
@@ -11,12 +10,9 @@ export function baseApi<T extends EntityBase>(endpoint: string) {
 
     all: new Endpoint<T[]>("get", `/${endpoint}/`),
 
-    create: new Endpoint<T, EntityNoId<T>>("post", `/${endpoint}/`),
+    create: new Endpoint<T, T>("post", `/${endpoint}/`),
 
-    update: new Endpoint<void, Partial<T> & Pick<T, "id">, { id: number }>(
-      "put",
-      `/${endpoint}/:id`
-    ),
+    update: new Endpoint<void, EntityId<T>>("put", `/${endpoint}`),
 
     delete: new Endpoint<void, undefined, { id: number }>(
       "delete",

@@ -41,12 +41,12 @@ export class Family extends EntityBase {
   @OneToMany(() => Variety, (v) => v.family, {
     onDelete: "CASCADE",
   })
-  varieties!: Variety[];
+  varieties?: Variety[];
 
-  static cleanCopy(family: Family): Family {
+  static cleanCopy<T extends Family>(family: T): Omit<T, "varieties"> {
     const newFamily = Object.assign({}, family);
 
-    newFamily.varieties = [];
+    delete newFamily.varieties;
 
     return newFamily;
   }

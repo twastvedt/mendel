@@ -1,4 +1,3 @@
-import { EntityNoId } from "@/api/BaseApi";
 import { plantApi } from "@/api/PlantApi";
 import { Plant } from "@/entity/Plant";
 import "../apiRequest";
@@ -6,7 +5,7 @@ import Store from "../Store";
 import { Action } from "./Action";
 
 export class AddPlantAction extends Action {
-  public constructor(private plant: EntityNoId<Plant>) {
+  public constructor(private plant: Plant) {
     super();
   }
 

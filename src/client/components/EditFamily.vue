@@ -56,7 +56,7 @@ import { Component, Vue, Watch, Prop } from "vue-property-decorator";
 
 import { Family } from "@/entity/Family";
 import Store from "../Store";
-import type { VueForm } from "../vueTypes";
+import type { VueForm } from "../types/vueTypes";
 
 @Component({})
 export default class EditFamily extends Vue {

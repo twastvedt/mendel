@@ -1,4 +1,3 @@
-import { EntityNoId } from "@/api/BaseApi";
 import { Entity, Column, OneToMany, ManyToOne } from "typeorm";
 import { EntityBase } from "./EntityBase";
 import { Garden } from "./Garden";
@@ -55,8 +54,12 @@ export class Planting extends EntityBase {
     this.areSeedlings = false;
   }
 
-  static cleanCopy(oldPlanting: EntityNoId<Planting>): EntityNoId<Planting> {
-    const newPlanting = Object.assign({}, oldPlanting);
+  static copy(oldPlanting: Planting): Planting {
+    return Object.assign({}, oldPlanting);
+  }
+
+  static cleanCopy(oldPlanting: Planting): Planting {
+    const newPlanting = Planting.copy(oldPlanting);
 
     delete newPlanting.variety;
     delete newPlanting.garden;

@@ -1,6 +1,8 @@
 import type { Request } from "express";
 import { EntityTarget, getManager, ObjectLiteral } from "typeorm";
 import type { ParsedQs } from "qs";
+import { EntityBase } from "@/entity/EntityBase";
+import { QueryDeepPartialEntity } from "typeorm/query-builder/QueryPartialEntity";
 
 type SimpleHandler<TParams, TResponse, TData> = (
   request: Request<TParams, TResponse, TData, ParsedQs, Record<string, unknown>>
@@ -80,12 +82,15 @@ export function create<T extends ObjectLiteral>(
   };
 }
 
-export function update<T extends ObjectLiteral & { id: string | number }>(
+export function update<T extends EntityBase>(
   entity: EntityTarget<T>
-): SimpleHandler<{ id: number }, void, Partial<T> & Pick<T, "id">> {
+): SimpleHandler<undefined, void, Partial<T> & { id: number }> {
   return async (request) => {
     const repository = getManager().getRepository(entity);
 
-    await repository.update(request.body.id, request.body);
+    await repository.update(
+      request.body.id,
+      request.body as QueryDeepPartialEntity<T>
+    );
   };
 }

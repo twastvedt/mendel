@@ -37,7 +37,7 @@ import { Variety } from "@/entity/Variety";
 @Component({})
 export default class PlantComponent extends Vue {
   @Prop() readonly variety!: Variety;
-  @Prop({ default: false }) readonly interactive!: boolean;
+  @Prop({ default: true }) readonly interactive!: boolean;
   @Prop({ default: true }) readonly drawSpacing!: boolean;
 
   get family(): Family {

@@ -1,4 +1,3 @@
-import { EntityNoId } from "@/api/BaseApi";
 import { Entity, Column, ManyToOne } from "typeorm";
 import { EntityBase } from "./EntityBase";
 import { Garden } from "./Garden";
@@ -32,7 +31,7 @@ export class Plant extends EntityBase {
   @ManyToOne(() => Planting, (planting) => planting.plants)
   planting?: Planting;
 
-  static cleanCopy(oldPlant: EntityNoId<Plant>): EntityNoId<Plant> {
+  static cleanCopy(oldPlant: Plant): Plant {
     const newPlant = Object.assign({}, oldPlant);
 
     delete newPlant.variety;

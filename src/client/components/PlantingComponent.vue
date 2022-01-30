@@ -75,6 +75,10 @@ export default class PlantingComponent extends Vue {
 .shape {
   fill-opacity: 0.5;
   stroke: none;
+
+  &:hover {
+    fill-opacity: 0.3;
+  }
 }
 
 .cursor .shape {

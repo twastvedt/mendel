@@ -13,6 +13,7 @@ import { geoIdentity, geoPath } from "d3-geo";
 import { familyApi } from "@/api/FamilyApi";
 import { Planting } from "@/entity/Planting";
 import { EntityBase } from "@/entity/EntityBase";
+import { EntityId } from "@/api/BaseApi";
 
 export type ElementType = "plant" | "bed" | "planting";
 
@@ -112,7 +113,7 @@ export default class Store {
       this.families.forEach((f) => {
         content += f.icon.replace("symbol ", `symbol id="family-${f.id}" `);
 
-        f.varieties.forEach((v) => {
+        f.varieties?.forEach((v) => {
           v.family = f;
           this.varieties.push(v);
         });
@@ -154,8 +155,7 @@ export default class Store {
       Object.assign(this.varieties[index], item);
 
       await varietyApi.update.request({
-        routeParams: { id: item.id },
-        data: Variety.cleanCopy(item),
+        data: Variety.cleanCopy(item) as EntityId<Variety>,
       });
     } else {
       const newVariety = await varietyApi.create.request({
@@ -170,7 +170,7 @@ export default class Store {
 
       if (family) {
         newVariety.family = family;
-        family.varieties.push(newVariety);
+        (family.varieties ??= []).push(newVariety);
       } else {
         throw new Error(`Could not find family for new variety: ${item.id}`);
       }
@@ -202,21 +202,23 @@ export default class Store {
       throw new Error(`Could not find family for variety: ${item.id}.`);
     }
 
-    index = family.varieties.findIndex((v) => v.id === item.id);
+    if (family.varieties) {
+      index = family.varieties.findIndex((v) => v.id === item.id);
 
-    if (index === -1) {
-      throw new Error(
-        `Could not find matching variety id in variety's family: ${item.id}`
-      );
+      if (index === -1) {
+        throw new Error(
+          `Could not find matching variety id in variety's family: ${item.id}`
+        );
+      }
+
+      family.varieties.splice(index, 1);
     }
-
-    family.varieties.splice(index, 1);
 
     await varietyApi.delete.request({ routeParams: { id: item.id } });
   }
 
   async editFamily(item: Family): Promise<void> {
-    if (item.id) {
+    if (item.id !== undefined) {
       const index = this.families.findIndex((v) => v.id === item.id);
 
       if (index === -1) {
@@ -227,14 +229,10 @@ export default class Store {
 
       Object.assign(this.families[index], item);
 
-      const newFamily: Partial<Family> & { id: number } =
-        Family.cleanCopy(item);
-
-      delete newFamily.varieties;
+      const newFamily = Family.cleanCopy(item);
 
       await familyApi.update.request({
-        routeParams: { id: item.id },
-        data: newFamily,
+        data: newFamily as EntityId<Family>,
       });
     } else {
       const newFamily = await familyApi.create.request({

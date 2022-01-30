@@ -1,11 +1,12 @@
 import { plantApi } from "@/api/PlantApi";
 import { Plant } from "@/entity/Plant";
 import "../apiRequest";
+import { EntityId } from "@/api/BaseApi";
 import Store from "../Store";
 import { Action } from "./Action";
 
 export class DeletePlantAction extends Action {
-  public constructor(private plant: Plant) {
+  public constructor(private plant: EntityId<Plant>) {
     super();
   }
 
@@ -32,6 +33,6 @@ export class DeletePlantAction extends Action {
 
     Object.assign(this.plant, newPlant);
 
-    state.garden?.plants.push(this.plant as Plant);
+    state.garden?.plants.push(this.plant);
   }
 }

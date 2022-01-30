@@ -51,6 +51,7 @@ import { DrawPlantTool } from "../tools/DrawPlantTool";
 import { DeletePlantTool } from "../tools/DeletePlantTool";
 import { Variety } from "@/entity/Variety";
 import { DrawPlantingTool } from "../tools/DrawPlantingTool";
+import { Family } from "@/entity/Family";
 
 @Component({})
 export default class Toolbar extends Vue {
@@ -63,7 +64,10 @@ export default class Toolbar extends Vue {
   get varietyList(): (Variety | { divider: boolean })[] {
     return this.state.families
       .sort((a, b) => a.name.localeCompare(b.name))
-      .filter((f) => f.varieties.length)
+      .filter(
+        (f): f is Family & Required<Pick<Family, "varieties">> =>
+          !!f.varieties?.length
+      )
       .flatMap((f) => [
         { divider: true },
         ...f.varieties.sort((a, b) => a.name.localeCompare(b.name)),

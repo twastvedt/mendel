@@ -5,8 +5,10 @@
     xmlns="http://www.w3.org/2000/svg"
     xmlns:xlink="http://www.w3.org/1999/xlink"
     @mousemove="onMouseMove"
+    @click="onClick"
+    @mouseleave="onHover"
   >
-    <g ref="content" class="content" @click="onClick" @mouseleave="onHover">
+    <g ref="content" class="content">
       <g v-if="state.garden" id="beds">
         <path
           v-for="bed in state.garden.beds"
