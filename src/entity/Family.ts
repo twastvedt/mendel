@@ -43,12 +43,8 @@ export class Family extends EntityBase {
   })
   varieties!: Variety[];
 
-  static clone(family: Family): Family {
-    return Object.assign({}, family);
-  }
-
-  static cleanClone(family: Family): Family {
-    const newFamily = Family.clone(family);
+  static cleanCopy(family: Family): Family {
+    const newFamily = Object.assign({}, family);
 
     newFamily.varieties = [];
 

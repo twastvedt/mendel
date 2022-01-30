@@ -4,20 +4,14 @@
 version: "3"
 services:
   db:
-    image: postgis/postgis:13-3.0-alpine
+    image: postgis/postgis:14-3.2-alpine
     environment:
       POSTGRES_DB: mendel
       POSTGRES_PASSWORD: mendel
       POSTGRES_USER: mendel
-    logging:
-      driver: "none"
     container_name: db
-    volumes:
-      - db-data:/var/lib/postgresql/data
     networks:
       - mendelnet
-    ports:
-      - "15432:5432"
 
   adminer:
     image: adminer:latest
@@ -44,6 +38,3 @@ services:
 
 networks:
   mendelnet:
-
-volumes:
-  db-data:

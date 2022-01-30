@@ -22,18 +22,21 @@ export class DrawPlantTool implements Tool {
   private tempVec = new Vector(0, 0);
   private lastClosestIndex?: number;
 
-  public constructor(private variety: Variety) {}
+  public constructor(private variety: Variety) {
+    this.cursorProps.variety = variety;
+  }
 
   public cursorComponent = plantComponent;
   public cursorProps: Record<string, unknown> = {
     transform: "",
+    interactive: false,
   };
 
   public setTransform(): void {
     if (this.plant) {
-      this.cursorProps.transform = `translate(${Store.state
-        .projection(this.plant.location.coordinates as [number, number])
-        ?.join(" ")})`;
+      this.cursorProps.transform = Store.state.makeTransform(
+        this.plant.location.coordinates as [number, number]
+      );
     }
   }
 
@@ -127,9 +130,9 @@ export class DrawPlantTool implements Tool {
     }
   }
 
-  public OnClick(x: number, y: number, plant?: Plant): Action {
+  public OnClick(x: number, y: number): Action {
     if (this.plant) {
-      return new AddPlantAction(Plant.copy(this.plant));
+      return new AddPlantAction(Object.assign({}, this.plant));
     }
 
     throw new Error("No action to save?");
@@ -138,12 +141,11 @@ export class DrawPlantTool implements Tool {
   public Start(): void {
     this.plant = new Plant();
     this.plant.variety = this.variety;
+    this.plant.varietyId = this.variety.id;
     this.plant.location = {
       type: "Point",
       coordinates: [0, 0],
     };
     this.plant.gardenId = Store.state.garden?.id;
-
-    this.cursorProps.plant = this.plant;
   }
 }

@@ -1,7 +1,11 @@
 <template>
-  <g :class="classList" @click="$emit('click', $event)">
+  <g :class="classList" @click="onClick">
     <template v-if="state.scaleRange > 1">
-      <circle :r="family.spacing / 2" class="spacingCircle" />
+      <circle
+        v-if="drawSpacing"
+        :r="family.spacing / 2"
+        class="spacingCircle"
+      />
       <use
         :width="iconSize"
         :height="iconSize"
@@ -20,37 +24,28 @@
       class="solidCircle"
     />
 
-    <title>{{ title }}</title>
+    <title v-if="interactive">{{ title }}</title>
   </g>
 </template>
 
 <script lang="ts">
-import { Plant } from "@/entity/Plant";
 import { Component, Prop, Vue } from "vue-property-decorator";
 import Store from "../Store";
-import "reflect-metadata";
 import { Family } from "@/entity/Family";
 import { Variety } from "@/entity/Variety";
 
 @Component({})
 export default class PlantComponent extends Vue {
-  @Prop() readonly plant!: Plant;
-  @Prop({ default: false }) readonly isCursor!: boolean;
+  @Prop() readonly variety!: Variety;
+  @Prop({ default: false }) readonly interactive!: boolean;
+  @Prop({ default: true }) readonly drawSpacing!: boolean;
 
   get family(): Family {
-    if (this.plant.variety?.family) {
-      return this.plant.variety.family;
+    if (this.variety.family) {
+      return this.variety.family;
     }
 
-    throw new Error("Plant has no family");
-  }
-
-  get variety(): Variety {
-    if (this.plant.variety) {
-      return this.plant.variety;
-    }
-
-    throw new Error("Plant has no variety");
+    throw new Error("Variety has no family");
   }
 
   get iconSize(): number {
@@ -62,10 +57,16 @@ export default class PlantComponent extends Vue {
   }
 
   get classList(): Record<string, unknown> {
-    return { cursor: this.isCursor, notCursor: !this.isCursor };
+    return { interactive: this.interactive, notInteractive: !this.interactive };
   }
 
   state = Store.state;
+
+  onClick(event: PointerEvent): void {
+    if (this.interactive) {
+      this.$emit("click", event);
+    }
+  }
 }
 </script>
 
@@ -75,7 +76,7 @@ export default class PlantComponent extends Vue {
   stroke: none;
 }
 
-.notCursor .solidCircle:hover {
+.interactive .solidCircle:hover {
   opacity: 90%;
 }
 
@@ -86,10 +87,11 @@ export default class PlantComponent extends Vue {
   stroke-dasharray: 5 5;
 }
 
-.notCursor .spacingCircle:hover {
+.interactive .spacingCircle:hover {
   fill-opacity: 0.5;
 }
 
+.notInteractive,
 .icon {
   pointer-events: none;
 }

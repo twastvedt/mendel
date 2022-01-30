@@ -42,7 +42,7 @@
       :show-expand="showExpand"
       :expanded.sync="expanded"
     >
-      <template #header.data-table-expand="{}">
+      <template #[`header.data-table-expand`]="{}">
         <v-checkbox
           off-icon="mdi-chevron-down"
           on-icon="mdi-chevron-up"
@@ -50,7 +50,7 @@
         />
       </template>
 
-      <template #item.actions="{ item }">
+      <template #[`item.actions`]="{ item }">
         <v-icon small class="mr-2" @click="editItem(item)"> mdi-pencil </v-icon>
         <v-icon small class="mr-2" @click="$emit('delete', item)">
           mdi-delete

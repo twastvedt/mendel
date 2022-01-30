@@ -6,22 +6,35 @@
     xmlns:xlink="http://www.w3.org/1999/xlink"
     @mousemove="onMouseMove"
   >
-    <g ref="content" class="content" @click="onClick">
+    <g ref="content" class="content" @click="onClick" @mouseleave="onHover">
       <g v-if="state.garden" id="beds">
         <path
           v-for="bed in state.garden.beds"
           :key="`${bed.id}-bed`"
+          class="bed"
+          :style="elementStyle('bed')"
           :d="state.pathGenerator(bed.shape)"
+          @click="onClick($event, bed)"
+          @mouseenter="onHover($event, bed)"
         />
 
-        <plant-component
+        <PlantingComponent
+          v-for="(planting, index) in state.garden.plantings"
+          :key="`${index}-planting`"
+          :planting="planting"
+          :style="elementStyle('planting')"
+          @click="onClick($event, planting)"
+          @mouseover="onHover($event, planting)"
+        />
+
+        <PlantComponent
           v-for="(plant, index) in state.garden.plants"
           :key="`${index}-plant`"
-          :transform="`translate(${state
-            .projection(plant.location.coordinates)
-            .join(' ')})`"
-          :plant="plant"
+          :transform="state.makeTransform(plant.location.coordinates)"
+          :variety="plant.variety"
+          :style="elementStyle('plant')"
           @click="onClick($event, plant)"
+          @mouseover="onHover($event, plant)"
         />
 
         <dynamic
@@ -36,16 +49,18 @@
 
 <script lang="ts">
 import { Component, Vue } from "vue-property-decorator";
-import Store from "../Store";
+import Store, { ElementType } from "../Store";
 import * as d3 from "d3";
 import { zoom, D3ZoomEvent } from "d3-zoom";
 
 import PlantComponent from "./PlantComponent.vue";
-import { Plant } from "@/entity/Plant";
+import PlantingComponent from "./PlantingComponent.vue";
+import { EntityBase } from "@/entity/EntityBase";
 
 @Component({
   components: {
     PlantComponent,
+    PlantingComponent,
   },
 })
 export default class GardenMap extends Vue {
@@ -69,7 +84,7 @@ export default class GardenMap extends Vue {
   async mounted(): Promise<void> {
     console.debug("Map mounted");
 
-    await this.state.loadGarden();
+    await this.state.ready;
 
     if (!this.state.garden) {
       return;
@@ -96,17 +111,6 @@ export default class GardenMap extends Vue {
     this.svg.call(this.zoom);
 
     Vue.nextTick(() => this.zoomFit());
-
-    // this.map
-    //   .on("zoomend", this.onMapZoomed, this)
-    //   .on("mouseout", this.onMouseOut, this)
-
-    // L.tileLayer
-    //   .wms("https://imageserver.gisdata.mn.gov/cgi-bin/mncomp?VERSION=1.3.0", {
-    //     layers: "mncomp",
-    //     maxZoom: 30,
-    //   })
-    //   .addTo(this.map);
   }
 
   zoomFit(): void {
@@ -132,14 +136,31 @@ export default class GardenMap extends Vue {
     }
   }
 
-  onClick(event: MouseEvent, plant?: Plant): void {
-    this.state.onClick(...d3.pointer(event, this.content.node()), plant);
+  onClick(event: MouseEvent, element?: EntityBase): void {
+    this.state.onClick(...d3.pointer(event, this.content.node()), element);
+  }
+
+  onHover(event: MouseEvent, element?: EntityBase): void {
+    this.state.tool?.OnHover?.(
+      ...d3.pointer(event, this.content.node()),
+      element
+    );
   }
 
   onMouseMove(event: MouseEvent): void {
     if (this.state.tool) {
       this.state.updateTool(d3.pointer(event, this.content.node()));
     }
+  }
+
+  elementStyle(elementType: ElementType): Record<string, string> {
+    return {
+      "pointer-events":
+        !this.state.tool ||
+        this.state.tool?.interactiveElements?.has(elementType)
+          ? "auto"
+          : "none",
+    };
   }
 }
 </script>
@@ -156,7 +177,7 @@ export default class GardenMap extends Vue {
   }
 }
 
-::v-deep #beds path {
+::v-deep .bed {
   fill: rgba($color: #ffffff, $alpha: 0.5);
   stroke: #000000;
   stroke-width: 1px;

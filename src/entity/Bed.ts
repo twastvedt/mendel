@@ -1,11 +1,11 @@
-import type { Polygon } from "geojson";
 import { Entity, Column, ManyToOne } from "typeorm";
 import { EntityBase } from "./EntityBase";
 import { Garden } from "./Garden";
+import { Polygon } from "./geoJson";
 
 @Entity()
 export class Bed extends EntityBase {
-  @Column("geometry", { spatialFeatureType: "Polygon", srid: 26915 })
+  @Column("geometry", { spatialFeatureType: "Polygon" })
   shape!: Polygon;
 
   @Column()

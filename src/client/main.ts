@@ -3,6 +3,7 @@ import Vuetify from "vuetify";
 import App from "./App.vue";
 import colors from "vuetify/lib/util/colors";
 import router from "./router";
+import "reflect-metadata";
 
 Vue.use(Vuetify);
 

@@ -11,6 +11,10 @@ import { Plant } from "@/entity/Plant";
 import { Delaunay } from "d3-delaunay";
 import { geoIdentity, geoPath } from "d3-geo";
 import { familyApi } from "@/api/FamilyApi";
+import { Planting } from "@/entity/Planting";
+import { EntityBase } from "@/entity/EntityBase";
+
+export type ElementType = "plant" | "bed" | "planting";
 
 export default class Store {
   static _state: Store;
@@ -46,6 +50,8 @@ export default class Store {
 
   cursor?: d3.Selection<SVGGElement, unknown, null, undefined>;
 
+  ready: Promise<void>;
+
   get scaleRange() {
     if (this.scale > 10) {
       return 3;
@@ -56,14 +62,28 @@ export default class Store {
     }
   }
 
+  public constructor() {
+    this.ready = this.initialize();
+  }
+
+  async initialize(): Promise<void> {
+    await this.loadGarden();
+  }
+
   async loadGarden(): Promise<void> {
     this.error = "";
     this.loading = true;
 
-    try {
-      this.garden = await gardenApi.one.request({ routeParams: { id: 1 } });
+    await this.loadVarieties();
 
-      this.garden.plants.forEach((p) => this.inflatePlant(p));
+    try {
+      const garden = await gardenApi.one.request({ routeParams: { id: 1 } });
+
+      garden.plants.forEach((p) => this.inflatePlant(p));
+
+      garden.plantings.forEach((p) => this.inflatePlanting(p));
+
+      this.garden = garden;
 
       this.updateDelaunay();
     } catch (error) {
@@ -109,9 +129,9 @@ export default class Store {
     this.loading = false;
   }
 
-  onClick(x: number, y: number, plant?: Plant): void {
+  onClick(x: number, y: number, element?: EntityBase): void {
     if (this.tool && this.garden) {
-      const action = this.tool.OnClick(x, y, plant);
+      const action = this.tool.OnClick(x, y, element);
 
       if (action) {
         action.Do(this);
@@ -135,11 +155,11 @@ export default class Store {
 
       await varietyApi.update.request({
         routeParams: { id: item.id },
-        data: Variety.cleanClone(item),
+        data: Variety.cleanCopy(item),
       });
     } else {
       const newVariety = await varietyApi.create.request({
-        data: Variety.cleanClone(item),
+        data: Variety.cleanCopy(item),
       });
 
       this.varieties.push(newVariety);
@@ -208,7 +228,7 @@ export default class Store {
       Object.assign(this.families[index], item);
 
       const newFamily: Partial<Family> & { id: number } =
-        Family.cleanClone(item);
+        Family.cleanCopy(item);
 
       delete newFamily.varieties;
 
@@ -218,7 +238,7 @@ export default class Store {
       });
     } else {
       const newFamily = await familyApi.create.request({
-        data: Family.cleanClone(item),
+        data: Family.cleanCopy(item),
       });
 
       this.families.push(newFamily);
@@ -267,6 +287,20 @@ export default class Store {
     return plant;
   }
 
+  inflatePlanting(planting: Planting): Planting {
+    if (planting.varietyId !== undefined) {
+      planting.variety = this.varieties.find(
+        (v) => v.id === planting.varietyId
+      );
+    }
+
+    if (planting.gardenId === this.garden?.id) {
+      planting.garden === this.garden;
+    }
+
+    return planting;
+  }
+
   removePlant(id: number): void;
   removePlant(plant: Plant): void;
   removePlant(idOrPlant: Plant | number): void {
@@ -286,6 +320,26 @@ export default class Store {
       this.garden.plants.splice(i, 1);
 
       this.updateDelaunay();
+    }
+  }
+
+  removePlanting(id: number): void;
+  removePlanting(planting: Planting): void;
+  removePlanting(idOrPlanting: Planting | number): void {
+    if (!this.garden) {
+      return;
+    }
+
+    let i;
+
+    if (typeof idOrPlanting === "number") {
+      i = this.garden.plantings.findIndex((p) => p.id === idOrPlanting);
+    } else {
+      i = this.garden.plantings.indexOf(idOrPlanting);
+    }
+
+    if (i !== -1) {
+      this.garden.plantings.splice(i, 1);
     }
   }
 
@@ -326,14 +380,18 @@ export default class Store {
       }
 
       this.tool = null;
+
+      this.toolName = "";
     }
+  }
+
+  makeTransform(coordinate: [number, number]): string {
+    return `translate(${this.projection(coordinate)?.join(" ")})`;
   }
 
   keyListener(event: KeyboardEvent): void {
     if (event.key === "Escape" && this.tool) {
       this.clearTool();
-
-      this.toolName = "";
     }
   }
 }

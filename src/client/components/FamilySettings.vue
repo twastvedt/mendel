@@ -67,8 +67,6 @@ export default class FamilySettings extends Vue {
     },
   ];
 
-  async mounted(): Promise<void> {}
-
   plantCount(family: Family): number | undefined {
     return this.state.garden?.plants.filter(
       (p) => p.variety?.family?.id === family.id

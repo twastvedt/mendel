@@ -91,7 +91,7 @@ export default class EditFamily extends Vue {
 
   @Watch("value")
   resetForm(): void {
-    this.formValue = this.value ? Family.clone(this.value) : this.default;
+    this.formValue = this.value ? Object.assign({}, this.value) : this.default;
 
     this.$refs.form?.resetValidation();
   }

@@ -7,6 +7,7 @@ import BedRoutes from "./controller/Beds";
 import VarietyRoutes from "./controller/Varieties";
 import GardenRoutes from "./controller/Gardens";
 import PlantRoutes from "./controller/Plants";
+import PlantingRoutes from "./controller/Plantings";
 import FamilyRoutes from "./controller/Families";
 
 createConnection()
@@ -37,6 +38,7 @@ createConnection()
     app.use(GardenRoutes);
     app.use(VarietyRoutes);
     app.use(PlantRoutes);
+    app.use(PlantingRoutes);
     app.use(FamilyRoutes);
 
     // Run app

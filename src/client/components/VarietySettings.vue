@@ -14,11 +14,11 @@
         />
       </template>
 
-      <template #item.plants="{ item }">
+      <template #[`item.plants`]="{ item }">
         {{ item.plants ? item.plants.length : 0 }}
       </template>
 
-      <template #item.color="{ item }">
+      <template #[`item.color`]="{ item }">
         <svg class="svgicon" style="height: 32px; width: 32px">
           <use :href="`#family-${item.family.id}`" :fill="item.color" />
         </svg>
@@ -61,7 +61,5 @@ export default class VarietySettings extends Vue {
       value: "plants",
     },
   ];
-
-  async mounted(): Promise<void> {}
 }
 </script>

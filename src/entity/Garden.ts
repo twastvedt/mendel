@@ -1,7 +1,7 @@
-import type { Point } from "geojson";
 import { Entity, Column, OneToMany } from "typeorm";
 import { Bed } from "./Bed";
 import { EntityBase } from "./EntityBase";
+import { Point } from "./geoJson";
 import { Plant } from "./Plant";
 import { Planting } from "./Planting";
 

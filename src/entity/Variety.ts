@@ -46,11 +46,7 @@ export class Variety extends EntityBase {
   @JoinColumn({ name: nameof(Variety.prototype.familyId) })
   family?: Family;
 
-  static clone(variety: Variety): Variety {
-    return Object.assign({}, variety);
-  }
-
-  static cleanClone(variety: Variety): Variety {
+  static cleanCopy(variety: Variety): Variety {
     const newVariety = Object.assign({}, variety);
 
     delete newVariety.family;

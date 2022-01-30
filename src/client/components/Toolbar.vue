@@ -4,11 +4,11 @@
 
     <v-btn-toggle v-model="state.toolName" @change="newTool">
       <v-btn value="drawPlant"> <v-icon>mdi-sprout</v-icon></v-btn>
-      <v-btn value="drawBed"> <v-icon>mdi-dots-hexagon</v-icon></v-btn>
+      <v-btn value="drawPlanting"> <v-icon>mdi-dots-hexagon</v-icon></v-btn>
       <v-btn value="delete"> <v-icon>mdi-close</v-icon></v-btn>
     </v-btn-toggle>
 
-    <v-autocomplete
+    <v-select
       v-model="variety"
       :disabled="disableVarietySelect"
       :items="varietyList"
@@ -40,7 +40,7 @@
           ></v-list-item-subtitle>
         </v-list-item-content>
       </template>
-    </v-autocomplete>
+    </v-select>
   </v-app-bar>
 </template>
 
@@ -50,6 +50,7 @@ import Store from "../Store";
 import { DrawPlantTool } from "../tools/DrawPlantTool";
 import { DeletePlantTool } from "../tools/DeletePlantTool";
 import { Variety } from "@/entity/Variety";
+import { DrawPlantingTool } from "../tools/DrawPlantingTool";
 
 @Component({})
 export default class Toolbar extends Vue {
@@ -70,7 +71,7 @@ export default class Toolbar extends Vue {
   }
 
   async mounted(): Promise<void> {
-    await this.state.loadVarieties();
+    await this.state.ready;
 
     this.variety = this.varietyList[1] as Variety;
   }
@@ -92,7 +93,10 @@ export default class Toolbar extends Vue {
           }
 
           break;
-        case "drawBed":
+        case "drawPlanting":
+          if (this.variety) {
+            this.state.setTool(new DrawPlantingTool(this.variety));
+          }
           break;
         case "delete":
           this.state.setTool(new DeletePlantTool());
@@ -104,9 +108,10 @@ export default class Toolbar extends Vue {
   newVariety(newVariety: Variety): void {
     if (
       newVariety &&
-      (this.state.toolName === "drawPlant" || this.state.toolName === "drawBed")
+      (this.state.toolName === "drawPlant" ||
+        this.state.toolName === "drawPlanting")
     ) {
-      this.state.setTool(new DrawPlantTool(newVariety));
+      this.newTool(this.state.toolName);
     }
   }
 }

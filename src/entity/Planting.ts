@@ -1,50 +1,68 @@
-import type { Polygon } from "geojson";
+import { EntityNoId } from "@/api/BaseApi";
 import { Entity, Column, OneToMany, ManyToOne } from "typeorm";
 import { EntityBase } from "./EntityBase";
 import { Garden } from "./Garden";
+import { Polygon } from "./geoJson";
 import { Plant } from "./Plant";
 import { Variety } from "./Variety";
 
 @Entity()
 export class Planting extends EntityBase {
-  @Column("geometry", { spatialFeatureType: "Polygon", srid: 26915 })
+  @Column("geometry", { spatialFeatureType: "Polygon" })
   shape!: Polygon;
 
-  @Column()
-  plantDate!: Date;
+  @Column({ nullable: true })
+  plantDate?: Date;
 
-  @Column()
+  @Column({ nullable: true })
   quantity?: number;
 
   @Column()
   areSeedlings: boolean;
 
-  @Column()
+  @Column({ nullable: true })
   germinationRank?: number;
 
-  @Column()
+  @Column({ nullable: true })
   growthRank?: number;
 
-  @Column()
+  @Column({ nullable: true })
   healthRank?: number;
 
-  @Column()
+  @Column({ nullable: true })
   yeildRank?: number;
 
+  @Column({ nullable: true })
+  varietyId?: number;
+
   @ManyToOne(() => Variety, (variety) => variety.plantings)
-  variety!: Variety;
+  variety?: Variety;
 
   @OneToMany(() => Plant, (plant) => plant.planting, {
     onDelete: "CASCADE",
   })
-  plants!: Plant[];
+  plants?: Plant[];
+
+  @Column({ nullable: true })
+  gardenId?: number;
 
   @ManyToOne(() => Garden, (garden) => garden.plantings)
-  garden!: Garden;
+  garden?: Garden;
 
   constructor() {
     super();
 
     this.areSeedlings = false;
+  }
+
+  static cleanCopy(oldPlanting: EntityNoId<Planting>): EntityNoId<Planting> {
+    const newPlanting = Object.assign({}, oldPlanting);
+
+    delete newPlanting.variety;
+    delete newPlanting.garden;
+
+    newPlanting.plants = [];
+
+    return newPlanting;
   }
 }
