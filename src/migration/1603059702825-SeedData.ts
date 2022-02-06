@@ -2,7 +2,6 @@ import { getRepository, MigrationInterface } from "typeorm";
 import { features } from "./SeedBeds.json";
 import { Bed } from "@/entity/Bed";
 import { Variety } from "@/entity/Variety";
-import { Polygon } from "geojson";
 import { Family } from "@/entity/Family";
 
 import fs from "fs";
@@ -13,6 +12,7 @@ import { Garden } from "@/entity/Garden";
 
 //@ts-ignore
 import { createSVGWindow } from "svgdom";
+import { Polygon } from "@/entity/geoJson";
 
 export class SeedData1603059702825 implements MigrationInterface {
   public async up(): Promise<void> {

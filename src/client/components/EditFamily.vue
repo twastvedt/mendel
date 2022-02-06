@@ -55,7 +55,7 @@
 import { Component, Vue, Watch, Prop } from "vue-property-decorator";
 
 import { Family } from "@/entity/Family";
-import Store from "../Store";
+import { state } from "../Store";
 import type { VueForm } from "../types/vueTypes";
 
 @Component({})
@@ -67,7 +67,7 @@ export default class EditFamily extends Vue {
   @Prop()
   value?: Family;
 
-  state = Store.state;
+  state = state;
 
   formValue = this.default;
   valid = true;

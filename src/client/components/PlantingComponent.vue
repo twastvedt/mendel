@@ -23,7 +23,7 @@
 <script lang="ts">
 import { Planting } from "@/entity/Planting";
 import { Component, Prop, Vue } from "vue-property-decorator";
-import Store from "../Store";
+import { state } from "../Store";
 import { Variety } from "@/entity/Variety";
 import PlantComponent from "./PlantComponent.vue";
 import polylabel from "polylabel";
@@ -62,12 +62,12 @@ export default class PlantingComponent extends Vue {
   }
 
   get transform(): string {
-    return this.state.makeTransform(
+    return state.makeTransform(
       polylabel(this.planting.shape.coordinates) as [number, number]
     );
   }
 
-  state = Store.state;
+  state = state;
 }
 </script>
 

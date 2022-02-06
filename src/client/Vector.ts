@@ -1,4 +1,14 @@
 export class Vector {
+  private _array?: [number, number];
+
+  get asArray(): [number, number] {
+    if (!this._array) {
+      this._array = [this.x, this.y];
+    }
+
+    return this._array;
+  }
+
   constructor(private _x: number, private _y: number) {}
 
   private _length?: number;
@@ -49,15 +59,29 @@ export class Vector {
     return this;
   }
 
+  public copy(b: Vector): this {
+    this.x = b.x;
+    this.y = b.y;
+
+    return this;
+  }
+
   public normalize(): this {
     this.length = 1;
 
     return this;
   }
 
-  public subtract(other: Vector): this {
-    this.x -= other.x;
-    this.y -= other.y;
+  public subtract(dx: number, dy: number): this;
+  public subtract(other: Vector): this;
+  public subtract(otherOrDx: Vector | number, dy?: number): this {
+    if (typeof otherOrDx === "number") {
+      this.x -= otherOrDx;
+      this.y -= dy as number;
+    } else {
+      this.x -= otherOrDx.x;
+      this.y -= otherOrDx.y;
+    }
 
     return this;
   }
@@ -67,6 +91,29 @@ export class Vector {
     this.y += other.y;
 
     return this;
+  }
+
+  public scale(s: number): this {
+    this.x *= s;
+    this.y *= s;
+
+    return this;
+  }
+
+  public rotate(angle: number): this {
+    const cos = Math.cos(angle);
+    const sin = Math.sin(angle);
+
+    const newX = this.x * cos - this.y * sin;
+    this.y = this.x * sin + this.y * cos;
+
+    this.x = newX;
+
+    return this;
+  }
+
+  public dot(b: Vector): number {
+    return this.x * b.x + this.y * b.y;
   }
 
   public static fromArray(numbers: number[]): Vector {
@@ -86,6 +133,14 @@ export class Vector {
       return target.set(a.x + b.x, a.y + b.y);
     } else {
       return new Vector(a.x + b.x, a.y + b.y);
+    }
+  }
+
+  public static scale(a: Vector, b: number, target?: Vector): Vector {
+    if (target) {
+      return target.set(a.x * b, a.y * b);
+    } else {
+      return new Vector(a.x * b, a.y * b);
     }
   }
 }

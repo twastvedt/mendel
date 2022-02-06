@@ -2,16 +2,17 @@ import { Variety } from "@/entity/Variety";
 import { Tool } from "./Tool";
 import { AddPlantingAction } from "../actions/AddPlantingAction";
 import { Action } from "../actions/Action";
-import Store, { ElementType } from "../Store";
+import { ElementType, state } from "../Store";
 import drawPlanting from "../components/DrawPlanting.vue";
 import { Planting } from "@/entity/Planting";
 import { Bed } from "@/entity/Bed";
 import { polygonArea } from "d3-polygon";
+import { GridPoints } from "../services/polygonGrid";
 
 export class DrawPlantingTool implements Tool {
   public Stop(): void {
     if (this.planting) {
-      Store.state.removePlanting(this.planting);
+      state.removePlanting(this.planting);
 
       delete this.planting;
     }
@@ -24,12 +25,20 @@ export class DrawPlantingTool implements Tool {
   public interactiveElements = new Set<ElementType>(["bed"]);
 
   public cursorComponent = drawPlanting;
-  public cursorProps: Record<string, unknown> = {
-    cursor: [],
+  public cursorProps = {
+    cursor: [0, 0],
+    plants: null as GridPoints | null,
+    planting: null as Planting | null,
   };
+
+  private index?: number;
 
   public OnCursorMove(x: number, y: number): void {
     this.cursorProps.cursor = [x, y];
+
+    if (this.cursorProps.plants && this.index != undefined) {
+      state.grid?.setCursor([x, y], this.index);
+    }
   }
 
   public OnClick(x: number, y: number, bed?: Bed): Action | void {
@@ -57,12 +66,23 @@ export class DrawPlantingTool implements Tool {
     }
   }
 
-  public OnHover(x: number, y: number, bed?: Bed): void {
+  public OnHover(x: number, y: number, bed?: Bed, index?: number): void {
     if (this.planting) {
-      if (bed) {
+      if (bed && index != undefined && state.grid) {
         this.planting.shape.coordinates = bed.shape.coordinates;
+
+        state.grid.setCursor([x, y], index);
+
+        if (this.index !== index) {
+          this.cursorProps.plants = state.grid.grids[index];
+          this.index = index;
+        }
       } else {
         this.planting.shape.coordinates = [[[0, 0]]];
+
+        this.cursorProps.plants = null;
+
+        delete this.index;
       }
     }
   }
@@ -75,7 +95,13 @@ export class DrawPlantingTool implements Tool {
       type: "Polygon",
       coordinates: [[[0, 0]]],
     };
-    this.planting.gardenId = Store.state.garden?.id;
+    this.planting.gardenId = state.garden?.id;
+
+    if (!this.variety.family || !state.grid) {
+      throw new Error("Family and grid required");
+    }
+
+    state.grid.diameter = this.variety.family.spacing;
 
     this.cursorProps.planting = this.planting;
   }

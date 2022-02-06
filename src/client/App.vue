@@ -18,13 +18,19 @@
     <v-main>
       <router-view />
     </v-main>
+
+    <v-footer fixed>
+      {{
+        state.cursorPosition.map((c) => Math.round(c * 100) / 100).join(", ")
+      }}
+    </v-footer>
   </v-app>
 </template>
 
 <script lang="ts">
 import { Component, Vue } from "vue-property-decorator";
 import toolbar from "./components/Toolbar.vue";
-import Store from "./Store";
+import { state } from "./Store";
 
 @Component({
   components: {
@@ -35,9 +41,9 @@ export default class App extends Vue {
   constructor() {
     super();
 
-    addEventListener("keyup", (event) => this.state.keyListener(event));
+    addEventListener("keyup", (event) => state.keyListener(event));
   }
 
-  state = Store.state;
+  state = state;
 }
 </script>

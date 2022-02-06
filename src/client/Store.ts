@@ -9,28 +9,18 @@ import { Tool } from "./tools/Tool";
 import { Action } from "./actions/Action";
 import { Plant } from "@/entity/Plant";
 import { Delaunay } from "d3-delaunay";
-import { geoIdentity, geoPath } from "d3-geo";
+import { geoPath } from "d3-geo";
 import { familyApi } from "@/api/FamilyApi";
 import { Planting } from "@/entity/Planting";
 import { EntityBase } from "@/entity/EntityBase";
 import { EntityId } from "@/api/BaseApi";
+import { Position } from "@/entity/geoJson";
+import { PolygonGrid } from "./services/polygonGrid";
 
 export type ElementType = "plant" | "bed" | "planting";
 
-export default class Store {
-  static _state: Store;
-
-  static get state(): Store {
-    if (!Store._state) {
-      Store._state = new Store();
-    }
-    return Store._state;
-  }
-
-  // TODO: We assume data is stored in inches relative to garden origin.
-  projection = geoIdentity().reflectY(true);
-
-  pathGenerator = geoPath(this.projection);
+export class Store {
+  pathGenerator = geoPath();
 
   delaunay?: Delaunay<unknown>;
 
@@ -49,9 +39,13 @@ export default class Store {
   toolName = "";
   tool: Tool | null = null;
 
+  cursorPosition = [0, 0] as Position;
+
   cursor?: d3.Selection<SVGGElement, unknown, null, undefined>;
 
   ready: Promise<void>;
+
+  grid = null as PolygonGrid | null;
 
   get scaleRange() {
     if (this.scale > 10) {
@@ -87,6 +81,8 @@ export default class Store {
       this.garden = garden;
 
       this.updateDelaunay();
+
+      this.grid = new PolygonGrid(garden, 6);
     } catch (error) {
       this.error = error as string;
     }
@@ -352,22 +348,16 @@ export default class Store {
   }
 
   setTool(tool: Tool): void {
-    if (this.garden) {
-      this.clearTool();
+    this.clearTool();
 
-      tool.Start();
+    tool.Start();
 
-      this.tool = tool;
-    }
+    this.tool = tool;
   }
 
   updateTool(cursor: [number, number]) {
     if (this.tool && this.garden) {
-      const point = this.projection.invert(cursor);
-
-      if (point) {
-        this.tool.OnCursorMove(...point);
-      }
+      this.tool.OnCursorMove(...cursor);
     }
   }
 
@@ -378,18 +368,20 @@ export default class Store {
       }
 
       this.tool = null;
-
-      this.toolName = "";
     }
   }
 
   makeTransform(coordinate: [number, number]): string {
-    return `translate(${this.projection(coordinate)?.join(" ")})`;
+    return `translate(${coordinate.join(" ")})`;
   }
 
   keyListener(event: KeyboardEvent): void {
     if (event.key === "Escape" && this.tool) {
       this.clearTool();
+
+      this.toolName = "";
     }
   }
 }
+
+export const state = new Store();

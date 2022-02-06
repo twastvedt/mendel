@@ -9,16 +9,25 @@
     @mouseleave="onHover"
   >
     <g ref="content" class="content">
-      <g v-if="state.garden" id="beds">
-        <path
-          v-for="bed in state.garden.beds"
-          :key="`${bed.id}-bed`"
-          class="bed"
-          :style="elementStyle('bed')"
-          :d="state.pathGenerator(bed.shape)"
-          @click="onClick($event, bed)"
-          @mouseenter="onHover($event, bed)"
-        />
+      <g v-if="state.garden" transform="scale(1,-1)">
+        <g v-for="(bed, i) in state.garden.beds" :key="`${bed.id}-bed`">
+          <path
+            class="bed"
+            :style="elementStyle('bed')"
+            :d="state.pathGenerator(bed.shape)"
+            @click="onClick($event, bed)"
+            @mouseenter="onHover($event, bed, i)"
+            @mouseleave="onHover($event)"
+          />
+
+          <!-- <circle
+            v-for="(point, i) in bed.shape.coordinates[0]"
+            :key="`p${i}`"
+            :cx="point[0]"
+            :cy="point[1]"
+            r="0.5"
+          /> -->
+        </g>
 
         <PlantingComponent
           v-for="(planting, index) in state.garden.plantings"
@@ -26,7 +35,8 @@
           :planting="planting"
           :style="elementStyle('planting')"
           @click="onClick($event, planting)"
-          @mouseover="onHover($event, planting)"
+          @mouseover="onHover($event, planting, index)"
+          @mouseleave="onHover($event)"
         />
 
         <PlantComponent
@@ -36,7 +46,8 @@
           :variety="plant.variety"
           :style="elementStyle('plant')"
           @click="onClick($event, plant)"
-          @mouseover="onHover($event, plant)"
+          @mouseover="onHover($event, plant, index)"
+          @mouseleave="onHover($event)"
         />
 
         <dynamic
@@ -51,13 +62,14 @@
 
 <script lang="ts">
 import { Component, Vue } from "vue-property-decorator";
-import Store, { ElementType } from "../Store";
+import { ElementType, state } from "../Store";
 import * as d3 from "d3";
 import { zoom, D3ZoomEvent } from "d3-zoom";
 
 import PlantComponent from "./PlantComponent.vue";
 import PlantingComponent from "./PlantingComponent.vue";
 import { EntityBase } from "@/entity/EntityBase";
+import { PolygonGrid } from "../services/polygonGrid";
 
 @Component({
   components: {
@@ -71,13 +83,14 @@ export default class GardenMap extends Vue {
     content: SVGGElement;
   };
 
-  state = Store.state;
+  state = state;
+
   zoom!: d3.ZoomBehavior<SVGSVGElement, unknown>;
 
   zoomed(e: D3ZoomEvent<SVGSVGElement, unknown>): void {
     this.content.attr("transform", e.transform as any);
 
-    this.state.scale = e.transform.k;
+    state.scale = e.transform.k;
   }
 
   content!: d3.Selection<SVGGElement, unknown, null, undefined>;
@@ -86,9 +99,9 @@ export default class GardenMap extends Vue {
   async mounted(): Promise<void> {
     console.debug("Map mounted");
 
-    await this.state.ready;
+    await state.ready;
 
-    if (!this.state.garden) {
+    if (!state.garden) {
       return;
     }
 
@@ -99,11 +112,9 @@ export default class GardenMap extends Vue {
 
     d3.select(this.$refs.map).attr("viewBox", [0, 0, width, height] as any);
 
-    this.content = d3
-      .select(this.$refs.content)
-      .attr("transform", "translate(0,0)");
+    this.content = d3.select(this.$refs.content);
 
-    this.state.cursor = this.content.append("g").classed("cursor", true);
+    state.cursor = this.content.append("g").classed("cursor", true);
 
     this.zoom = zoom<SVGSVGElement, unknown>().on(
       "zoom",
@@ -139,27 +150,43 @@ export default class GardenMap extends Vue {
   }
 
   onClick(event: MouseEvent, element?: EntityBase): void {
-    this.state.onClick(...d3.pointer(event, this.content.node()), element);
+    if (state.garden) {
+      const point = d3.pointer(event, this.content.node());
+      point[1] = -point[1];
+
+      console.log(point);
+      console.log(
+        PolygonGrid.distanceToPolygon(
+          state.garden.beds[0].shape.coordinates[0],
+          point
+        )
+      );
+    }
+    // state.onClick(...d3.pointer(event, this.content.node()), element);
   }
 
-  onHover(event: MouseEvent, element?: EntityBase): void {
-    this.state.tool?.OnHover?.(
-      ...d3.pointer(event, this.content.node()),
-      element
-    );
+  onHover(event: MouseEvent, element?: EntityBase, index?: number): void {
+    const point = d3.pointer(event, this.content.node());
+    point[1] = -point[1];
+
+    state.tool?.OnHover?.(...point, element, index);
   }
 
   onMouseMove(event: MouseEvent): void {
-    if (this.state.tool) {
-      this.state.updateTool(d3.pointer(event, this.content.node()));
+    const point = d3.pointer(event, this.content.node());
+    point[1] = -point[1];
+
+    [...state.cursorPosition] = point;
+
+    if (state.tool) {
+      state.updateTool(point);
     }
   }
 
   elementStyle(elementType: ElementType): Record<string, string> {
     return {
       "pointer-events":
-        !this.state.tool ||
-        this.state.tool?.interactiveElements?.has(elementType)
+        !state.tool || state.tool?.interactiveElements?.has(elementType)
           ? "auto"
           : "none",
     };

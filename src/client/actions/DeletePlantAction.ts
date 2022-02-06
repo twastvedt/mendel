@@ -2,7 +2,7 @@ import { plantApi } from "@/api/PlantApi";
 import { Plant } from "@/entity/Plant";
 import "../apiRequest";
 import { EntityId } from "@/api/BaseApi";
-import Store from "../Store";
+import { Store } from "../Store";
 import { Action } from "./Action";
 
 export class DeletePlantAction extends Action {

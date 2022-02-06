@@ -66,7 +66,7 @@
 import { Component, Vue, Watch, Prop } from "vue-property-decorator";
 
 import { Family } from "@/entity/Family";
-import Store from "../Store";
+import { state } from "../Store";
 import { Variety } from "@/entity/Variety";
 import type { VueForm } from "../types/vueTypes";
 
@@ -79,7 +79,7 @@ export default class EditVariety extends Vue {
   @Prop()
   value?: Variety;
 
-  state = Store.state;
+  state = state;
 
   formValue = this.default;
   families: Family[] = [];

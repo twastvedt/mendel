@@ -1,21 +1,26 @@
 import { Garden } from "@/entity/Garden";
 import { BBox, Position } from "@/entity/geoJson";
-import { polygonContains } from "d3-polygon";
+import { HexGrid } from "../hexGrid/HexGrid";
 import { Vector } from "../Vector";
 
-interface GridPoints {
+export interface GridPoints {
   interiorPoints: Position[];
-  edgePoints: Position[];
+  offset: Position;
+  edgePoints: { point: Position; edges: number[]; display: boolean }[];
 }
 
-const equilateralTriangleHeight = Math.sqrt(3) / 2;
+const halfRoot3 = Math.sqrt(3) / 2;
+const root3 = Math.sqrt(3);
+
+const tempVec1 = new Vector(0, 0);
+const tempVec2 = new Vector(0, 0);
 
 export class PolygonGrid {
-  private paddedBounds: BBox[] = [];
+  public grids: GridPoints[] = [];
 
-  private grids: GridPoints[] = [];
+  private _diameter!: number;
 
-  private _diameter = 6;
+  public hexGrid: HexGrid;
 
   public get diameter(): number {
     return this._diameter;
@@ -26,16 +31,20 @@ export class PolygonGrid {
       throw new Error("Diameter must be greater than 0.");
     }
 
-    this.grids = [];
-
-    this.paddedBounds = this.garden.beds.map((b) =>
-      this.polygonBounds(b.shape.coordinates[0], value)
-    );
-
     this._diameter = value;
+
+    this.hexGrid.size = value / root3;
+
+    this.grids = this.garden.beds.map((b) =>
+      this.makeGrid(b.shape.coordinates[0])
+    );
   }
 
-  constructor(private garden: Garden) {}
+  constructor(private garden: Garden, diameter: number) {
+    this.hexGrid = new HexGrid(0, new Vector(0, 0), diameter / root3);
+
+    this.diameter = diameter;
+  }
 
   /**
    *
@@ -45,89 +54,186 @@ export class PolygonGrid {
   setCursor(point: Position, bedIndex: number): void {
     const grid = this.grids[bedIndex];
 
-    if (!grid) {
-      this.makeGrid(point, bedIndex);
+    this.hexGrid.origin.set(0, 0);
 
+    const nearestHex = this.hexGrid.convertFrom(
+      this.hexGrid.convertTo(point, true)
+    );
+
+    const offset = grid.offset;
+
+    offset[0] = point[0] - nearestHex.x;
+    offset[1] = point[1] - nearestHex.y;
+
+    if (!offset[0] && !offset[1]) {
       return;
     }
 
-    const gridPoint = grid.interiorPoints[0] ?? grid.edgePoints[0];
+    grid.edgePoints.forEach((p) => {
+      const result = PolygonGrid.distanceToPolygon(
+        this.garden.beds[bedIndex].shape.coordinates[0],
+        [p.point[0] + offset[0], p.point[1] + offset[1]],
+        undefined,
+        p.edges
+      );
 
-    //...
+      p.display = result.distance >= 0;
+    });
   }
 
-  makeGrid(origin: Position, bedIndex: number): GridPoints {
-    const grid: GridPoints = { interiorPoints: [], edgePoints: [] };
+  makeGrid(polygon: Position[]): GridPoints {
+    const grid: GridPoints = {
+      interiorPoints: [],
+      edgePoints: [],
+      offset: [0, 0],
+    };
 
-    const coordinates = new Set<Position>([[0, 0]]);
+    const bounds = this.polygonBounds(polygon, this._diameter / root3);
 
-    const bounds = this.paddedBounds[bedIndex];
+    this.hexGrid.origin.set(0, 0);
 
-    const bed = this.garden.beds[bedIndex].shape.coordinates[0];
+    const corners = (
+      [
+        [bounds[0], bounds[1]],
+        [bounds[2], bounds[1]],
+        [bounds[2], bounds[3]],
+      ] as Position[]
+    ).map((c) => this.hexGrid.convertTo(c, true));
 
-    for (const coordinate of coordinates) {
-      const point = this.relativeGridPoint(origin, ...coordinate);
+    const line1 = corners[0].lineTo(corners[1]);
+    const line2 = corners[1].lineTo(corners[2]);
 
-      if (
-        point[0] <= bounds[0] ||
-        point[0] >= bounds[2] ||
-        point[1] <= bounds[1] ||
-        point[1] >= bounds[3]
-      ) {
-        continue;
+    const delta = corners[2].subtract(corners[1]);
+
+    const maxDiff = Math.max(...delta.asArray);
+
+    const axis = delta.asArray.indexOf(maxDiff);
+    const isNegative = corners[2][axis] < corners[1][axis];
+
+    for (const hex2 of line2) {
+      const offset = hex2.subtract(line2[0]);
+
+      for (const hex1 of line1) {
+        const newHex = hex1.add(offset);
+
+        const point = this.hexGrid.convertFrom(newHex).asArray;
+
+        const { distance, closest } = PolygonGrid.distanceToPolygon(
+          polygon,
+          point,
+          this.hexGrid.size
+        );
+
+        if (distance > this._diameter) {
+          grid.interiorPoints.push(point);
+        } else if (distance > -this._diameter) {
+          grid.edgePoints.push({
+            point,
+            edges: closest,
+            display: distance > 0,
+          });
+        }
       }
-
-      const distance = this.distanceToPolygon(bed, point);
-
-      if (distance >= this._diameter) {
-        grid.interiorPoints.push(point);
-      } else if (distance > -this._diameter) {
-        grid.edgePoints.push(point);
-      }
-
-      // Add adjacent points to the todo list, if they aren't already there.
-      coordinates.add([coordinate[0], coordinate[1] + 1]);
-      coordinates.add([coordinate[0] + 1, coordinate[1]]);
-      coordinates.add([coordinate[0] - 1, coordinate[1]]);
-      coordinates.add([coordinate[0], coordinate[1] - 1]);
-      // Skewed grid, so only two of the corners are adjacent in the hexagonal pattern.
-      coordinates.add([coordinate[0] - 1, coordinate[1] + 1]);
-      coordinates.add([coordinate[0] + 1, coordinate[1] - 1]);
     }
-
-    this.grids[bedIndex] = grid;
 
     return grid;
   }
 
-  distanceToPolygon(polygon: Position[], point: Position): number {
-    let distance = undefined as number | undefined;
+  /**
+   * Find the signed distance to the closest point on a polygon. Positive distances are inside the polygon.
+   * @param polygon
+   * @param point
+   * @param getClosest Output the indeces of all edges closer than this threshold.
+   * @param segmentsToCheck Only check these polygon segments for closest edge.
+   * @returns
+   */
+  static distanceToPolygon(
+    polygon: Position[],
+    point: Position,
+    getClosest?: number,
+    segmentsToCheck?: number[]
+  ): { distance: number; closest: number[] } {
+    const p = new Vector(...point);
 
-    let segmentStart: Position;
+    const segmentEnd = new Vector(...polygon[0]);
+    const segmentStart = new Vector(...polygon[0]);
 
-    polygon.forEach((segmentEnd, n) => {
-      segmentStart = n == 0 ? polygon[polygon.length - 1] : polygon[n - 1];
+    const x = point[0];
+    const y = point[1];
+    let x1;
+    let y1;
+    let inside = false;
+    const closest = [] as number[];
+    let lastCheckedSegment = 0;
 
-      // https://en.wikipedia.org/wiki/Distance_from_a_point_to_a_line
-      // TODO: Cache polygon segment lengths
-      const d =
-        ((segmentEnd[0] - segmentStart[0]) * (segmentStart[1] - point[1]) -
-          (segmentStart[0] - point[0]) * (segmentEnd[1] - segmentStart[0])) /
-        Math.sqrt(
-          (segmentEnd[0] - segmentStart[0]) ** 2 +
-            (segmentEnd[1] - segmentStart[1]) ** 2
-        );
-
-      if (!distance || Math.abs(d) < Math.abs(distance)) {
-        distance = d;
+    const distance = polygon.reduce((minD, vertex, n) => {
+      if (n === 0) {
+        return minD;
       }
-    });
 
-    if (!distance) {
+      segmentStart.copy(segmentEnd);
+      segmentEnd.set(...vertex);
+
+      x1 = vertex[0];
+      y1 = vertex[1];
+
+      if (
+        y1 > y !== segmentStart.y > y &&
+        x < ((segmentStart.x - x1) * (y - y1)) / (segmentStart.y - y1) + x1
+      ) {
+        inside = !inside;
+      }
+
+      if (segmentsToCheck?.length) {
+        // Don't calculate distance if this isn't one of the segments to check.
+        const foundIndex = segmentsToCheck.indexOf(n - 1, lastCheckedSegment);
+
+        if (foundIndex !== -1) {
+          lastCheckedSegment = foundIndex + 1;
+        } else {
+          return minD;
+        }
+      }
+
+      // https://stackoverflow.com/a/1501725/890132
+      // TODO: Cache polygon segment lengths
+      Vector.subtract(p, segmentStart, tempVec1);
+      Vector.subtract(segmentEnd, segmentStart, tempVec2);
+
+      const l2 = tempVec2.length ** 2;
+
+      if (l2 == 0) {
+        return minD;
+      }
+
+      const param = tempVec1.dot(tempVec2) / l2;
+
+      let d;
+
+      if (param < 0) {
+        d = p.distanceTo(segmentStart);
+      } else if (param > 1) {
+        d = p.distanceTo(segmentEnd);
+      } else {
+        d = p.distanceTo(tempVec2.scale(param).add(segmentStart));
+      }
+
+      if (getClosest && d <= getClosest) {
+        closest.push(n - 1);
+      }
+
+      if (minD == undefined || d < minD) {
+        return d;
+      }
+
+      return minD;
+    }, undefined as number | undefined);
+
+    if (distance === undefined) {
       throw new Error("Empty polygon?");
     }
 
-    return distance;
+    return { distance: distance * (inside ? 1 : -1), closest };
   }
 
   /**
@@ -139,7 +245,7 @@ export class PolygonGrid {
   relativeGridPoint(origin: Position, x: number, y: number): Position {
     return [
       origin[0] + this._diameter * x + (this._diameter / 2) * y,
-      origin[1] + this._diameter * y * equilateralTriangleHeight,
+      origin[1] + this._diameter * y * halfRoot3,
     ];
   }
 

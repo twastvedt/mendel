@@ -46,7 +46,7 @@
 
 <script lang="ts">
 import { Component, Vue } from "vue-property-decorator";
-import Store from "../Store";
+import { state } from "../Store";
 import { DrawPlantTool } from "../tools/DrawPlantTool";
 import { DeletePlantTool } from "../tools/DeletePlantTool";
 import { Variety } from "@/entity/Variety";
@@ -55,14 +55,14 @@ import { Family } from "@/entity/Family";
 
 @Component({})
 export default class Toolbar extends Vue {
-  state = Store.state;
+  state = state;
 
   disableVarietySelect = false;
 
   variety: Variety | null = null;
 
   get varietyList(): (Variety | { divider: boolean })[] {
-    return this.state.families
+    return state.families
       .sort((a, b) => a.name.localeCompare(b.name))
       .filter(
         (f): f is Family & Required<Pick<Family, "varieties">> =>
@@ -75,7 +75,7 @@ export default class Toolbar extends Vue {
   }
 
   async mounted(): Promise<void> {
-    await this.state.ready;
+    await state.ready;
 
     this.variety = this.varietyList[1] as Variety;
   }
@@ -89,21 +89,21 @@ export default class Toolbar extends Vue {
   }
 
   newTool(newTool: string): void {
-    if (this.state.garden) {
+    if (state.garden) {
       switch (newTool) {
         case "drawPlant":
           if (this.variety) {
-            this.state.setTool(new DrawPlantTool(this.variety));
+            state.setTool(new DrawPlantTool(this.variety));
           }
 
           break;
         case "drawPlanting":
           if (this.variety) {
-            this.state.setTool(new DrawPlantingTool(this.variety));
+            state.setTool(new DrawPlantingTool(this.variety));
           }
           break;
         case "delete":
-          this.state.setTool(new DeletePlantTool());
+          state.setTool(new DeletePlantTool());
           break;
       }
     }
@@ -112,10 +112,9 @@ export default class Toolbar extends Vue {
   newVariety(newVariety: Variety): void {
     if (
       newVariety &&
-      (this.state.toolName === "drawPlant" ||
-        this.state.toolName === "drawPlanting")
+      (state.toolName === "drawPlant" || state.toolName === "drawPlanting")
     ) {
-      this.newTool(this.state.toolName);
+      this.newTool(state.toolName);
     }
   }
 }

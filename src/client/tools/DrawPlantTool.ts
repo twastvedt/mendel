@@ -3,14 +3,14 @@ import { Tool } from "./Tool";
 import { AddPlantAction } from "../actions/AddPlantAction";
 import { Action } from "../actions/Action";
 import { Plant } from "@/entity/Plant";
-import Store from "../Store";
+import { state } from "../Store";
 import { Vector } from "../Vector";
 import plantComponent from "../components/PlantComponent.vue";
 
 export class DrawPlantTool implements Tool {
   public Stop(): void {
     if (this.plant) {
-      Store.state.removePlant(this.plant);
+      state.removePlant(this.plant);
 
       delete this.plant;
     }
@@ -34,7 +34,7 @@ export class DrawPlantTool implements Tool {
 
   public setTransform(): void {
     if (this.plant) {
-      this.cursorProps.transform = Store.state.makeTransform(
+      this.cursorProps.transform = state.makeTransform(
         this.plant.location.coordinates as [number, number]
       );
     }
@@ -44,16 +44,16 @@ export class DrawPlantTool implements Tool {
     if (this.plant?.variety?.family?.spacing !== undefined) {
       this.cursor.set(x, y);
 
-      if (Store.state.delaunay) {
+      if (state.delaunay) {
         const thisRadius = this.plant.variety.family.spacing / 2;
 
-        this.lastClosestIndex = Store.state.delaunay.find(
+        this.lastClosestIndex = state.delaunay.find(
           x,
           y,
           this.lastClosestIndex
         );
 
-        const neighbors = Store.state.delaunay.neighbors(this.lastClosestIndex);
+        const neighbors = state.delaunay.neighbors(this.lastClosestIndex);
 
         const closestPlants: {
           location: Vector;
@@ -62,7 +62,7 @@ export class DrawPlantTool implements Tool {
         }[] = [];
 
         for (const i of [...neighbors, this.lastClosestIndex]) {
-          const plant = Store.state.garden?.plants[i];
+          const plant = state.garden?.plants[i];
 
           if (plant?.variety?.family) {
             const plantVector = Vector.fromArray(plant.location.coordinates);
@@ -146,6 +146,6 @@ export class DrawPlantTool implements Tool {
       type: "Point",
       coordinates: [0, 0],
     };
-    this.plant.gardenId = Store.state.garden?.id;
+    this.plant.gardenId = state.garden?.id;
   }
 }

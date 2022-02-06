@@ -6,7 +6,7 @@ import { ElementType } from "../Store";
 export interface Tool {
   OnClick(x: number, y: number, element?: EntityBase): Action | void;
 
-  OnHover?(x: number, y: number, element?: EntityBase): void;
+  OnHover?(x: number, y: number, element?: EntityBase, index?: number): void;
 
   Start(): void;
   Stop(): void;

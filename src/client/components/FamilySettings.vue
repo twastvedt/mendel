@@ -29,7 +29,7 @@
 
 <script lang="ts">
 import { Component, Vue } from "vue-property-decorator";
-import Store from "../Store";
+import { state } from "../Store";
 import type { DataTableHeader } from "vuetify";
 import EditFamily from "./EditFamily.vue";
 import EditDataTable from "./EditDataTable.vue";
@@ -42,7 +42,7 @@ import { Family } from "@/entity/Family";
   },
 })
 export default class FamilySettings extends Vue {
-  state = Store.state;
+  state = state;
 
   headers: DataTableHeader[] = [
     {
@@ -68,7 +68,7 @@ export default class FamilySettings extends Vue {
   ];
 
   plantCount(family: Family): number | undefined {
-    return this.state.garden?.plants.filter(
+    return state.garden?.plants.filter(
       (p) => p.variety?.family?.id === family.id
     ).length;
   }
@@ -76,12 +76,12 @@ export default class FamilySettings extends Vue {
   async deleteFamily(family: Family): Promise<void> {
     const varieties =
       family.varieties?.length ??
-      this.state.varieties.filter((v) => v.familyId === family.id).length;
+      state.varieties.filter((v) => v.familyId === family.id).length;
 
     if (varieties) {
       alert(`Can't delete family which still has ${varieties} varietie(s).`);
     } else {
-      this.state.deleteFamily(family);
+      state.deleteFamily(family);
     }
   }
 }

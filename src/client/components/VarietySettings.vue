@@ -29,7 +29,7 @@
 
 <script lang="ts">
 import { Component, Vue } from "vue-property-decorator";
-import Store from "../Store";
+import { state } from "../Store";
 import type { DataTableHeader } from "vuetify";
 import EditVariety from "./EditVariety.vue";
 import EditDataTable from "./EditDataTable.vue";
@@ -41,7 +41,7 @@ import EditDataTable from "./EditDataTable.vue";
   },
 })
 export default class VarietySettings extends Vue {
-  state = Store.state;
+  state = state;
 
   varietyHeaders: DataTableHeader[] = [
     {

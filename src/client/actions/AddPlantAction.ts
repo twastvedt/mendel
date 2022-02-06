@@ -1,7 +1,7 @@
 import { plantApi } from "@/api/PlantApi";
 import { Plant } from "@/entity/Plant";
 import "../apiRequest";
-import Store from "../Store";
+import { Store } from "../Store";
 import { Action } from "./Action";
 
 export class AddPlantAction extends Action {

@@ -30,7 +30,7 @@
 
 <script lang="ts">
 import { Component, Prop, Vue } from "vue-property-decorator";
-import Store from "../Store";
+import { state } from "../Store";
 import { Family } from "@/entity/Family";
 import { Variety } from "@/entity/Variety";
 
@@ -49,7 +49,7 @@ export default class PlantComponent extends Vue {
   }
 
   get iconSize(): number {
-    return Math.min(40 / this.state.scale, (this.family.spacing * 2) / 3);
+    return Math.min(40 / state.scale, (this.family.spacing * 2) / 3);
   }
 
   get title(): string {
@@ -60,7 +60,7 @@ export default class PlantComponent extends Vue {
     return { interactive: this.interactive, notInteractive: !this.interactive };
   }
 
-  state = Store.state;
+  state = state;
 
   onClick(event: PointerEvent): void {
     if (this.interactive) {
