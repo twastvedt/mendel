@@ -15,7 +15,7 @@
       </template>
 
       <template #[`item.plants`]="{ item }">
-        {{ item.plants ? item.plants.length : 0 }}
+        {{ plantCount(item) }}
       </template>
 
       <template #[`item.color`]="{ item }">
@@ -33,6 +33,7 @@ import { state } from "../Store";
 import type { DataTableHeader } from "vuetify";
 import EditVariety from "./EditVariety.vue";
 import EditDataTable from "./EditDataTable.vue";
+import { Variety } from "@/entity/Variety";
 
 @Component({
   components: {
@@ -61,5 +62,10 @@ export default class VarietySettings extends Vue {
       value: "plants",
     },
   ];
+
+  plantCount(variety: Variety): number | undefined {
+    return state.garden?.plants.filter((p) => p.variety?.id === variety.id)
+      .length;
+  }
 }
 </script>
