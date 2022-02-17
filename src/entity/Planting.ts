@@ -37,15 +37,15 @@ export class Planting extends EntityBase {
   @ManyToOne(() => Variety, (variety) => variety.plantings)
   variety?: Variety;
 
-  @OneToMany(() => Plant, (plant) => plant.planting, {
-    onDelete: "CASCADE",
-  })
+  @OneToMany(() => Plant, (plant) => plant.planting)
   plants?: Plant[];
 
   @Column({ nullable: true })
   gardenId?: number;
 
-  @ManyToOne(() => Garden, (garden) => garden.plantings)
+  @ManyToOne(() => Garden, (garden) => garden.plantings, {
+    onDelete: "CASCADE",
+  })
   garden?: Garden;
 
   constructor() {

@@ -38,9 +38,7 @@ export class Family extends EntityBase {
   @Column()
   spacing!: number;
 
-  @OneToMany(() => Variety, (v) => v.family, {
-    onDelete: "CASCADE",
-  })
+  @OneToMany(() => Variety, (v) => v.family)
   varieties?: Variety[];
 
   static cleanCopy<T extends Family>(family: T): Omit<T, "varieties"> {

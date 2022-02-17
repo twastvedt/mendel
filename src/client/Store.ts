@@ -331,7 +331,7 @@ export class Store {
     if (typeof idOrPlant === "number") {
       i = this.garden.plants.findIndex((p) => p.id === idOrPlant);
     } else {
-      i = this.garden.plants.indexOf(idOrPlant);
+      i = this.garden.plants.findIndex((p) => p.id === idOrPlant.id);
     }
 
     if (i !== -1) {
@@ -348,16 +348,21 @@ export class Store {
       return;
     }
 
+    let planting;
     let i;
 
     if (typeof idOrPlanting === "number") {
       i = this.garden.plantings.findIndex((p) => p.id === idOrPlanting);
+      planting = this.garden.plantings[i];
     } else {
-      i = this.garden.plantings.indexOf(idOrPlanting);
+      planting = idOrPlanting;
+      i = this.garden.plantings.findIndex((p) => p.id === idOrPlanting.id);
     }
 
     if (i !== -1) {
       this.garden.plantings.splice(i, 1);
+
+      planting.plants?.forEach((p) => this.removePlant(p));
     }
   }
 

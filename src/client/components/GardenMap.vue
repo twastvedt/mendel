@@ -123,10 +123,10 @@ export default class GardenMap extends Vue {
 
     this.svg.call(this.zoom);
 
-    Vue.nextTick(() => this.zoomFit());
+    Vue.nextTick(() => this.zoomFit(false));
   }
 
-  zoomFit(): void {
+  zoomFit(animate: boolean): void {
     const bounds = this.$refs.content.getBBox();
 
     if (bounds) {
@@ -139,13 +139,18 @@ export default class GardenMap extends Vue {
           0.9 / Math.max(bounds.width / width, bounds.height / height),
         translate = [width / 2 - scale * midX, height / 2 - scale * midY];
 
-      this.svg
-        .transition()
-        .duration(750)
-        .call(
-          this.zoom.transform,
-          d3.zoomIdentity.translate(translate[0], translate[1]).scale(scale)
-        );
+      let zoomable;
+
+      if (animate) {
+        zoomable = this.svg.transition().duration(750);
+      } else {
+        zoomable = this.svg;
+      }
+
+      zoomable.call(
+        this.zoom.transform,
+        d3.zoomIdentity.translate(translate[0], translate[1]).scale(scale)
+      );
     }
   }
 

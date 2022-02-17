@@ -3,9 +3,20 @@
     <v-app-bar-nav-icon @click.stop="state.drawer = !state.drawer" />
 
     <v-btn-toggle v-model="state.toolName" @change="newTool">
-      <v-btn value="drawPlant"> <v-icon>mdi-sprout</v-icon></v-btn>
-      <v-btn value="drawPlanting"> <v-icon>mdi-dots-hexagon</v-icon></v-btn>
-      <v-btn value="delete"> <v-icon>mdi-close</v-icon></v-btn>
+      <v-btn value="drawPlant" title="Add plant">
+        <v-icon>mdi-sprout</v-icon></v-btn
+      >
+      <v-btn value="drawPlanting" title="Add planting">
+        <v-icon>mdi-dots-hexagon</v-icon></v-btn
+      >
+      <v-btn value="deletePlant" title="Delete plant">
+        <v-icon>mdi-sprout</v-icon>
+        <v-icon class="badge" color="red darken-4">mdi-close</v-icon>
+      </v-btn>
+      <v-btn value="deletePlanting" title="Delete planting">
+        <v-icon>mdi-dots-hexagon</v-icon
+        ><v-icon class="badge" color="red darken-4">mdi-close</v-icon>
+      </v-btn>
     </v-btn-toggle>
 
     <v-select
@@ -49,6 +60,7 @@ import { Component, Vue } from "vue-property-decorator";
 import { state } from "../Store";
 import { DrawPlantTool } from "../tools/DrawPlantTool";
 import { DeletePlantTool } from "../tools/DeletePlantTool";
+import { DeletePlantingTool } from "../tools/DeletePlantingTool";
 import { Variety } from "@/entity/Variety";
 import { DrawPlantingTool } from "../tools/DrawPlantingTool";
 import { Family } from "@/entity/Family";
@@ -102,8 +114,11 @@ export default class Toolbar extends Vue {
             state.setTool(new DrawPlantingTool(this.variety));
           }
           break;
-        case "delete":
+        case "deletePlant":
           state.setTool(new DeletePlantTool());
+          break;
+        case "deletePlanting":
+          state.setTool(new DeletePlantingTool());
           break;
       }
     }
@@ -129,5 +144,14 @@ export default class Toolbar extends Vue {
   height: 32px;
   width: 32px;
   margin-right: 8px;
+}
+
+.v-icon.badge {
+  height: 50%;
+  width: 50%;
+  position: absolute;
+  display: block;
+  right: 15%;
+  bottom: 15%;
 }
 </style>

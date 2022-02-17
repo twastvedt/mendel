@@ -15,19 +15,16 @@ export class Garden extends EntityBase {
 
   @OneToMany(() => Bed, (bed) => bed.garden, {
     eager: true,
-    onDelete: "CASCADE",
   })
   beds!: Bed[];
 
   @OneToMany(() => Plant, (plant) => plant.garden, {
     eager: true,
-    onDelete: "CASCADE",
   })
   plants!: Plant[];
 
   @OneToMany(() => Planting, (planting) => planting.garden, {
     eager: true,
-    onDelete: "CASCADE",
   })
   plantings!: Planting[];
 }

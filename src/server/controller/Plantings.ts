@@ -30,7 +30,7 @@ plantingApi.createWithPlants.addWrappedHandler(router, async (request) => {
     p.varietyId = planting.varietyId;
   });
 
-  plantRepo.save(planting.plants);
+  planting.plants = await plantRepo.save(planting.plants);
 
   return planting;
 });

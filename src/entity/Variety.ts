@@ -1,4 +1,4 @@
-import { Entity, Column, ManyToOne, JoinColumn, OneToMany } from "typeorm";
+import { Entity, Column, ManyToOne, OneToMany } from "typeorm";
 import { EntityBase } from "./EntityBase";
 import { Family } from "./Family";
 import { Plant } from "./Plant";
@@ -32,6 +32,11 @@ export class Variety extends EntityBase {
   @Column()
   familyId?: number;
 
+  @ManyToOne(() => Family, (family) => family.varieties, {
+    onDelete: "CASCADE",
+  })
+  family?: Family;
+
   @OneToMany(() => Plant, (plant) => plant.variety, {
     onDelete: "CASCADE",
   })
@@ -41,10 +46,6 @@ export class Variety extends EntityBase {
     onDelete: "CASCADE",
   })
   plantings?: Planting[];
-
-  @ManyToOne(() => Family, (family) => family.varieties)
-  @JoinColumn({ name: nameof(Variety.prototype.familyId) })
-  family?: Family;
 
   static cleanCopy(variety: Variety): Variety {
     const newVariety = Object.assign({}, variety);

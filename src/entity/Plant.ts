@@ -22,13 +22,17 @@ export class Plant extends EntityBase {
   @Column({ nullable: true })
   gardenId?: number;
 
-  @ManyToOne(() => Garden, (garden) => garden.plants)
+  @ManyToOne(() => Garden, (garden) => garden.plants, {
+    onDelete: "CASCADE",
+  })
   garden?: Garden;
 
   @Column({ nullable: true })
   plantingId?: number;
 
-  @ManyToOne(() => Planting, (planting) => planting.plants)
+  @ManyToOne(() => Planting, (planting) => planting.plants, {
+    onDelete: "CASCADE",
+  })
   planting?: Planting;
 
   static cleanCopy(oldPlant: Plant): Plant {
