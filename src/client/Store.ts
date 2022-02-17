@@ -9,7 +9,7 @@ import { Tool } from "./tools/Tool";
 import { Action } from "./actions/Action";
 import { Plant } from "@/entity/Plant";
 import { Delaunay } from "d3-delaunay";
-import { geoPath } from "d3-geo";
+import { geoIdentity, geoPath } from "d3-geo";
 import { familyApi } from "@/api/FamilyApi";
 import { Planting } from "@/entity/Planting";
 import { EntityBase } from "@/entity/EntityBase";
@@ -20,7 +20,10 @@ import { PolygonGrid } from "./services/polygonGrid";
 export type ElementType = "plant" | "bed" | "planting";
 
 export class Store {
-  pathGenerator = geoPath();
+  // TODO: We assume data is stored in inches relative to garden origin.
+  projection = geoIdentity().reflectY(true);
+
+  pathGenerator = geoPath(this.projection);
 
   delaunay?: Delaunay<unknown>;
 
@@ -74,11 +77,11 @@ export class Store {
     try {
       const garden = await gardenApi.one.request({ routeParams: { id: 1 } });
 
-      garden.plants.forEach((p) => this.inflatePlant(p));
+      this.garden = garden;
 
       garden.plantings.forEach((p) => this.inflatePlanting(p));
 
-      this.garden = garden;
+      garden.plants.forEach((p) => this.inflatePlant(p));
 
       this.updateDelaunay();
 
@@ -126,9 +129,9 @@ export class Store {
     this.loading = false;
   }
 
-  onClick(x: number, y: number, element?: EntityBase): void {
+  onClick(point: Position, element?: EntityBase): void {
     if (this.tool && this.garden) {
-      const action = this.tool.OnClick(x, y, element);
+      const action = this.tool.OnClick(point, element);
 
       if (action) {
         action.Do(this);
@@ -154,9 +157,9 @@ export class Store {
         data: Variety.cleanCopy(item) as EntityId<Variety>,
       });
     } else {
-      const newVariety = await varietyApi.create.request({
+      const newVariety = (await varietyApi.create.request({
         data: Variety.cleanCopy(item),
-      });
+      })) as Variety;
 
       this.varieties.push(newVariety);
 
@@ -231,9 +234,9 @@ export class Store {
         data: newFamily as EntityId<Family>,
       });
     } else {
-      const newFamily = await familyApi.create.request({
+      const newFamily = (await familyApi.create.request({
         data: Family.cleanCopy(item),
-      });
+      })) as Family;
 
       this.families.push(newFamily);
     }
@@ -264,18 +267,39 @@ export class Store {
     await familyApi.delete.request({ routeParams: { id: item.id } });
   }
 
+  addPlant(plant: Plant): void {
+    this.inflatePlant(plant);
+
+    this.garden?.plants.push(plant);
+  }
+
+  addPlanting(planting: Planting): void {
+    this.inflatePlanting(planting);
+
+    this.garden?.plantings.push(planting);
+  }
+
   inflatePlant(plant: Plant): Plant {
     if (plant.varietyId !== undefined) {
       plant.variety = this.varieties.find((v) => v.id === plant.varietyId);
     }
 
     if (plant.gardenId === this.garden?.id) {
-      plant.garden === this.garden;
+      plant.garden = this.garden;
     }
 
     if (plant.plantingId !== undefined) {
-      plant.planting ===
-        this.garden?.plantings.find((p) => p.id === plant.plantingId);
+      const planting = this.garden?.plantings.find(
+        (p) => p.id === plant.plantingId
+      );
+
+      if (planting) {
+        plant.planting = planting;
+
+        planting.plants ??= [];
+
+        planting.plants.push(plant);
+      }
     }
 
     return plant;
@@ -357,7 +381,7 @@ export class Store {
 
   updateTool(cursor: [number, number]) {
     if (this.tool && this.garden) {
-      this.tool.OnCursorMove(...cursor);
+      this.tool.OnCursorMove(cursor);
     }
   }
 
@@ -372,7 +396,7 @@ export class Store {
   }
 
   makeTransform(coordinate: [number, number]): string {
-    return `translate(${coordinate.join(" ")})`;
+    return `translate(${this.projection(coordinate)?.join(" ")})`;
   }
 
   keyListener(event: KeyboardEvent): void {

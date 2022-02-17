@@ -70,15 +70,15 @@ export function all<T extends ObjectLiteral>(
 
 export function create<T extends ObjectLiteral>(
   entity: EntityTarget<T>
-): SimpleHandler<undefined, T, Partial<T>> {
+): SimpleHandler<undefined, T | T[], T | T[]> {
   return async (request) => {
     const repository = getManager().getRepository(entity);
 
-    const newEntity = repository.create(request.body);
-
-    await repository.save(newEntity);
-
-    return newEntity;
+    if (Array.isArray(request.body)) {
+      return repository.save(request.body);
+    } else {
+      return repository.save(request.body);
+    }
   };
 }
 

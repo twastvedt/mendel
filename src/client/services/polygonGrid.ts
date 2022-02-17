@@ -1,5 +1,6 @@
 import { Garden } from "@/entity/Garden";
 import { BBox, Position } from "@/entity/geoJson";
+import { Hex } from "../hexGrid/Hex";
 import { HexGrid } from "../hexGrid/HexGrid";
 import { Vector } from "../Vector";
 
@@ -54,8 +55,6 @@ export class PolygonGrid {
   setCursor(point: Position, bedIndex: number): void {
     const grid = this.grids[bedIndex];
 
-    this.hexGrid.origin.set(0, 0);
-
     const nearestHex = this.hexGrid.convertFrom(
       this.hexGrid.convertTo(point, true)
     );
@@ -90,8 +89,6 @@ export class PolygonGrid {
 
     const bounds = this.polygonBounds(polygon, this._diameter / root3);
 
-    this.hexGrid.origin.set(0, 0);
-
     const corners = (
       [
         [bounds[0], bounds[1]],
@@ -103,18 +100,20 @@ export class PolygonGrid {
     const line1 = corners[0].lineTo(corners[1]);
     const line2 = corners[1].lineTo(corners[2]);
 
-    const delta = corners[2].subtract(corners[1]);
-
-    const maxDiff = Math.max(...delta.asArray);
-
-    const axis = delta.asArray.indexOf(maxDiff);
-    const isNegative = corners[2][axis] < corners[1][axis];
+    let lastHexRow = [] as (Hex | undefined)[];
 
     for (const hex2 of line2) {
       const offset = hex2.subtract(line2[0]);
 
-      for (const hex1 of line1) {
+      lastHexRow = line1.map((hex1, i) => {
         const newHex = hex1.add(offset);
+
+        if (
+          newHex.equals(lastHexRow[i - 1]) ||
+          newHex.equals(lastHexRow[i + 1])
+        ) {
+          return undefined;
+        }
 
         const point = this.hexGrid.convertFrom(newHex).asArray;
 
@@ -133,7 +132,9 @@ export class PolygonGrid {
             display: distance > 0,
           });
         }
-      }
+
+        return newHex;
+      });
     }
 
     return grid;
@@ -234,19 +235,6 @@ export class PolygonGrid {
     }
 
     return { distance: distance * (inside ? 1 : -1), closest };
-  }
-
-  /**
-   * Find a point in the skewed circle grid.
-   * @param origin
-   * @param x
-   * @param y
-   */
-  relativeGridPoint(origin: Position, x: number, y: number): Position {
-    return [
-      origin[0] + this._diameter * x + (this._diameter / 2) * y,
-      origin[1] + this._diameter * y * halfRoot3,
-    ];
   }
 
   polygonBounds(polygon: Position[], padding = 0): BBox {

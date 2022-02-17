@@ -6,6 +6,7 @@ import { Plant } from "@/entity/Plant";
 import { state } from "../Store";
 import { Vector } from "../Vector";
 import plantComponent from "../components/PlantComponent.vue";
+import { Position } from "@/entity/geoJson";
 
 export class DrawPlantTool implements Tool {
   public Stop(): void {
@@ -40,16 +41,15 @@ export class DrawPlantTool implements Tool {
     }
   }
 
-  public OnCursorMove(x: number, y: number): void {
+  public OnCursorMove(point: Position): void {
     if (this.plant?.variety?.family?.spacing !== undefined) {
-      this.cursor.set(x, y);
+      this.cursor.set(...point);
 
       if (state.delaunay) {
         const thisRadius = this.plant.variety.family.spacing / 2;
 
         this.lastClosestIndex = state.delaunay.find(
-          x,
-          y,
+          ...point,
           this.lastClosestIndex
         );
 
@@ -76,7 +76,7 @@ export class DrawPlantTool implements Tool {
           }
 
           if (closestPlants.length === 0) {
-            [...this.plant.location.coordinates] = [x, y];
+            this.plant.location.coordinates = point;
           } else if (closestPlants.length === 1) {
             const closest = closestPlants[0];
 
@@ -130,7 +130,7 @@ export class DrawPlantTool implements Tool {
     }
   }
 
-  public OnClick(x: number, y: number): Action {
+  public OnClick(point: Position): Action {
     if (this.plant) {
       return new AddPlantAction(Object.assign({}, this.plant));
     }

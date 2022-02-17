@@ -9,7 +9,7 @@
     />
 
     <PlantComponent
-      v-if="!isCursor && state.scaleRange > 1"
+      v-if="!isCursor && state.scaleRange > 1 && !planting.plants"
       :transform="transform"
       :draw-spacing="false"
       :interactive="false"

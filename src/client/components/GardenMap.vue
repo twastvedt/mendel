@@ -9,7 +9,7 @@
     @mouseleave="onHover"
   >
     <g ref="content" class="content">
-      <g v-if="state.garden" transform="scale(1,-1)">
+      <g v-if="state.garden">
         <g v-for="(bed, i) in state.garden.beds" :key="`${bed.id}-bed`">
           <path
             class="bed"
@@ -150,26 +150,17 @@ export default class GardenMap extends Vue {
   }
 
   onClick(event: MouseEvent, element?: EntityBase): void {
-    if (state.garden) {
-      const point = d3.pointer(event, this.content.node());
-      point[1] = -point[1];
+    const point = d3.pointer(event, this.content.node());
+    point[1] = -point[1];
 
-      console.log(point);
-      console.log(
-        PolygonGrid.distanceToPolygon(
-          state.garden.beds[0].shape.coordinates[0],
-          point
-        )
-      );
-    }
-    // state.onClick(...d3.pointer(event, this.content.node()), element);
+    state.onClick(point, element);
   }
 
   onHover(event: MouseEvent, element?: EntityBase, index?: number): void {
     const point = d3.pointer(event, this.content.node());
     point[1] = -point[1];
 
-    state.tool?.OnHover?.(...point, element, index);
+    state.tool?.OnHover?.(point, element, index);
   }
 
   onMouseMove(event: MouseEvent): void {

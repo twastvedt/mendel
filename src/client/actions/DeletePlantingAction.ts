@@ -25,14 +25,10 @@ export class DeletePlantingAction extends Action {
   public async Undo(state: Store): Promise<void> {
     await super.Undo(state);
 
-    const newPlanting = await plantingApi.create.request({
+    const newPlanting = (await plantingApi.create.request({
       data: this.planting,
-    });
+    })) as Planting;
 
-    state.inflatePlanting(newPlanting);
-
-    Object.assign(this.planting, newPlanting);
-
-    state.garden?.plantings.push(this.planting);
+    state.addPlanting(Object.assign(this.planting, newPlanting));
   }
 }

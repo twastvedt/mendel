@@ -12,7 +12,7 @@ export class AddPlantAction extends Action {
   public async Do(state: Store): Promise<void> {
     await super.Do(state);
 
-    state.garden?.plants.push(this.plant as Plant);
+    state.addPlant(this.plant);
 
     state.updateDelaunay();
 

@@ -81,8 +81,8 @@ export class Hex {
     return results;
   }
 
-  equals(b: Hex): boolean {
-    return this.q === b.q && this.r === b.r;
+  equals(b?: Hex): boolean {
+    return !!b && this.q === b.q && this.r === b.r;
   }
 
   toVector(): Vector {

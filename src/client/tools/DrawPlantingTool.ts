@@ -8,6 +8,7 @@ import { Planting } from "@/entity/Planting";
 import { Bed } from "@/entity/Bed";
 import { polygonArea } from "d3-polygon";
 import { GridPoints } from "../services/polygonGrid";
+import { Position } from "@/entity/geoJson";
 
 export class DrawPlantingTool implements Tool {
   public Stop(): void {
@@ -33,45 +34,47 @@ export class DrawPlantingTool implements Tool {
 
   private index?: number;
 
-  public OnCursorMove(x: number, y: number): void {
-    this.cursorProps.cursor = [x, y];
+  public OnCursorMove(point: Position): void {
+    this.cursorProps.cursor = point;
 
     if (this.cursorProps.plants && this.index != undefined) {
-      state.grid?.setCursor([x, y], this.index);
+      state.grid?.setCursor(point, this.index);
     }
   }
 
-  public OnClick(x: number, y: number, bed?: Bed): Action | void {
+  public OnClick(point: Position, bed?: Bed): Action | void {
     if (this.planting) {
       if (bed) {
         this.planting.shape.coordinates = bed.shape.coordinates;
 
-        if (this.variety.family) {
-          // A perfect packing would use a factor of 0.907. Polygons may be far from perfect, not sure what the best estimate to use is.
-          // TODO: Allow spacing circles to extend past polygon boundary. Or add option to do so.
-          this.planting.quantity = Math.round(
-            (this.planting.shape.coordinates.reduce(
-              (_, p) => polygonArea(p),
-              0
-            ) *
-              0.9) /
-              (Math.PI * this.variety.family.spacing ** 2)
-          );
+        const plants = this.cursorProps.plants;
+
+        if (plants) {
+          this.planting.quantity =
+            plants.interiorPoints.length +
+            plants.edgePoints.reduce((t, p) => t + (p.display ? 1 : 0), 0);
         }
 
-        return new AddPlantingAction(Object.assign({}, this.planting));
+        return new AddPlantingAction(
+          Planting.cleanCopy(this.planting),
+          plants?.interiorPoints
+            .concat(
+              plants.edgePoints.filter((e) => e.display).map((e) => e.point)
+            )
+            .map((p) => [p[0] + plants.offset[0], p[1] + plants.offset[1]])
+        );
       }
     } else {
       throw new Error("No action to save?");
     }
   }
 
-  public OnHover(x: number, y: number, bed?: Bed, index?: number): void {
+  public OnHover(point: Position, bed?: Bed, index?: number): void {
     if (this.planting) {
       if (bed && index != undefined && state.grid) {
         this.planting.shape.coordinates = bed.shape.coordinates;
 
-        state.grid.setCursor([x, y], index);
+        state.grid.setCursor(point, index);
 
         if (this.index !== index) {
           this.cursorProps.plants = state.grid.grids[index];

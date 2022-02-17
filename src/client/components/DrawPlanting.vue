@@ -8,7 +8,7 @@
         :key="`interior${i}`"
         :fill="variety.color"
         :cx="point[0]"
-        :cy="point[1]"
+        :cy="-point[1]"
         :r="radius"
         class="previewCircle"
       />
@@ -18,7 +18,7 @@
         :key="`exterior${i}`"
         :fill="variety.color"
         :cx="p.point[0]"
-        :cy="p.point[1]"
+        :cy="-p.point[1]"
         :r="radius"
         class="previewCircle"
       />

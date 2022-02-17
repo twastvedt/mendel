@@ -8,15 +8,16 @@ import { isPlant, isPlanting } from "../types/entityTypes";
 import { EntityId } from "@/api/BaseApi";
 import { Planting } from "@/entity/Planting";
 import { Plant } from "@/entity/Plant";
+import { Position } from "@/entity/geoJson";
 
 export class DeletePlantTool implements Tool {
   public Stop(): void {}
 
-  public OnCursorMove(x: number, y: number): void {}
+  public OnCursorMove(point: Position): void {}
 
   public interactiveElements = new Set<ElementType>(["plant", "planting"]);
 
-  public OnClick(x: number, y: number, entity?: EntityBase): Action | void {
+  public OnClick(point: Position, entity?: EntityBase): Action | void {
     if (entity?.id == undefined) {
       return;
     }
