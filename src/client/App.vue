@@ -19,7 +19,7 @@
       <router-view />
     </v-main>
 
-    <v-footer fixed>
+    <v-footer app>
       <template v-if="state.tool">
         {{ state.tool.helpText }}
       </template>

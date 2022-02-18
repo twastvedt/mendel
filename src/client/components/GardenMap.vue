@@ -99,12 +99,14 @@ export default class GardenMap extends Vue {
   zoom!: d3.ZoomBehavior<SVGSVGElement, unknown>;
 
   zoomed(e: D3ZoomEvent<SVGSVGElement, unknown>): void {
-    this.content.attr("transform", e.transform as unknown as string);
+    this.$refs.content.setAttribute(
+      "transform",
+      e.transform as unknown as string
+    );
 
     state.scale = e.transform.k;
   }
 
-  content!: d3.Selection<SVGGElement, unknown, null, undefined>;
   svg!: d3.Selection<SVGSVGElement, unknown, null, undefined>;
 
   async mounted(): Promise<void> {
@@ -127,10 +129,6 @@ export default class GardenMap extends Vue {
       width,
       height,
     ] as unknown as string);
-
-    this.content = d3.select(this.$refs.content);
-
-    state.cursor = this.content.append("g").classed("cursor", true);
 
     this.zoom = zoom<SVGSVGElement, unknown>().on(
       "zoom",
@@ -179,7 +177,7 @@ export default class GardenMap extends Vue {
   }
 
   onMouseMove(event: MouseEvent): void {
-    const point = d3.pointer(event, this.content.node());
+    const point = d3.pointer(event, this.$refs.content);
     point[1] = -point[1];
 
     [...state.cursorPosition] = point;
@@ -212,7 +210,7 @@ export default class GardenMap extends Vue {
   }
 }
 
-::v-deep .bed {
+.bed {
   fill: rgba($color: #ffffff, $alpha: 0.5);
   stroke: #000000;
   stroke-width: 1px;
@@ -220,6 +218,8 @@ export default class GardenMap extends Vue {
 
 .area {
   fill: rgba($color: #ffffff, $alpha: 0.15);
-  stroke: none;
+  stroke: #999999;
+  stroke-dasharray: 5;
+  mix-blend-mode: multiply;
 }
 </style>

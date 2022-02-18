@@ -43,8 +43,6 @@ export class Store {
 
   cursorPosition = [0, 0] as Position;
 
-  cursor?: d3.Selection<SVGGElement, unknown, null, undefined>;
-
   ready: Promise<void>;
 
   grid = null as PolygonGrid | null;

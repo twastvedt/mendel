@@ -16,7 +16,6 @@ export enum Stage {
 
 export class DrawPlantingTool implements Tool {
   private planting?: Planting;
-  private snapped = false;
   private index?: number;
 
   public constructor(private variety: Variety, private grid: PolygonGrid) {}
@@ -31,6 +30,7 @@ export class DrawPlantingTool implements Tool {
     rotationCenter: null as Position | null,
     dividingLine: [] as Position[],
     stage: Stage.selecting,
+    snapped: false,
   };
 
   public get helpText(): string {
@@ -148,13 +148,15 @@ export class DrawPlantingTool implements Tool {
   }
 
   public onClick(point: Position): Action | void {
-    switch (this.cursorProps.stage) {
+    const props = this.cursorProps;
+
+    switch (props.stage) {
       case Stage.selecting:
-        if (this.snapped) {
+        if (props.snapped) {
           // Snapped to the start of a dividing line.
 
-          this.cursorProps.stage = Stage.drawingLine;
-          this.cursorProps.dividingLine.unshift(point);
+          props.stage = Stage.drawingLine;
+          props.dividingLine.unshift(point);
         } else {
           return this.finish();
         }
@@ -162,23 +164,23 @@ export class DrawPlantingTool implements Tool {
         break;
 
       case Stage.drawingLine:
-        if (this.snapped) {
+        if (props.snapped) {
           if (this.index === undefined) {
             throw new Error("Index undefined when finishing dividing line?");
           }
 
           // Finish the dividing line.
 
-          this.cursorProps.stage = Stage.selectingAfterLine;
-          this.snapped = false;
+          props.stage = Stage.selectingAfterLine;
+          props.snapped = false;
           const indices = this.grid.splitPolygon(
             this.index,
-            this.cursorProps.dividingLine
+            props.dividingLine
           );
 
           this.onHover(point, indices[0]);
         } else {
-          this.cursorProps.dividingLine.unshift(point);
+          props.dividingLine.unshift(point);
         }
 
         break;
@@ -206,15 +208,15 @@ export class DrawPlantingTool implements Tool {
   }
 
   private snapToBeds(point: Position): boolean {
-    const closest = this.grid.closestPolygon(point, 3);
+    const closest = this.grid.closestPolygon(point, 4 / state.scale);
 
     if (closest.distance !== undefined) {
       this.cursorProps.dividingLine.splice(0, 1, closest.point.asArray);
 
-      this.snapped = true;
+      this.cursorProps.snapped = true;
       return true;
     }
-    this.snapped = false;
+    this.cursorProps.snapped = false;
 
     return false;
   }
@@ -238,9 +240,11 @@ export class DrawPlantingTool implements Tool {
       this.index !== undefined &&
       props.cursor
     ) {
+      const r = 50 / state.scale;
+
       props.rotationCenter = [
-        props.cursor[0] - 50 / state.scale,
-        props.cursor[1],
+        props.cursor[0] - r * Math.cos(this.grid.rotation),
+        props.cursor[1] - r * Math.sin(this.grid.rotation),
       ];
 
       this.grid.hexGrid.origin.set(...props.rotationCenter);

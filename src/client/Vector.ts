@@ -143,4 +143,8 @@ export class Vector {
       return new Vector(a.x * b, a.y * b);
     }
   }
+
+  public static fromPolar(r: number, theta: number): Vector {
+    return new Vector(r * Math.cos(theta), r * Math.sin(theta));
+  }
 }

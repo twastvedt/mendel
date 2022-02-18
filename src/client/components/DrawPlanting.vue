@@ -38,7 +38,7 @@
       />
 
       <circle
-        class="rotationCenter"
+        class="point"
         r="1"
         :cx="projectedRotationCenter[0]"
         :cy="projectedRotationCenter[1]"
@@ -53,7 +53,7 @@
 
     <circle
       v-if="projectedLineHead"
-      class="rotationCenter"
+      :class="['point', { snapped }]"
       r="1"
       :cx="projectedLineHead[0]"
       :cy="projectedLineHead[1]"
@@ -85,6 +85,7 @@ export default class DrawPlanting extends Vue {
   @Prop() readonly rotationCenter?: Position;
   @Prop() readonly dividingLine!: Position[];
   @Prop() readonly stage!: Stage;
+  @Prop() readonly snapped!: boolean;
 
   get radius(): number | undefined {
     if (this.variety.family) {
@@ -138,7 +139,7 @@ export default class DrawPlanting extends Vue {
   Stage = Stage;
 }
 </script>
-<style scoped>
+<style lang="scss" scoped>
 g {
   pointer-events: none;
 }
@@ -154,10 +155,14 @@ g {
   stroke-width: 2px;
 }
 
-.rotationCenter {
+.point {
   stroke: black;
-  fill: white;
+  fill: black;
   stroke-width: 2px;
+
+  &.snapped {
+    fill: white;
+  }
 }
 
 .dividingLine {
