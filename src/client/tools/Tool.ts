@@ -12,6 +12,8 @@ export interface Tool {
   Start(): void;
   Stop(): void;
 
+  helpText: string;
+
   OnCursorMove(point: Position): void;
 
   interactiveElements?: Set<ElementType>;

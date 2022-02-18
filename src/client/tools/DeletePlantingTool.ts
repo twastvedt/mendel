@@ -10,6 +10,8 @@ import { Position } from "@/entity/geoJson";
 export class DeletePlantingTool implements Tool {
   public Stop(): void {}
 
+  public helpText = "Click on a planting to delete it and all of its plants.";
+
   public OnCursorMove(point: Position): void {}
 
   public interactiveElements = new Set<ElementType>(["planting"]);

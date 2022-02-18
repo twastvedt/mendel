@@ -62,6 +62,14 @@ export class Store {
 
   public constructor() {
     this.ready = this.initialize();
+
+    addEventListener("keyup", (event) => {
+      if (event.key === "Escape" && this.tool) {
+        this.clearTool();
+
+        this.toolName = "";
+      }
+    });
   }
 
   async initialize(): Promise<void> {
@@ -129,9 +137,9 @@ export class Store {
     this.loading = false;
   }
 
-  onClick(point: Position, element?: EntityBase): void {
+  onClick(element?: EntityBase): void {
     if (this.tool && this.garden) {
-      const action = this.tool.OnClick(point, element);
+      const action = this.tool.OnClick(this.cursorPosition, element);
 
       if (action) {
         action.Do(this);
@@ -402,14 +410,6 @@ export class Store {
 
   makeTransform(coordinate: [number, number]): string {
     return `translate(${this.projection(coordinate)?.join(" ")})`;
-  }
-
-  keyListener(event: KeyboardEvent): void {
-    if (event.key === "Escape" && this.tool) {
-      this.clearTool();
-
-      this.toolName = "";
-    }
   }
 }
 

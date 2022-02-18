@@ -6,12 +6,18 @@ import { ElementType, state } from "../Store";
 import drawPlanting from "../components/DrawPlanting.vue";
 import { Planting } from "@/entity/Planting";
 import { Bed } from "@/entity/Bed";
-import { polygonArea } from "d3-polygon";
 import { GridPoints } from "../services/polygonGrid";
 import { Position } from "@/entity/geoJson";
 
 export class DrawPlantingTool implements Tool {
+  public helpText =
+    "Click in a bed to fill it with plants. Hold control to rotate plant grid.";
+
   public Stop(): void {
+    removeEventListener("keydown", this.onKeyDown);
+
+    removeEventListener("keyup", this.onKeyUp);
+
     if (this.planting) {
       state.removePlanting(this.planting);
 
@@ -27,23 +33,33 @@ export class DrawPlantingTool implements Tool {
 
   public cursorComponent = drawPlanting;
   public cursorProps = {
-    cursor: [0, 0],
+    cursor: null as Position | null,
     plants: null as GridPoints | null,
     planting: null as Planting | null,
+    rotationCenter: null as [number, number] | null,
   };
 
   private index?: number;
 
   public OnCursorMove(point: Position): void {
-    this.cursorProps.cursor = point;
+    const props = this.cursorProps;
 
-    if (this.cursorProps.plants && this.index != undefined) {
-      state.grid?.setCursor(point, this.index);
+    props.cursor = point;
+
+    if (props.plants && state.grid) {
+      if (props.rotationCenter) {
+        state.grid.rotation = Math.atan2(
+          point[1] - props.rotationCenter[1],
+          point[0] - props.rotationCenter[0]
+        );
+      } else {
+        state.grid.setCursor(point);
+      }
     }
   }
 
   public OnClick(point: Position, bed?: Bed): Action | void {
-    if (this.planting) {
+    if (this.planting && this.index) {
       if (bed) {
         this.planting.shape.coordinates = bed.shape.coordinates;
 
@@ -70,25 +86,72 @@ export class DrawPlantingTool implements Tool {
   }
 
   public OnHover(point: Position, bed?: Bed, index?: number): void {
-    if (this.planting) {
-      if (bed && index != undefined && state.grid) {
+    if (this.planting && state.grid) {
+      if (this.cursorProps.rotationCenter) {
+        this.index = index;
+      } else if (bed && index != undefined) {
         this.planting.shape.coordinates = bed.shape.coordinates;
+        state.grid.activeGrid = index;
 
-        state.grid.setCursor(point, index);
+        state.grid.setCursor(point);
 
         if (this.index !== index) {
+          if (!document.hasFocus()) {
+            window.focus();
+            console.log("window focused");
+          }
+
           this.cursorProps.plants = state.grid.grids[index];
+
           this.index = index;
         }
       } else {
-        this.planting.shape.coordinates = [[[0, 0]]];
+        // Only clear the planting display if we aren't currently rotating.
 
-        this.cursorProps.plants = null;
-
-        delete this.index;
+        this.clearDisplay();
       }
     }
   }
+
+  private clearDisplay(): void {
+    if (this.planting) {
+      this.planting.shape.coordinates = [[[0, 0]]];
+
+      this.cursorProps.plants = null;
+
+      delete this.index;
+    }
+  }
+
+  private onKeyDown = (event: KeyboardEvent) => {
+    const props = this.cursorProps;
+
+    if (
+      event.ctrlKey &&
+      !props.rotationCenter &&
+      this.index !== undefined &&
+      props.cursor
+    ) {
+      props.rotationCenter = [
+        props.cursor[0] - 50 / state.scale,
+        props.cursor[1],
+      ];
+
+      state.grid?.hexGrid.origin.set(...props.rotationCenter);
+    }
+  };
+
+  private onKeyUp = (event: KeyboardEvent) => {
+    const props = this.cursorProps;
+
+    if (event.key === "Control") {
+      props.rotationCenter = null;
+
+      if (this.index === undefined) {
+        this.clearDisplay();
+      }
+    }
+  };
 
   public Start(): void {
     this.planting = new Planting();
@@ -106,6 +169,16 @@ export class DrawPlantingTool implements Tool {
 
     state.grid.diameter = this.variety.family.spacing;
 
-    this.cursorProps.planting = this.planting;
+    const props = this.cursorProps;
+
+    props.planting = this.planting;
+
+    if (!document.hasFocus()) {
+      window.focus();
+      console.log("window focused");
+    }
+
+    addEventListener("keydown", this.onKeyDown);
+    addEventListener("keyup", this.onKeyUp);
   }
 }

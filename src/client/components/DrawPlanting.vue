@@ -23,6 +23,23 @@
         class="previewCircle"
       />
     </g>
+
+    <template v-if="projectedRotationCenter && projectedCursor">
+      <line
+        class="rotationLine"
+        :x1="projectedRotationCenter[0]"
+        :y1="projectedRotationCenter[1]"
+        :x2="projectedCursor[0]"
+        :y2="projectedCursor[1]"
+      />
+
+      <circle
+        class="rotationCenter"
+        r="1"
+        :cx="projectedRotationCenter[0]"
+        :cy="projectedRotationCenter[1]"
+      />
+    </template>
   </g>
 </template>
 
@@ -34,6 +51,7 @@ import { Variety } from "@/entity/Variety";
 import PlantingComponent from "./PlantingComponent.vue";
 import PlantComponent from "./PlantComponent.vue";
 import { GridPoints } from "../services/polygonGrid";
+import { Position } from "@/entity/geoJson";
 
 @Component({
   components: {
@@ -43,13 +61,32 @@ import { GridPoints } from "../services/polygonGrid";
 })
 export default class DrawPlanting extends Vue {
   @Prop() readonly planting!: Planting;
-  @Prop() readonly cursor!: [number, number];
+  @Prop() readonly cursor?: [number, number];
   @Prop() readonly plants?: GridPoints;
+  @Prop() readonly rotationCenter?: [number, number];
 
   get radius(): number | undefined {
     if (this.variety.family) {
       return this.variety.family.spacing / 2;
     }
+
+    return undefined;
+  }
+
+  get projectedRotationCenter(): Position | null {
+    if (this.rotationCenter) {
+      return state.projection(this.rotationCenter);
+    }
+
+    return null;
+  }
+
+  get projectedCursor(): Position | null {
+    if (this.cursor) {
+      return state.projection(this.cursor);
+    }
+
+    return null;
   }
 
   get variety(): Variety {
@@ -72,5 +109,16 @@ g {
   fill-opacity: 0.2;
   stroke: gray;
   stroke-width: 1px;
+}
+
+.rotationLine {
+  stroke: black;
+  stroke-width: 2px;
+}
+
+.rotationCenter {
+  stroke: black;
+  fill: white;
+  stroke-width: 2px;
 }
 </style>

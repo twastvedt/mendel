@@ -69,7 +69,7 @@ import { zoom, D3ZoomEvent } from "d3-zoom";
 import PlantComponent from "./PlantComponent.vue";
 import PlantingComponent from "./PlantingComponent.vue";
 import { EntityBase } from "@/entity/EntityBase";
-import { PolygonGrid } from "../services/polygonGrid";
+import { Position } from "@/entity/geoJson";
 
 @Component({
   components: {
@@ -155,17 +155,11 @@ export default class GardenMap extends Vue {
   }
 
   onClick(event: MouseEvent, element?: EntityBase): void {
-    const point = d3.pointer(event, this.content.node());
-    point[1] = -point[1];
-
-    state.onClick(point, element);
+    state.onClick(element);
   }
 
   onHover(event: MouseEvent, element?: EntityBase, index?: number): void {
-    const point = d3.pointer(event, this.content.node());
-    point[1] = -point[1];
-
-    state.tool?.OnHover?.(point, element, index);
+    state.tool?.OnHover?.(state.cursorPosition, element, index);
   }
 
   onMouseMove(event: MouseEvent): void {

@@ -9,6 +9,8 @@ import plantComponent from "../components/PlantComponent.vue";
 import { Position } from "@/entity/geoJson";
 
 export class DrawPlantTool implements Tool {
+  public helpText = "Click to draw a plant.";
+
   public Stop(): void {
     if (this.plant) {
       state.removePlant(this.plant);

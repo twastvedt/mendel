@@ -20,6 +20,10 @@
     </v-main>
 
     <v-footer fixed>
+      <template v-if="state.tool">
+        {{ state.tool.helpText }}
+      </template>
+      <v-spacer />
       {{
         state.cursorPosition.map((c) => Math.round(c * 100) / 100).join(", ")
       }}
@@ -40,8 +44,6 @@ import { state } from "./Store";
 export default class App extends Vue {
   constructor() {
     super();
-
-    addEventListener("keyup", (event) => state.keyListener(event));
   }
 
   state = state;

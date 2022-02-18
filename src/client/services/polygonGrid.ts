@@ -23,6 +23,11 @@ export class PolygonGrid {
 
   public hexGrid: HexGrid;
 
+  /**
+   * Grid cursor is currently over. Used when updating rotation, so only that grid is recalculated.
+   */
+  public activeGrid = 0;
+
   public get diameter(): number {
     return this._diameter;
   }
@@ -36,9 +41,17 @@ export class PolygonGrid {
 
     this.hexGrid.size = value / root3;
 
-    this.grids = this.garden.beds.map((b) =>
-      this.makeGrid(b.shape.coordinates[0])
-    );
+    this.garden.beds.map((b, i) => this.updateGrid(i));
+  }
+
+  public get rotation(): number {
+    return this.hexGrid.angle;
+  }
+
+  public set rotation(radians: number) {
+    this.hexGrid.angle = radians;
+
+    this.updateGrid(this.activeGrid);
   }
 
   constructor(private garden: Garden, diameter: number) {
@@ -48,12 +61,10 @@ export class PolygonGrid {
   }
 
   /**
-   *
    * @param point Cursor location, in database coordinates.
-   * @param bedIndex Current bed, found from SVG pointer events.
    */
-  setCursor(point: Position, bedIndex: number): void {
-    const grid = this.grids[bedIndex];
+  setCursor(point: Position): void {
+    const grid = this.grids[this.activeGrid];
 
     const nearestHex = this.hexGrid.convertFrom(
       this.hexGrid.convertTo(point, true)
@@ -70,7 +81,7 @@ export class PolygonGrid {
 
     grid.edgePoints.forEach((p) => {
       const result = PolygonGrid.distanceToPolygon(
-        this.garden.beds[bedIndex].shape.coordinates[0],
+        this.garden.beds[this.activeGrid].shape.coordinates[0],
         [p.point[0] + offset[0], p.point[1] + offset[1]],
         undefined,
         p.edges
@@ -80,12 +91,22 @@ export class PolygonGrid {
     });
   }
 
-  makeGrid(polygon: Position[]): GridPoints {
-    const grid: GridPoints = {
-      interiorPoints: [],
-      edgePoints: [],
-      offset: [0, 0],
-    };
+  public updateGrid(index: number): GridPoints {
+    const polygon = this.garden.beds[index].shape.coordinates[0];
+
+    let grid: GridPoints = this.grids[index];
+
+    if (grid) {
+      grid.interiorPoints = [];
+      grid.edgePoints = [];
+    } else {
+      grid = {
+        interiorPoints: [],
+        edgePoints: [],
+        offset: [0, 0],
+      };
+      this.grids[index] = grid;
+    }
 
     const bounds = this.polygonBounds(polygon, this._diameter / root3);
 
