@@ -11,7 +11,7 @@ import { Position } from "@/entity/geoJson";
 export class DrawPlantTool implements Tool {
   public helpText = "Click to draw a plant.";
 
-  public Stop(): void {
+  public stop(): void {
     if (this.plant) {
       state.removePlant(this.plant);
 
@@ -43,7 +43,7 @@ export class DrawPlantTool implements Tool {
     }
   }
 
-  public OnCursorMove(point: Position): void {
+  public onCursorMove(point: Position): void {
     if (this.plant?.variety?.family?.spacing !== undefined) {
       this.cursor.set(...point);
 
@@ -132,7 +132,7 @@ export class DrawPlantTool implements Tool {
     }
   }
 
-  public OnClick(point: Position): Action {
+  public onClick(): Action {
     if (this.plant) {
       return new AddPlantAction(Object.assign({}, this.plant));
     }
@@ -140,7 +140,7 @@ export class DrawPlantTool implements Tool {
     throw new Error("No action to save?");
   }
 
-  public Start(): void {
+  public start(): void {
     this.plant = new Plant();
     this.plant.variety = this.variety;
     this.plant.varietyId = this.variety.id;

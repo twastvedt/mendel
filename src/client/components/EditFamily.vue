@@ -28,6 +28,7 @@
           <template #activator="{ on, attrs }">
             <v-btn x-large v-bind="attrs" class="bigSquareButton" v-on="on">
               <svg class="svgicon">
+                <!-- eslint-disable-next-line vue/no-v-html -->
                 <defs v-html="icon" />
                 <use href="#edit-icon" :fill="formValue.color" />
               </svg>

@@ -16,7 +16,16 @@
       :variety="variety"
       class="icon"
     />
-    <title v-html="title"></title>
+    <title>
+      {{ variety.name }} <span v-if="variety.family">{{
+        variety.family.name
+      }}</span> <template v-if="planting.plants"> <br/> &#xA;
+      {{ planting.plants.length }}
+      </template> <template v-else-if="planting.quantity != undefined"> <br/>
+      &#xA;
+      {{ planting.quantity }}
+      </template>
+    </title>
   </g>
 </template>
 
@@ -43,18 +52,6 @@ export default class PlantingComponent extends Vue {
     }
 
     throw new Error("Planting has no variety");
-  }
-
-  get title(): string {
-    let title = `${this.variety.name} ${this.variety.family?.name}`;
-
-    if (this.planting.plants?.length) {
-      title += `<br>&#xA;${this.planting.plants?.length}`;
-    } else if (this.planting.quantity != undefined) {
-      title += `<br>&#xA;~${this.planting.quantity}`;
-    }
-
-    return title;
   }
 
   get classList(): Record<string, unknown> {

@@ -133,7 +133,7 @@ export interface GeometryCollection extends GeoJsonObject {
   geometries: Geometry[];
 }
 
-export type GeoJsonProperties = { [name: string]: any } | null;
+export type GeoJsonProperties = { [name: string]: unknown } | null;
 
 /**
  * A feature object which contains a geometry and associated properties.

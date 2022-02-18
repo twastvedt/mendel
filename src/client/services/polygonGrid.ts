@@ -1,5 +1,10 @@
-import { Garden } from "@/entity/Garden";
 import { BBox, Position } from "@/entity/geoJson";
+import {
+  distanceToPolygon,
+  pointInBounds,
+  polygonBounds,
+  splitPolygon,
+} from "../geometry/polygonTools";
 import { Hex } from "../hexGrid/Hex";
 import { HexGrid } from "../hexGrid/HexGrid";
 import { Vector } from "../Vector";
@@ -10,18 +15,24 @@ export interface GridPoints {
   edgePoints: { point: Position; edges: number[]; display: boolean }[];
 }
 
-const halfRoot3 = Math.sqrt(3) / 2;
-const root3 = Math.sqrt(3);
+export interface Area {
+  polygon: Position[];
+  parent?: Area;
+  siblings: Area[];
+}
 
-const tempVec1 = new Vector(0, 0);
-const tempVec2 = new Vector(0, 0);
+const root3 = Math.sqrt(3);
 
 export class PolygonGrid {
   public grids: GridPoints[] = [];
 
+  public areas: Area[];
+
   private _diameter!: number;
 
   public hexGrid: HexGrid;
+
+  public bounds: BBox[];
 
   /**
    * Grid cursor is currently over. Used when updating rotation, so only that grid is recalculated.
@@ -41,7 +52,7 @@ export class PolygonGrid {
 
     this.hexGrid.size = value / root3;
 
-    this.garden.beds.map((b, i) => this.updateGrid(i));
+    this.areas.forEach((p, i) => this.updateGrid(i));
   }
 
   public get rotation(): number {
@@ -54,8 +65,12 @@ export class PolygonGrid {
     this.updateGrid(this.activeGrid);
   }
 
-  constructor(private garden: Garden, diameter: number) {
+  constructor(polygons: Position[][], diameter: number) {
+    this.areas = polygons.map((polygon) => ({ polygon, siblings: [] }));
+
     this.hexGrid = new HexGrid(0, new Vector(0, 0), diameter / root3);
+
+    this.bounds = polygons.map(polygonBounds);
 
     this.diameter = diameter;
   }
@@ -63,7 +78,7 @@ export class PolygonGrid {
   /**
    * @param point Cursor location, in database coordinates.
    */
-  setCursor(point: Position): void {
+  public setCursor(point: Position): void {
     const grid = this.grids[this.activeGrid];
 
     const nearestHex = this.hexGrid.convertFrom(
@@ -80,8 +95,8 @@ export class PolygonGrid {
     }
 
     grid.edgePoints.forEach((p) => {
-      const result = PolygonGrid.distanceToPolygon(
-        this.garden.beds[this.activeGrid].shape.coordinates[0],
+      const result = distanceToPolygon(
+        this.areas[this.activeGrid].polygon,
         [p.point[0] + offset[0], p.point[1] + offset[1]],
         undefined,
         p.edges
@@ -92,13 +107,14 @@ export class PolygonGrid {
   }
 
   public updateGrid(index: number): GridPoints {
-    const polygon = this.garden.beds[index].shape.coordinates[0];
+    const polygon = this.areas[index].polygon;
 
     let grid: GridPoints = this.grids[index];
 
     if (grid) {
       grid.interiorPoints = [];
       grid.edgePoints = [];
+      grid.offset = [0, 0];
     } else {
       grid = {
         interiorPoints: [],
@@ -108,13 +124,14 @@ export class PolygonGrid {
       this.grids[index] = grid;
     }
 
-    const bounds = this.polygonBounds(polygon, this._diameter / root3);
+    const bounds = this.bounds[index];
+    const padding = this._diameter / root3;
 
     const corners = (
       [
-        [bounds[0], bounds[1]],
-        [bounds[2], bounds[1]],
-        [bounds[2], bounds[3]],
+        [bounds[0] - padding, bounds[1] - padding],
+        [bounds[2] + padding, bounds[1] - padding],
+        [bounds[2] + padding, bounds[3] + padding],
       ] as Position[]
     ).map((c) => this.hexGrid.convertTo(c, true));
 
@@ -138,7 +155,7 @@ export class PolygonGrid {
 
         const point = this.hexGrid.convertFrom(newHex).asArray;
 
-        const { distance, closest } = PolygonGrid.distanceToPolygon(
+        const { distance, closest } = distanceToPolygon(
           polygon,
           point,
           this.hexGrid.size
@@ -161,121 +178,75 @@ export class PolygonGrid {
     return grid;
   }
 
-  /**
-   * Find the signed distance to the closest point on a polygon. Positive distances are inside the polygon.
-   * @param polygon
-   * @param point
-   * @param getClosest Output the indeces of all edges closer than this threshold.
-   * @param segmentsToCheck Only check these polygon segments for closest edge.
-   * @returns
-   */
-  static distanceToPolygon(
-    polygon: Position[],
+  public closestPolygon(
     point: Position,
-    getClosest?: number,
-    segmentsToCheck?: number[]
-  ): { distance: number; closest: number[] } {
-    const p = new Vector(...point);
+    maxDistance: number
+  ): {
+    distance: number | undefined;
+    point: Vector;
+  } {
+    const min = {
+      distance: undefined as number | undefined,
+      point: new Vector(0, 0),
+    };
 
-    const segmentEnd = new Vector(...polygon[0]);
-    const segmentStart = new Vector(...polygon[0]);
+    this.areas
+      .filter((_, i) => pointInBounds(point, this.bounds[i], maxDistance))
+      .forEach(({ polygon }) => {
+        const result = distanceToPolygon(polygon, point);
 
-    const x = point[0];
-    const y = point[1];
-    let x1;
-    let y1;
-    let inside = false;
-    const closest = [] as number[];
-    let lastCheckedSegment = 0;
+        const distance = Math.abs(result.distance);
 
-    const distance = polygon.reduce((minD, vertex, n) => {
-      if (n === 0) {
-        return minD;
-      }
-
-      segmentStart.copy(segmentEnd);
-      segmentEnd.set(...vertex);
-
-      x1 = vertex[0];
-      y1 = vertex[1];
-
-      if (
-        y1 > y !== segmentStart.y > y &&
-        x < ((segmentStart.x - x1) * (y - y1)) / (segmentStart.y - y1) + x1
-      ) {
-        inside = !inside;
-      }
-
-      if (segmentsToCheck?.length) {
-        // Don't calculate distance if this isn't one of the segments to check.
-        const foundIndex = segmentsToCheck.indexOf(n - 1, lastCheckedSegment);
-
-        if (foundIndex !== -1) {
-          lastCheckedSegment = foundIndex + 1;
-        } else {
-          return minD;
+        if (
+          distance <= maxDistance &&
+          (min.distance === undefined || distance < min.distance)
+        ) {
+          min.distance = distance;
+          min.point.copy(result.point);
         }
-      }
+      });
 
-      // https://stackoverflow.com/a/1501725/890132
-      // TODO: Cache polygon segment lengths
-      Vector.subtract(p, segmentStart, tempVec1);
-      Vector.subtract(segmentEnd, segmentStart, tempVec2);
-
-      const l2 = tempVec2.length ** 2;
-
-      if (l2 == 0) {
-        return minD;
-      }
-
-      const param = tempVec1.dot(tempVec2) / l2;
-
-      let d;
-
-      if (param < 0) {
-        d = p.distanceTo(segmentStart);
-      } else if (param > 1) {
-        d = p.distanceTo(segmentEnd);
-      } else {
-        d = p.distanceTo(tempVec2.scale(param).add(segmentStart));
-      }
-
-      if (getClosest && d <= getClosest) {
-        closest.push(n - 1);
-      }
-
-      if (minD == undefined || d < minD) {
-        return d;
-      }
-
-      return minD;
-    }, undefined as number | undefined);
-
-    if (distance === undefined) {
-      throw new Error("Empty polygon?");
-    }
-
-    return { distance: distance * (inside ? 1 : -1), closest };
+    return min;
   }
 
-  polygonBounds(polygon: Position[], padding = 0): BBox {
-    return polygon.reduce(
-      (box, point) => {
-        if (point[0] - padding < box[0]) {
-          box[0] = point[0] - padding;
-        } else if (point[0] + padding > box[2]) {
-          box[2] = point[0] + padding;
-        }
+  public splitPolygon(index: number, line: Position[]): number[] {
+    const parent = this.areas[index];
 
-        if (point[1] - padding < box[1]) {
-          box[1] = point[1] - padding;
-        } else if (point[1] + padding > box[3]) {
-          box[3] = point[1] + padding;
-        }
+    const children = splitPolygon(parent.polygon, line).map((polygon) => ({
+      polygon,
+      siblings: [] as Area[],
+      parent,
+    }));
 
-        return box;
-      },
-      [...polygon[0], ...polygon[1]]
-    );
+    children[0].siblings.push(children[1]);
+    children[1].siblings.push(children[0]);
+
+    this.areas.splice(index, 1, children[0]);
+    const length = this.areas.push(children[1]);
+
+    [index, length - 1].forEach((i) => {
+      this.bounds[i] = polygonBounds(this.areas[i].polygon);
+      this.updateGrid(i);
+    });
+
+    return [index, length - 1];
+  }
+
+  public mergePolygon(index: number): number {
+    const child = this.areas[index];
+
+    if (!child.parent) {
+      throw new Error("Can't merge polygon without a parent");
+    }
+
+    child.siblings.forEach((s) => {
+      const index = this.areas.indexOf(s);
+
+      this.areas.splice(index, 1);
+      this.grids.splice(index, 1);
+      this.bounds.splice(index, 1);
+    });
+
+    return this.areas.push(child.parent);
   }
 }

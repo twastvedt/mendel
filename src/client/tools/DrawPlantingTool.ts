@@ -5,15 +5,77 @@ import { Action } from "../actions/Action";
 import { ElementType, state } from "../Store";
 import drawPlanting from "../components/DrawPlanting.vue";
 import { Planting } from "@/entity/Planting";
-import { Bed } from "@/entity/Bed";
-import { GridPoints } from "../services/polygonGrid";
+import { GridPoints, PolygonGrid } from "../services/polygonGrid";
 import { Position } from "@/entity/geoJson";
 
-export class DrawPlantingTool implements Tool {
-  public helpText =
-    "Click in a bed to fill it with plants. Hold control to rotate plant grid.";
+export enum Stage {
+  selecting,
+  drawingLine,
+  selectingAfterLine,
+}
 
-  public Stop(): void {
+export class DrawPlantingTool implements Tool {
+  private planting?: Planting;
+  private snapped = false;
+  private index?: number;
+
+  public constructor(private variety: Variety, private grid: PolygonGrid) {}
+
+  public interactiveElements = new Set<ElementType>(["area"]);
+
+  public cursorComponent = drawPlanting;
+  public cursorProps = {
+    cursor: null as Position | null,
+    plants: null as GridPoints | null,
+    planting: null as Planting | null,
+    rotationCenter: null as Position | null,
+    dividingLine: [] as Position[],
+    stage: Stage.selecting,
+  };
+
+  public get helpText(): string {
+    switch (this.cursorProps.stage) {
+      case Stage.selecting:
+        return "Click in a bed to fill it with plants. Hold control to rotate plant grid. Click on a bed's edge to divide it.";
+
+      case Stage.drawingLine:
+        return "Click to continue dividing the bed. Click on the bed's edge to finish.";
+
+      case Stage.selectingAfterLine:
+        return "Click in a bed to fill it with plants. Hold control to rotate plant grid.";
+    }
+  }
+
+  public start(): void {
+    this.planting = new Planting();
+    this.planting.variety = this.variety;
+    this.planting.varietyId = this.variety.id;
+    this.planting.shape = {
+      type: "Polygon",
+      coordinates: [[[0, 0]]],
+    };
+    this.planting.gardenId = state.garden?.id;
+
+    if (!this.variety.family) {
+      throw new Error("Family required");
+    }
+
+    this.grid.diameter = this.variety.family.spacing;
+
+    const props = this.cursorProps;
+
+    props.planting = this.planting;
+
+    if (!document.hasFocus()) {
+      window.focus();
+      console.log("window focused");
+    }
+
+    addEventListener("keydown", this.onKeyDown);
+    addEventListener("keyup", this.onKeyUp);
+  }
+
+  public stop(): void {
     removeEventListener("keydown", this.onKeyDown);
 
     removeEventListener("keyup", this.onKeyUp);
@@ -25,92 +87,136 @@ export class DrawPlantingTool implements Tool {
     }
   }
 
-  private planting?: Planting;
-
-  public constructor(private variety: Variety) {}
-
-  public interactiveElements = new Set<ElementType>(["bed"]);
-
-  public cursorComponent = drawPlanting;
-  public cursorProps = {
-    cursor: null as Position | null,
-    plants: null as GridPoints | null,
-    planting: null as Planting | null,
-    rotationCenter: null as [number, number] | null,
-  };
-
-  private index?: number;
-
-  public OnCursorMove(point: Position): void {
+  public onCursorMove(point: Position): void {
     const props = this.cursorProps;
 
     props.cursor = point;
 
-    if (props.plants && state.grid) {
-      if (props.rotationCenter) {
-        state.grid.rotation = Math.atan2(
-          point[1] - props.rotationCenter[1],
-          point[0] - props.rotationCenter[0]
-        );
-      } else {
-        state.grid.setCursor(point);
-      }
-    }
-  }
-
-  public OnClick(point: Position, bed?: Bed): Action | void {
-    if (this.planting && this.index) {
-      if (bed) {
-        this.planting.shape.coordinates = bed.shape.coordinates;
-
-        const plants = this.cursorProps.plants;
-
-        if (plants) {
-          this.planting.quantity =
-            plants.interiorPoints.length +
-            plants.edgePoints.reduce((t, p) => t + (p.display ? 1 : 0), 0);
+    switch (props.stage) {
+      case Stage.selecting:
+        if (!this.snapToBeds(point)) {
+          props.dividingLine.splice(0, 1);
         }
 
-        return new AddPlantingAction(
-          Planting.cleanCopy(this.planting),
-          plants?.interiorPoints
-            .concat(
-              plants.edgePoints.filter((e) => e.display).map((e) => e.point)
-            )
-            .map((p) => [p[0] + plants.offset[0], p[1] + plants.offset[1]])
-        );
-      }
-    } else {
-      throw new Error("No action to save?");
+        this.updateGrid(point);
+
+        break;
+
+      case Stage.drawingLine:
+        if (!this.snapToBeds(point)) {
+          props.dividingLine.splice(0, 1, point);
+        }
+
+        break;
+
+      case Stage.selectingAfterLine:
+        this.updateGrid(point);
+
+        break;
     }
   }
 
-  public OnHover(point: Position, bed?: Bed, index?: number): void {
-    if (this.planting && state.grid) {
-      if (this.cursorProps.rotationCenter) {
+  public onHover(point: Position, index?: number): void {
+    if (!this.planting || this.cursorProps.stage === Stage.drawingLine) {
+      return;
+    }
+
+    if (this.cursorProps.rotationCenter) {
+      this.index = index;
+    } else if (index != undefined) {
+      this.planting.shape.coordinates = [this.grid.areas[index].polygon];
+      this.grid.activeGrid = index;
+
+      this.grid.setCursor(point);
+
+      if (this.index !== index) {
+        if (!document.hasFocus()) {
+          window.focus();
+          console.log("window focused");
+        }
+
+        this.cursorProps.plants = this.grid.grids[index];
+
         this.index = index;
-      } else if (bed && index != undefined) {
-        this.planting.shape.coordinates = bed.shape.coordinates;
-        state.grid.activeGrid = index;
+      }
+    } else if (this.cursorProps.stage === Stage.selecting) {
+      // Only clear the planting display if we aren't currently rotating.
+      // In final stage, never clear.
 
-        state.grid.setCursor(point);
+      this.clearDisplay();
+    }
+  }
 
-        if (this.index !== index) {
-          if (!document.hasFocus()) {
-            window.focus();
-            console.log("window focused");
+  public onClick(point: Position): Action | void {
+    switch (this.cursorProps.stage) {
+      case Stage.selecting:
+        if (this.snapped) {
+          // Snapped to the start of a dividing line.
+
+          this.cursorProps.stage = Stage.drawingLine;
+          this.cursorProps.dividingLine.unshift(point);
+        } else {
+          return this.finish();
+        }
+
+        break;
+
+      case Stage.drawingLine:
+        if (this.snapped) {
+          if (this.index === undefined) {
+            throw new Error("Index undefined when finishing dividing line?");
           }
 
-          this.cursorProps.plants = state.grid.grids[index];
+          // Finish the dividing line.
 
-          this.index = index;
+          this.cursorProps.stage = Stage.selectingAfterLine;
+          this.snapped = false;
+          const indices = this.grid.splitPolygon(
+            this.index,
+            this.cursorProps.dividingLine
+          );
+
+          this.onHover(point, indices[0]);
+        } else {
+          this.cursorProps.dividingLine.unshift(point);
         }
-      } else {
-        // Only clear the planting display if we aren't currently rotating.
 
-        this.clearDisplay();
-      }
+        break;
+
+      case Stage.selectingAfterLine:
+        return this.finish();
     }
+  }
+
+  private updateGrid(point: Position): void {
+    const props = this.cursorProps;
+
+    if (!props.plants) {
+      return;
+    }
+
+    if (props.rotationCenter) {
+      this.grid.rotation = Math.atan2(
+        point[1] - props.rotationCenter[1],
+        point[0] - props.rotationCenter[0]
+      );
+    } else {
+      this.grid.setCursor(point);
+    }
+  }
+
+  private snapToBeds(point: Position): boolean {
+    const closest = this.grid.closestPolygon(point, 3);
+
+    if (closest.distance !== undefined) {
+      this.cursorProps.dividingLine.splice(0, 1, closest.point.asArray);
+
+      this.snapped = true;
+      return true;
+    }
+    this.snapped = false;
+
+    return false;
   }
 
   private clearDisplay(): void {
@@ -137,7 +243,7 @@ export class DrawPlantingTool implements Tool {
         props.cursor[1],
       ];
 
-      state.grid?.hexGrid.origin.set(...props.rotationCenter);
+      this.grid.hexGrid.origin.set(...props.rotationCenter);
     }
   };
 
@@ -153,32 +259,26 @@ export class DrawPlantingTool implements Tool {
     }
   };
 
-  public Start(): void {
-    this.planting = new Planting();
-    this.planting.variety = this.variety;
-    this.planting.varietyId = this.variety.id;
-    this.planting.shape = {
-      type: "Polygon",
-      coordinates: [[[0, 0]]],
-    };
-    this.planting.gardenId = state.garden?.id;
+  private finish(): AddPlantingAction | undefined {
+    if (this.planting && this.index !== undefined) {
+      this.planting.shape.coordinates = [this.grid.areas[this.index].polygon];
 
-    if (!this.variety.family || !state.grid) {
-      throw new Error("Family and grid required");
+      const plants = this.cursorProps.plants;
+
+      if (plants) {
+        this.planting.quantity =
+          plants.interiorPoints.length +
+          plants.edgePoints.reduce((t, p) => t + (p.display ? 1 : 0), 0);
+      }
+
+      return new AddPlantingAction(
+        Planting.cleanCopy(this.planting),
+        plants?.interiorPoints
+          .concat(
+            plants.edgePoints.filter((e) => e.display).map((e) => e.point)
+          )
+          .map((p) => [p[0] + plants.offset[0], p[1] + plants.offset[1]])
+      );
     }
-
-    state.grid.diameter = this.variety.family.spacing;
-
-    const props = this.cursorProps;
-
-    props.planting = this.planting;
-
-    if (!document.hasFocus()) {
-      window.focus();
-      console.log("window focused");
-    }
-
-    addEventListener("keydown", this.onKeyDown);
-    addEventListener("keyup", this.onKeyUp);
   }
 }

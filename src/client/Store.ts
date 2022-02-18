@@ -12,12 +12,11 @@ import { Delaunay } from "d3-delaunay";
 import { geoIdentity, geoPath } from "d3-geo";
 import { familyApi } from "@/api/FamilyApi";
 import { Planting } from "@/entity/Planting";
-import { EntityBase } from "@/entity/EntityBase";
 import { EntityId } from "@/api/BaseApi";
 import { Position } from "@/entity/geoJson";
 import { PolygonGrid } from "./services/polygonGrid";
 
-export type ElementType = "plant" | "bed" | "planting";
+export type ElementType = "plant" | "bed" | "planting" | "area";
 
 export class Store {
   // TODO: We assume data is stored in inches relative to garden origin.
@@ -77,26 +76,24 @@ export class Store {
   }
 
   async loadGarden(): Promise<void> {
-    this.error = "";
     this.loading = true;
 
     await this.loadVarieties();
 
-    try {
-      const garden = await gardenApi.one.request({ routeParams: { id: 1 } });
+    const garden = await gardenApi.one.request({ routeParams: { id: 1 } });
 
-      this.garden = garden;
+    this.garden = garden;
 
-      garden.plantings.forEach((p) => this.inflatePlanting(p));
+    garden.plantings.forEach((p) => this.inflatePlanting(p));
 
-      garden.plants.forEach((p) => this.inflatePlant(p));
+    garden.plants.forEach((p) => this.inflatePlant(p));
 
-      this.updateDelaunay();
+    this.updateDelaunay();
 
-      this.grid = new PolygonGrid(garden, 6);
-    } catch (error) {
-      this.error = error as string;
-    }
+    this.grid = new PolygonGrid(
+      garden.beds.map((b) => b.shape.coordinates[0]),
+      6
+    );
 
     this.loading = false;
   }
@@ -137,9 +134,9 @@ export class Store {
     this.loading = false;
   }
 
-  onClick(element?: EntityBase): void {
+  onClick(element?: unknown): void {
     if (this.tool && this.garden) {
-      const action = this.tool.OnClick(this.cursorPosition, element);
+      const action = this.tool.onClick(this.cursorPosition, element);
 
       if (action) {
         action.Do(this);
@@ -387,29 +384,31 @@ export class Store {
   setTool(tool: Tool): void {
     this.clearTool();
 
-    tool.Start();
+    tool.start?.();
 
     this.tool = tool;
   }
 
-  updateTool(cursor: [number, number]) {
-    if (this.tool && this.garden) {
-      this.tool.OnCursorMove(cursor);
+  updateTool(cursor: Position) {
+    if (this.tool) {
+      this.tool.onCursorMove?.(cursor);
     }
   }
 
   clearTool(): void {
     if (this.tool) {
-      if (this.garden) {
-        this.tool?.Stop();
-      }
+      this.tool?.stop?.();
 
       this.tool = null;
     }
   }
 
-  makeTransform(coordinate: [number, number]): string {
+  makeTransform(coordinate: Position): string {
     return `translate(${this.projection(coordinate)?.join(" ")})`;
+  }
+
+  pathFromPoints(coordinates: Position[]): string | null {
+    return this.pathGenerator({ type: "LineString", coordinates });
   }
 }
 

@@ -110,8 +110,8 @@ export default class Toolbar extends Vue {
 
           break;
         case "drawPlanting":
-          if (this.variety) {
-            state.setTool(new DrawPlantingTool(this.variety));
+          if (this.variety && state.grid) {
+            state.setTool(new DrawPlantingTool(this.variety, state.grid));
           }
           break;
         case "deletePlant":

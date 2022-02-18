@@ -10,12 +10,12 @@
   >
     <g ref="content" class="content">
       <g v-if="state.garden">
-        <g v-for="(bed, i) in state.garden.beds" :key="`${bed.id}-bed`">
+        <g v-for="(bed, i) in state.garden.beds" :key="bed.id">
           <path
             class="bed"
             :style="elementStyle('bed')"
             :d="state.pathGenerator(bed.shape)"
-            @click="onClick($event, bed)"
+            @click.stop="onClick($event, bed)"
             @mouseenter="onHover($event, bed, i)"
             @mouseleave="onHover($event)"
           />
@@ -29,12 +29,25 @@
           /> -->
         </g>
 
+        <g v-if="state.grid">
+          <path
+            v-for="(area, i) in state.grid.areas"
+            :key="i"
+            class="area"
+            :style="elementStyle('area')"
+            :d="state.pathFromPoints(area.polygon)"
+            @click.stop="onClick($event, area)"
+            @mouseenter="onHover($event, area, i)"
+            @mouseleave="onHover($event)"
+          />
+        </g>
+
         <PlantingComponent
           v-for="(planting, index) in state.garden.plantings"
           :key="`${index}-planting`"
           :planting="planting"
           :style="elementStyle('planting')"
-          @click="onClick($event, planting)"
+          @click.stop="onClick($event, planting)"
           @mouseover="onHover($event, planting, index)"
           @mouseleave="onHover($event)"
         />
@@ -45,7 +58,7 @@
           :transform="state.makeTransform(plant.location.coordinates)"
           :variety="plant.variety"
           :style="elementStyle('plant')"
-          @click="onClick($event, plant)"
+          @click.stop="onClick($event, plant)"
           @mouseover="onHover($event, plant, index)"
           @mouseleave="onHover($event)"
         />
@@ -68,8 +81,6 @@ import { zoom, D3ZoomEvent } from "d3-zoom";
 
 import PlantComponent from "./PlantComponent.vue";
 import PlantingComponent from "./PlantingComponent.vue";
-import { EntityBase } from "@/entity/EntityBase";
-import { Position } from "@/entity/geoJson";
 
 @Component({
   components: {
@@ -88,7 +99,7 @@ export default class GardenMap extends Vue {
   zoom!: d3.ZoomBehavior<SVGSVGElement, unknown>;
 
   zoomed(e: D3ZoomEvent<SVGSVGElement, unknown>): void {
-    this.content.attr("transform", e.transform as any);
+    this.content.attr("transform", e.transform as unknown as string);
 
     state.scale = e.transform.k;
   }
@@ -110,7 +121,12 @@ export default class GardenMap extends Vue {
     const width = this.$refs.map.clientWidth,
       height = this.$refs.map.clientHeight;
 
-    d3.select(this.$refs.map).attr("viewBox", [0, 0, width, height] as any);
+    d3.select(this.$refs.map).attr("viewBox", [
+      0,
+      0,
+      width,
+      height,
+    ] as unknown as string);
 
     this.content = d3.select(this.$refs.content);
 
@@ -154,12 +170,12 @@ export default class GardenMap extends Vue {
     }
   }
 
-  onClick(event: MouseEvent, element?: EntityBase): void {
+  onClick(event: MouseEvent, element?: unknown): void {
     state.onClick(element);
   }
 
-  onHover(event: MouseEvent, element?: EntityBase, index?: number): void {
-    state.tool?.OnHover?.(state.cursorPosition, element, index);
+  onHover(event: MouseEvent, element?: unknown, index?: number): void {
+    state.tool?.onHover?.(state.cursorPosition, index, element);
   }
 
   onMouseMove(event: MouseEvent): void {
@@ -200,5 +216,10 @@ export default class GardenMap extends Vue {
   fill: rgba($color: #ffffff, $alpha: 0.5);
   stroke: #000000;
   stroke-width: 1px;
+}
+
+.area {
+  fill: rgba($color: #ffffff, $alpha: 0.15);
+  stroke: none;
 }
 </style>
