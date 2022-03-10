@@ -109,25 +109,26 @@ export function distanceToPolygon(
   };
 }
 
-export function polygonBounds(polygon: Position[], padding = 0): BBox {
-  return polygon.reduce(
-    (box, point) => {
-      if (point[0] - padding < box[0]) {
-        box[0] = point[0] - padding;
-      } else if (point[0] + padding > box[2]) {
-        box[2] = point[0] + padding;
-      }
+export function polygonBounds(
+  polygon: Position[],
+  initialBox?: BBox,
+  padding = 0
+): BBox {
+  return polygon.reduce((box, point) => {
+    if (point[0] - padding < box[0]) {
+      box[0] = point[0] - padding;
+    } else if (point[0] + padding > box[2]) {
+      box[2] = point[0] + padding;
+    }
 
-      if (point[1] - padding < box[1]) {
-        box[1] = point[1] - padding;
-      } else if (point[1] + padding > box[3]) {
-        box[3] = point[1] + padding;
-      }
+    if (point[1] - padding < box[1]) {
+      box[1] = point[1] - padding;
+    } else if (point[1] + padding > box[3]) {
+      box[3] = point[1] + padding;
+    }
 
-      return box;
-    },
-    [...polygon[0], ...polygon[1]]
-  );
+    return box;
+  }, initialBox ?? [...polygon[0], ...polygon[1]]);
 }
 
 export function pointInBounds(
@@ -141,6 +142,10 @@ export function pointInBounds(
     bounds[2] + padding >= point[0] &&
     bounds[3] - padding >= point[1]
   );
+}
+
+export function bboxArea(bbox: BBox): number {
+  return (bbox[2] - bbox[0]) * (bbox[3] - bbox[1]);
 }
 
 export function splitPolygon(

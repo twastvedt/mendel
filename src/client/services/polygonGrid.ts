@@ -70,7 +70,7 @@ export class PolygonGrid {
 
     this.hexGrid = new HexGrid(0, new Vector(0, 0), diameter / root3);
 
-    this.bounds = polygons.map(polygonBounds);
+    this.bounds = polygons.map((p) => polygonBounds(p));
 
     this.diameter = diameter;
   }

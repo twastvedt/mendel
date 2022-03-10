@@ -1,5 +1,6 @@
 import "reflect-metadata";
 import { createConnection } from "typeorm";
+import { static as _static } from "express";
 import express from "express";
 import * as bodyParser from "body-parser";
 
@@ -9,6 +10,7 @@ import GardenRoutes from "./controller/Gardens";
 import PlantRoutes from "./controller/Plants";
 import PlantingRoutes from "./controller/Plantings";
 import FamilyRoutes from "./controller/Families";
+import { join } from "path";
 
 createConnection()
   .then(async (connection) => {
@@ -16,6 +18,12 @@ createConnection()
     await connection.synchronize(true);
 
     connection.runMigrations();
+
+    const production = process.env.NODE_ENV === "production";
+
+    console.log(
+      `Starting Express in ${production ? "production" : "development"} mode.`
+    );
 
     const app = express();
 
@@ -40,6 +48,12 @@ createConnection()
     app.use(PlantRoutes);
     app.use(PlantingRoutes);
     app.use(FamilyRoutes);
+
+    const publicPath = join(__dirname, "clientBuild");
+
+    if (production) {
+      app.use(_static(publicPath, { maxAge: "1y", etag: false }));
+    }
 
     // Run app
     app.listen(3000);

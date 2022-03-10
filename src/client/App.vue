@@ -12,7 +12,7 @@
 
       <v-divider></v-divider>
 
-      <router-view name="navigation" />
+      <MainMenu />
     </v-navigation-drawer>
 
     <v-main>
@@ -35,10 +35,12 @@
 import { Component, Vue } from "vue-property-decorator";
 import toolbar from "./components/Toolbar.vue";
 import { state } from "./Store";
+import MainMenu from "./components/MainMenu.vue";
 
 @Component({
   components: {
     toolbar,
+    MainMenu,
   },
 })
 export default class App extends Vue {

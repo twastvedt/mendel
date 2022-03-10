@@ -5,6 +5,7 @@ import VarietySettings from "../components/VarietySettings.vue";
 import FamilySettings from "../components/FamilySettings.vue";
 import MainMenu from "../components/MainMenu.vue";
 import SettingsMenu from "../components/SettingsMenu.vue";
+import Summary from "../components/Summary.vue";
 
 Vue.use(VueRouter);
 
@@ -12,29 +13,28 @@ const routes: Array<RouteConfig> = [
   {
     path: "/",
     name: "Map",
-    components: {
-      default: GardenMap,
-      navigation: MainMenu,
-    },
+    component: GardenMap,
   },
   {
     path: "/settings",
     name: "Settings",
-    components: {
-      default: FamilySettings,
-      navigation: SettingsMenu,
-    },
+    component: FamilySettings,
+  },
+  {
+    path: "/summary",
+    name: "Summary",
+    component: Summary,
   },
   {
     path: "/settings/families",
     name: "Families",
-    components: { default: FamilySettings, navigation: SettingsMenu },
+    component: FamilySettings,
   },
 
   {
     path: "/settings/varieties",
     name: "Varieties",
-    components: { default: VarietySettings, navigation: SettingsMenu },
+    component: VarietySettings,
   },
 ];
 
