@@ -1,0 +1,11 @@
+{
+  "name": "@mendel/common",
+  "version": "1.0.0",
+  "description": "Common library for Mendel client and server.",
+  "main": "dist/index.js",
+  "private": true,
+  "dependencies": {
+    "axios": "^0.26.1",
+    "typeorm": "0.2.45"
+  }
+}

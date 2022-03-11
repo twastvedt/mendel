@@ -1,37 +1,12 @@
 {
+  "extends": "./tsconfig-base.json",
   "compilerOptions": {
-    "target": "esnext",
-    "module": "commonjs",
-    "strict": true,
-    "jsx": "preserve",
-    "importHelpers": true,
-    "moduleResolution": "node",
-    "outDir": "./build",
-    "experimentalDecorators": true,
-    "emitDecoratorMetadata": true,
-    "skipLibCheck": true,
-    "esModuleInterop": true,
-    "allowJs": true,
-    "allowSyntheticDefaultImports": true,
-    "resolveJsonModule": true,
-    "sourceMap": true,
-    "baseUrl": ".",
-    "typeRoots": [
-      "./types",
-      "./node_modules/@types",
-      "./node_modules/vuetify/types"
-    ],
-    "paths": {
-      "@/*": ["./src/*"]
-    },
-    "plugins": [{ "transform": "ts-nameof", "type": "raw" }],
-    "lib": [
-      "esnext",
-      "dom",
-      "dom.iterable",
-      "esnext.asynciterable",
-      "scripthost"
-    ]
+    "noEmit": true
   },
-  "include": ["./src/**/*"]
+  "include": ["./src/**/*"],
+  "references": [
+    { "path": "common" },
+    { "path": "server" },
+    { "path": "client" }
+  ]
 }
