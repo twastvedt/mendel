@@ -3,7 +3,9 @@ FROM node:16-alpine AS vue
 RUN mkdir -p /app
 WORKDIR /app
 
-COPY package*.json tsconfig-base.json .eslintrc.js ./ 
+ENV NODE_ENV=production
+
+COPY package*.json tsconfig*.json .eslintrc.js ./ 
 COPY client/package.json client/
 COPY common/package.json common/
 
@@ -12,7 +14,7 @@ RUN npm ci
 COPY common common/
 COPY client client/
 
-RUN npm run -w client build
+RUN npx -w common tsc -b && npm run -w client build
 
 
 FROM node:16-alpine
@@ -22,7 +24,7 @@ WORKDIR /app
 
 ENV NODE_ENV=production
 
-COPY package*.json . 
+COPY package*.json ./
 COPY server/package.json server/
 COPY common/package.json common/
 
@@ -30,7 +32,7 @@ RUN npm ci
 
 COPY . .
 
-RUN rm -rf client
+RUN rm -rf client && npx -w common tsc -b
 
 COPY --from=vue /app/client/dist server/clientBuild
 

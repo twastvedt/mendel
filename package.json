@@ -8,6 +8,7 @@
     "dev-server": "npm run -w server serve",
     "dev": "concurrently \"npm run dev-client\" \"npm run dev-server\"",
     "start": "npm run -w server start",
+    "publish": "docker/publish.sh",
     "typeorm": "typeorm"
   },
   "dependencies": {
