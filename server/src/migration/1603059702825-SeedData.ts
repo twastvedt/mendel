@@ -27,7 +27,7 @@ export class SeedData1603059702825 implements MigrationInterface {
         }))
     );
 
-    const window: Window = createSVGWindow();
+    const window = createSVGWindow();
     const document = window.document;
     registerWindow(window, document);
 
@@ -67,7 +67,7 @@ export class SeedData1603059702825 implements MigrationInterface {
 
           const svg = draw.findOne("svg");
 
-          const artboard = svg.findOne("svg>rect:first-child");
+          const artboard = svg?.findOne("svg>rect:first-child");
 
           if (artboard?.attr("id")) {
             artboard.remove();
@@ -75,16 +75,16 @@ export class SeedData1603059702825 implements MigrationInterface {
 
           const symbol = draw
             .symbol()
-            .attr("viewBox", svg.attr("viewBox"))
-            .attr("style", svg.attr("style"));
+            .attr("viewBox", svg?.attr("viewBox"))
+            .attr("style", svg?.attr("style"));
 
-          svg.children().forEach((c) => symbol.add(c));
+          svg?.children().forEach((c) => symbol.add(c));
 
           let result = symbol.svg();
 
           result = result.replace("fill:none;", "");
 
-          svg.remove();
+          svg?.remove();
           symbol.remove();
 
           resolve(result);

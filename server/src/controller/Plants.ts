@@ -1,7 +1,5 @@
-import { plantApi } from "../../../common/src/api/PlantApi";
-import { Plant } from "../../../common/src/entity/Plant";
 import express from "express";
-
+import { plantApi, Plant } from "@mendel/common";
 import { all, create, one, remove } from "./handlers";
 import { addWrappedHandler } from "./addRoutes";
 

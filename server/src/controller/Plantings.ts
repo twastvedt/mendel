@@ -1,10 +1,7 @@
-import { plantingApi } from "../../../common/src/api/PlantingApi";
-import { Planting } from "../../../common/src/entity/Planting";
 import express from "express";
-
-import { all, create, one, remove } from "./handlers";
 import { getManager } from "typeorm";
-import { Plant } from "@mendel/common";
+import { plantingApi, Planting, Plant } from "@mendel/common";
+import { all, create, one, remove } from "./handlers";
 import { addWrappedHandler } from "./addRoutes";
 
 const router = express.Router();

@@ -1,5 +1,5 @@
-import { varietyApi, Variety, Family } from "@mendel/common";
 import express from "express";
+import { varietyApi, Variety, Family } from "@mendel/common";
 import { one, all, create, update, remove } from "./handlers";
 import { addWrappedHandler } from "./addRoutes";
 

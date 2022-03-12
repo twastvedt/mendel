@@ -5,12 +5,14 @@
   "main": "dist/index.js",
   "private": true,
   "dependencies": {
+    "@svgdotjs/svg.js": "^3.1.2",
     "express": "^4.17.3",
     "pg": "^8.7.3",
-    "tsconfig-paths": "^3.13.0",
     "ts-node": "10.7.0",
     "ts-nameof": "^5.0.0",
     "ttypescript": "^1.5.13",
+    "reflect-metadata": "^0.1.13",
+    "svgdom": "^0.1.10",
     "typeorm": "0.2.45",
     "ts-node-dev": "^1.1.8"
   },
@@ -20,7 +22,7 @@
     "@types/node": "^16"
   },
   "scripts": {
-    "serve": "ts-node-dev -r tsconfig-paths/register --compiler ttypescript src/index.ts",
-    "start": "ts-node -r tsconfig-paths/register --transpile-only --compiler ttypescript src/index.ts"
+    "serve": "ts-node-dev --compiler ttypescript src/index.ts",
+    "start": "ts-node --transpile-only --compiler ttypescript src/index.ts"
   }
 }

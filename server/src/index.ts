@@ -1,8 +1,7 @@
 import "reflect-metadata";
 import { createConnection } from "typeorm";
-import { static as _static } from "express";
-import express from "express";
-import * as bodyParser from "body-parser";
+import express, { static as _static, json } from "express";
+import { join } from "path";
 
 import BedRoutes from "./controller/Beds";
 import VarietyRoutes from "./controller/Varieties";
@@ -10,7 +9,6 @@ import GardenRoutes from "./controller/Gardens";
 import PlantRoutes from "./controller/Plants";
 import PlantingRoutes from "./controller/Plantings";
 import FamilyRoutes from "./controller/Families";
-import { join } from "path";
 
 createConnection()
   .then(async (connection) => {
@@ -25,7 +23,14 @@ createConnection()
       `Starting Express in ${production ? "production" : "development"} mode.`
     );
 
-    const app = express();
+    const app = express()
+      .use(json())
+      .use(BedRoutes)
+      .use(GardenRoutes)
+      .use(VarietyRoutes)
+      .use(PlantRoutes)
+      .use(PlantingRoutes)
+      .use(FamilyRoutes);
 
     app.use((req, res, next) => {
       res.setHeader("Access-Control-Allow-Origin", "*");
@@ -40,16 +45,7 @@ createConnection()
       next();
     });
 
-    app.use(bodyParser.json());
-
-    app.use(BedRoutes);
-    app.use(GardenRoutes);
-    app.use(VarietyRoutes);
-    app.use(PlantRoutes);
-    app.use(PlantingRoutes);
-    app.use(FamilyRoutes);
-
-    const publicPath = join(__dirname, "clientBuild");
+    const publicPath = join(__dirname, "../clientBuild");
 
     if (production) {
       app.use(_static(publicPath, { maxAge: "1y", etag: false }));

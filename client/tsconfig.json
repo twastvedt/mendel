@@ -4,7 +4,9 @@
     "outDir": "dist",
     "rootDir": "src",
     "tsBuildInfoFile": "dist/.tsbuildinfo",
-    "lib": ["esnext", "dom", "dom.iterable", "esnext.asynciterable"]
+    "lib": ["esnext", "dom", "dom.iterable", "esnext.asynciterable"],
+    "typeRoots": ["./node_modules/@types", "../node_modules/vuetify/types"],
+    "types": ["node"]
   },
   "include": ["src/**/*.ts", "src/**/*.vue"],
   "references": [{ "path": "../common" }]

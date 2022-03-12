@@ -1,5 +1,4 @@
-import { bedApi } from "../../../common/src/api/BedApi";
-import { Bed } from "../../../common/src/entity/Bed";
+import { bedApi, Bed } from "@mendel/common";
 import express from "express";
 
 import { all, create, one } from "./handlers";
