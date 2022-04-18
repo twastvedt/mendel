@@ -1,8 +1,4 @@
-import { EntityBase, Plant, Planting } from "@mendel/common";
-
-export function isPlant(entity?: EntityBase): entity is Plant {
-  return !!(entity as Plant).location;
-}
+import { EntityBase, Planting } from "@mendel/common";
 
 export function isPlanting(entity?: EntityBase): entity is Planting {
   return !!(entity as Planting).shape;

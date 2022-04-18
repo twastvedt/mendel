@@ -10,13 +10,11 @@ export class DeletePlantingAction extends Action {
   public async Do(state: Store): Promise<void> {
     await super.Do(state);
 
-    if (state.garden) {
-      state.removePlanting(this.planting.id);
+    state.garden?.removePlanting(this.planting.id);
 
-      await plantingApi.delete.request({
-        routeParams: { id: this.planting.id },
-      });
-    }
+    await plantingApi.delete.request({
+      routeParams: { id: this.planting.id },
+    });
   }
 
   public async Undo(state: Store): Promise<void> {
@@ -26,6 +24,6 @@ export class DeletePlantingAction extends Action {
       data: this.planting,
     })) as Planting;
 
-    state.addPlanting(Object.assign(this.planting, newPlanting));
+    state.garden?.addPlanting(Object.assign(this.planting, newPlanting));
   }
 }

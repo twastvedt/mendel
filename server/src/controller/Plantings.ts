@@ -1,6 +1,5 @@
 import express from "express";
-import { getManager } from "typeorm";
-import { plantingApi, Planting, Plant } from "@mendel/common";
+import { plantingApi, Planting } from "@mendel/common";
 import { all, create, one, remove } from "./handlers";
 import { addWrappedHandler } from "./addRoutes";
 
@@ -14,23 +13,17 @@ addWrappedHandler(plantingApi.one, router, one(Planting));
 
 addWrappedHandler(plantingApi.delete, router, remove(Planting));
 
-addWrappedHandler(plantingApi.createWithPlants, router, async (request) => {
-  const plantingRepo = getManager().getRepository(Planting);
-
-  const planting = await plantingRepo.save(request.body);
-
-  const plantRepo = getManager().getRepository(Plant);
-
-  planting.plants.forEach((p) => {
-    p.plantingId = planting.id;
-    p.gardenId = planting.gardenId;
-    p.plantDate = planting.plantDate;
-    p.varietyId = planting.varietyId;
-  });
-
-  planting.plants = await plantRepo.save(planting.plants);
-
-  return planting;
-});
+addWrappedHandler(
+  plantingApi.addPlant,
+  router,
+  Planting,
+  async (request, repository) => {
+    return (
+      await repository.update(request.params.id, {
+        locations: { coordinates: request.body },
+      })
+    ).generatedMaps[0] as Planting;
+  }
+);
 
 export default router;

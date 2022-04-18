@@ -1,7 +1,7 @@
 <template>
-  <v-container>
+  <v-container v-if="state.garden">
     <EditDataTable
-      v-model="state.families"
+      v-model="state.garden.families"
       name="Families"
       :headers="headers"
       @delete="deleteFamily"
@@ -10,7 +10,7 @@
         <EditFamily
           :value="props.value"
           @close="props.close"
-          @input="(item) => state.editFamily(item)"
+          @input="(item) => state.garden.editFamily(item)"
         />
       </template>
 
@@ -68,20 +68,18 @@ export default class FamilySettings extends Vue {
   ];
 
   plantCount(family: Family): number | undefined {
-    return state.garden?.plants.filter(
-      (p) => p.variety?.family?.id === family.id
-    ).length;
+    return state.garden?.plantCount({ familyId: family.id });
   }
 
   async deleteFamily(family: Family): Promise<void> {
     const varieties =
       family.varieties?.length ??
-      state.varieties.filter((v) => v.familyId === family.id).length;
+      state.garden?.varieties.filter((v) => v.familyId === family.id).length;
 
     if (varieties) {
       alert(`Can't delete family which still has ${varieties} varietie(s).`);
     } else {
-      state.deleteFamily(family);
+      state.garden?.deleteFamily(family);
     }
   }
 }

@@ -1,20 +1,19 @@
-import { Entity, Column, OneToMany, ManyToOne } from "typeorm";
+import { Entity, Column, ManyToOne } from "typeorm";
 import { EntityBase } from "./EntityBase";
 import { Garden } from "./Garden";
-import { Polygon } from "./geoJson";
-import { Plant } from "./Plant";
+import { MultiPoint, Polygon } from "./geoJson";
 import { Variety } from "./Variety";
 
 @Entity()
 export class Planting extends EntityBase {
-  @Column("geometry", { spatialFeatureType: "Polygon" })
-  shape!: Polygon;
+  @Column("geometry", { spatialFeatureType: "MultiPoint" })
+  locations!: MultiPoint;
+
+  @Column("geometry", { nullable: true, spatialFeatureType: "Polygon" })
+  shape?: Polygon;
 
   @Column({ nullable: true })
   plantDate?: Date;
-
-  @Column({ nullable: true })
-  quantity?: number;
 
   @Column()
   areSeedlings: boolean;
@@ -37,9 +36,6 @@ export class Planting extends EntityBase {
   @ManyToOne(() => Variety, (variety) => variety.plantings)
   variety?: Variety;
 
-  @OneToMany(() => Plant, (plant) => plant.planting)
-  plants?: Plant[];
-
   @Column({ nullable: true })
   gardenId?: number;
 
@@ -52,6 +48,10 @@ export class Planting extends EntityBase {
     super();
 
     this.areSeedlings = false;
+    this.locations = {
+      type: "MultiPoint",
+      coordinates: [],
+    };
   }
 
   static copy(oldPlanting: Planting): Planting {
@@ -63,8 +63,6 @@ export class Planting extends EntityBase {
 
     delete newPlanting.variety;
     delete newPlanting.garden;
-
-    newPlanting.plants = [];
 
     return newPlanting;
   }

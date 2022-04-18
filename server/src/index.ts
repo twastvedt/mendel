@@ -2,11 +2,11 @@ import "reflect-metadata";
 import { createConnection } from "typeorm";
 import express, { static as _static, json } from "express";
 import { join } from "path";
+import cors from "cors";
 
 import BedRoutes from "./controller/Beds";
 import VarietyRoutes from "./controller/Varieties";
 import GardenRoutes from "./controller/Gardens";
-import PlantRoutes from "./controller/Plants";
 import PlantingRoutes from "./controller/Plantings";
 import FamilyRoutes from "./controller/Families";
 
@@ -24,11 +24,10 @@ createConnection()
     );
 
     const app = express()
-      .use(json())
+      .use(json(), cors())
       .use(BedRoutes)
       .use(GardenRoutes)
       .use(VarietyRoutes)
-      .use(PlantRoutes)
       .use(PlantingRoutes)
       .use(FamilyRoutes);
 

@@ -10,7 +10,7 @@
   >
     <g ref="content" class="content">
       <g v-if="state.garden">
-        <g v-for="(bed, i) in state.garden.beds" :key="bed.id">
+        <g v-for="(bed, i) in state.garden.garden.beds" :key="bed.id">
           <path
             class="bed"
             :style="elementStyle('bed')"
@@ -29,9 +29,9 @@
           /> -->
         </g>
 
-        <g v-if="state.grid">
+        <g v-if="state.garden.grid">
           <path
-            v-for="(area, i) in state.grid.areas"
+            v-for="(area, i) in state.garden.grid.areas"
             :key="i"
             class="area"
             :style="elementStyle('area')"
@@ -43,23 +43,12 @@
         </g>
 
         <PlantingComponent
-          v-for="(planting, index) in state.garden.plantings"
+          v-for="(planting, index) in state.garden.garden.plantings"
           :key="`${index}-planting`"
           :planting="planting"
           :style="elementStyle('planting')"
           @click.stop="onClick($event, planting)"
           @mouseover="onHover($event, planting, index)"
-          @mouseleave="onHover($event)"
-        />
-
-        <PlantComponent
-          v-for="(plant, index) in state.garden.plants"
-          :key="`${index}-plant`"
-          :transform="state.makeTransform(plant.location.coordinates)"
-          :variety="plant.variety"
-          :style="elementStyle('plant')"
-          @click.stop="onClick($event, plant)"
-          @mouseover="onHover($event, plant, index)"
           @mouseleave="onHover($event)"
         />
 
@@ -79,12 +68,10 @@ import { ElementType, state } from "../Store";
 import * as d3 from "d3";
 import { zoom, D3ZoomEvent } from "d3-zoom";
 
-import PlantComponent from "./PlantComponent.vue";
 import PlantingComponent from "./PlantingComponent.vue";
 
 @Component({
   components: {
-    PlantComponent,
     PlantingComponent,
   },
 })

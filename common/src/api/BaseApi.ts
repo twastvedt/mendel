@@ -10,7 +10,10 @@ export function baseApi<T extends EntityBase>(endpoint: string) {
 
     all: new Endpoint<undefined, undefined, T[]>("get", `/${endpoint}/`),
 
-    create: new Endpoint<undefined, T | T[], T | T[]>("post", `/${endpoint}/`),
+    create: new Endpoint<undefined, T | T[], EntityId<T> | EntityId<T>[]>(
+      "post",
+      `/${endpoint}/`
+    ),
 
     update: new Endpoint<undefined, EntityId<T>, undefined>(
       "put",

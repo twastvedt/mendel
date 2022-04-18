@@ -10,6 +10,8 @@ RUN apk update && \
 
 WORKDIR /mendel
 
+USER node
+
 ENV dockerdev 1
 
 EXPOSE 3000

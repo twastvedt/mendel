@@ -52,7 +52,6 @@ export class DrawPlantingTool implements Tool {
       type: "Polygon",
       coordinates: [[[0, 0]]],
     };
-    this.planting.gardenId = state.garden?.id;
 
     if (!this.variety.family) {
       throw new Error("Family required");
@@ -79,7 +78,7 @@ export class DrawPlantingTool implements Tool {
     removeEventListener("keyup", this.onKeyUp);
 
     if (this.planting) {
-      state.removePlanting(this.planting);
+      state.garden?.removePlanting(this.planting);
 
       delete this.planting;
     }
@@ -122,7 +121,11 @@ export class DrawPlantingTool implements Tool {
     if (this.cursorProps.rotationCenter) {
       this.index = index;
     } else if (index != undefined) {
-      this.planting.shape.coordinates = [this.grid.areas[index].polygon];
+      this.planting.shape = {
+        type: "Polygon",
+        coordinates: [this.grid.areas[index].polygon],
+      };
+
       this.grid.activeGrid = index;
 
       this.grid.setCursor(point);
@@ -221,7 +224,7 @@ export class DrawPlantingTool implements Tool {
 
   private clearDisplay(): void {
     if (this.planting) {
-      this.planting.shape.coordinates = [[[0, 0]]];
+      delete this.planting.shape;
 
       this.cursorProps.plants = null;
 
@@ -263,24 +266,27 @@ export class DrawPlantingTool implements Tool {
 
   private finish(): AddPlantingAction | undefined {
     if (this.planting && this.index !== undefined) {
-      this.planting.shape.coordinates = [this.grid.areas[this.index].polygon];
+      this.planting.shape = {
+        type: "Polygon",
+        coordinates: [this.grid.areas[this.index].polygon],
+      };
 
       const plants = this.cursorProps.plants;
 
       if (plants) {
-        this.planting.quantity =
-          plants.interiorPoints.length +
-          plants.edgePoints.reduce((t, p) => t + (p.display ? 1 : 0), 0);
+        this.planting.locations.coordinates.push(
+          ...plants.interiorPoints
+            .concat(
+              plants.edgePoints.filter((e) => e.display).map((e) => e.point)
+            )
+            .map(
+              (p) =>
+                [p[0] + plants.offset[0], p[1] + plants.offset[1]] as Position
+            )
+        );
       }
 
-      return new AddPlantingAction(
-        Planting.cleanCopy(this.planting),
-        plants?.interiorPoints
-          .concat(
-            plants.edgePoints.filter((e) => e.display).map((e) => e.point)
-          )
-          .map((p) => [p[0] + plants.offset[0], p[1] + plants.offset[1]])
-      );
+      return new AddPlantingAction(Planting.cleanCopy(this.planting));
     }
   }
 }

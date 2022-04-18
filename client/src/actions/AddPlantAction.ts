@@ -1,37 +1,27 @@
-import { plantApi, Plant } from "@mendel/common";
+import { Planting, Position, EntityId } from "@mendel/common";
 import { Store } from "../Store";
 import { Action } from "./Action";
 
 export class AddPlantAction extends Action {
-  public constructor(private plant: Plant) {
+  private planting?: EntityId<Planting>;
+
+  public constructor(private location: Position, private varietyId: number) {
     super();
   }
 
   public async Do(state: Store): Promise<void> {
     await super.Do(state);
 
-    state.addPlant(this.plant);
-
-    state.updateDelaunay();
-
-    const newPlant = await plantApi.create.request({
-      data: Plant.cleanCopy(this.plant),
-    });
-
-    Object.assign(this.plant, newPlant);
+    this.planting = await state.garden?.addPlant(this.location, this.varietyId);
   }
 
   public async Undo(state: Store): Promise<void> {
     await super.Undo(state);
 
-    if (this.plant.id && state.garden) {
-      await plantApi.delete.request({
-        routeParams: { id: this.plant.id },
-      });
+    if (this.planting?.id !== undefined) {
+      await state.garden?.removePlant(this.planting, this.location);
 
-      state.removePlant(this.plant.id);
-
-      delete this.plant.id;
+      delete this.planting;
     }
   }
 }

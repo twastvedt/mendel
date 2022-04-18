@@ -21,10 +21,13 @@
 
     <v-select
       v-model="variety"
+      class="ml-3"
       :disabled="disableVarietySelect"
       :items="varietyList"
       dense
       solo
+      flat
+      outlined
       hide-details
       item-text="name"
       item-value="id"
@@ -73,16 +76,18 @@ export default class Toolbar extends Vue {
   variety: Variety | null = null;
 
   get varietyList(): (Variety | { divider: boolean })[] {
-    return state.families
-      .sort((a, b) => a.name.localeCompare(b.name))
-      .filter(
-        (f): f is Family & Required<Pick<Family, "varieties">> =>
-          !!f.varieties?.length
-      )
-      .flatMap((f) => [
-        { divider: true },
-        ...f.varieties.sort((a, b) => a.name.localeCompare(b.name)),
-      ]);
+    return (
+      state.garden?.families
+        .sort((a, b) => a.name.localeCompare(b.name))
+        .filter(
+          (f): f is Family & Required<Pick<Family, "varieties">> =>
+            !!f.varieties?.length
+        )
+        .flatMap((f) => [
+          { divider: true },
+          ...f.varieties.sort((a, b) => a.name.localeCompare(b.name)),
+        ]) ?? []
+    );
   }
 
   async mounted(): Promise<void> {
@@ -109,8 +114,10 @@ export default class Toolbar extends Vue {
 
           break;
         case "drawPlanting":
-          if (this.variety && state.grid) {
-            state.setTool(new DrawPlantingTool(this.variety, state.grid));
+          if (this.variety && state.garden.grid) {
+            state.setTool(
+              new DrawPlantingTool(this.variety, state.garden.grid)
+            );
           }
           break;
         case "deletePlant":

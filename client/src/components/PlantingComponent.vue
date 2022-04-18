@@ -1,6 +1,7 @@
 <template>
   <g :class="classList">
     <path
+      v-if="planting.shape"
       ref="shape"
       :d="state.pathGenerator(planting.shape)"
       :fill="variety.color"
@@ -9,8 +10,12 @@
     />
 
     <PlantComponent
-      v-if="!isCursor && state.scaleRange > 1 && !planting.plants"
-      :transform="transform"
+      v-if="
+        !isCursor &&
+        state.scaleRange > 1 &&
+        !planting.locations.coordinates.length
+      "
+      :transform="labelTransform"
       :draw-spacing="false"
       :interactive="false"
       :variety="variety"
@@ -19,11 +24,9 @@
     <title>
       {{ variety.name }} <span v-if="variety.family">{{
         variety.family.name
-      }}</span> <template v-if="planting.plants"> <br/> &#xA;
-      {{ planting.plants.length }}
-      </template> <template v-else-if="planting.quantity != undefined"> <br/>
+      }}</span> <template v-if="planting.locations.coordinates.length"> <br/>
       &#xA;
-      {{ planting.quantity }}
+      {{ planting.locations.coordinates.length }}
       </template>
     </title>
   </g>
@@ -57,10 +60,14 @@ export default class PlantingComponent extends Vue {
     return { cursor: this.isCursor };
   }
 
-  get transform(): string {
-    return state.makeTransform(
-      polylabel(this.planting.shape.coordinates) as [number, number]
-    );
+  get labelTransform(): string | undefined {
+    if (this.planting.shape) {
+      return state.makeTransform(
+        polylabel(this.planting.shape.coordinates) as [number, number]
+      );
+    }
+
+    return undefined;
   }
 
   state = state;

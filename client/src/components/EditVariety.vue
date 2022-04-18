@@ -10,7 +10,7 @@
         ></v-text-field>
         <v-select
           v-model="formValue.family"
-          :items="state.families"
+          :items="state.garden.families"
           item-text="name"
           return-object
           label="Family"
@@ -18,42 +18,35 @@
           :rules="[requiredRule]"
           @input="updateColor"
         ></v-select>
-        <template>
-          <v-row>
-            <v-col>
-              <div class="text-caption">Color</div>
-              <v-menu :close-on-content-click="false" :offset-y="true">
-                <template #activator="{ on, attrs }">
-                  <v-btn
-                    x-large
-                    v-bind="attrs"
-                    class="bigSquareButton"
-                    v-on="on"
-                  >
-                    <svg v-if="formValue.family" class="svgicon">
-                      <use
-                        :href="`#family-${formValue.family.id}`"
-                        :fill="formValue.color"
-                      />
-                    </svg>
-                  </v-btn>
-                </template>
-                <v-card>
-                  <v-color-picker
-                    v-model="formValue.color"
-                    dot-size="25"
-                    hide-inputs
-                    mode="hexa"
-                    swatches-max-height="200"
-                  ></v-color-picker>
-                </v-card>
-              </v-menu>
-            </v-col>
-            <v-col align-self="end">
-              <v-btn @click="updateColor">Reset</v-btn>
-            </v-col>
-          </v-row>
-        </template>
+        <v-row>
+          <v-col>
+            <div class="text-caption">Color</div>
+            <v-menu :close-on-content-click="false" :offset-y="true">
+              <template #activator="{ on, attrs }">
+                <v-btn x-large v-bind="attrs" class="bigSquareButton" v-on="on">
+                  <svg v-if="formValue.family" class="svgicon">
+                    <use
+                      :href="`#family-${formValue.family.id}`"
+                      :fill="formValue.color"
+                    />
+                  </svg>
+                </v-btn>
+              </template>
+              <v-card>
+                <v-color-picker
+                  v-model="formValue.color"
+                  dot-size="25"
+                  hide-inputs
+                  mode="hexa"
+                  swatches-max-height="200"
+                ></v-color-picker>
+              </v-card>
+            </v-menu>
+          </v-col>
+          <v-col align-self="end">
+            <v-btn @click="updateColor">Reset</v-btn>
+          </v-col>
+        </v-row>
       </v-card-text>
       <v-card-actions>
         <v-btn color="primary" :disabled="!valid" @click="save"> Save </v-btn>

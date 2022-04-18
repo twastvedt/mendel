@@ -1,7 +1,6 @@
 import { Entity, Column, ManyToOne, OneToMany } from "typeorm";
 import { EntityBase } from "./EntityBase";
 import { Family } from "./Family";
-import { Plant } from "./Plant";
 import { Planting } from "./Planting";
 
 @Entity()
@@ -37,11 +36,6 @@ export class Variety extends EntityBase {
   })
   family?: Family;
 
-  @OneToMany(() => Plant, (plant) => plant.variety, {
-    onDelete: "CASCADE",
-  })
-  plants?: Plant[];
-
   @OneToMany(() => Planting, (planting) => planting.variety, {
     onDelete: "CASCADE",
   })
@@ -51,7 +45,6 @@ export class Variety extends EntityBase {
     const newVariety = Object.assign({}, variety);
 
     delete newVariety.family;
-    delete newVariety.plants;
     delete newVariety.plantings;
 
     return newVariety;

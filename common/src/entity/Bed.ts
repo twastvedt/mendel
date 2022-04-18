@@ -14,7 +14,7 @@ export class Bed extends EntityBase {
   @Column({ nullable: true })
   endDate?: Date;
 
-  @ManyToOne(() => Garden, (garden) => garden.plants, {
+  @ManyToOne(() => Garden, (garden) => garden.beds, {
     onDelete: "CASCADE",
   })
   garden!: Garden;

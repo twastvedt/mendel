@@ -5,7 +5,7 @@
         <v-card>
           <v-card-title>Varieties</v-card-title>
           <v-data-table
-            :items="state.varieties"
+            :items="state.garden.varieties"
             name="Varieties"
             :headers="headers"
           >
@@ -88,7 +88,7 @@ export default class Summary extends Vue {
 
   areas = {
     Beds:
-      (state.garden?.beds.reduce(
+      (state.garden?.garden.beds.reduce(
         (total, bed) => total + polygonArea(bed.shape.coordinates[0]),
         0
       ) ?? 0) / 144,
@@ -96,12 +96,11 @@ export default class Summary extends Vue {
   };
 
   plantCount(variety: Variety): number | undefined {
-    return state.garden?.plants.filter((p) => p.variety?.id === variety.id)
-      .length;
+    return state.garden?.plantCount({ varietyId: variety.id });
   }
 
   get totalArea(): number | undefined {
-    const beds = state.garden?.beds;
+    const beds = state.garden?.garden.beds;
 
     if (beds) {
       return (

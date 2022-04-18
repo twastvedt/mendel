@@ -1,13 +1,11 @@
-import { Endpoint } from "./Endpoint";
+import { Position } from "../entity/geoJson";
 import { Planting } from "../entity/Planting";
 import { baseApi } from "./BaseApi";
-
-export type PlantingWithPlants = Planting & Required<Pick<Planting, "plants">>;
+import { Endpoint } from "./Endpoint";
 
 export const plantingApi = Object.assign(baseApi<Planting>("plantings"), {
-  createWithPlants: new Endpoint<
-    undefined,
-    PlantingWithPlants,
-    PlantingWithPlants
-  >("put", "/plantings/withPlants"),
+  addPlant: new Endpoint<{ id: number }, Position[], Planting | undefined>(
+    "post",
+    "/plantings/:id/add"
+  ),
 });

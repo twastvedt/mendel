@@ -1,16 +1,16 @@
 <template>
-  <v-container>
+  <v-container v-if="state.garden">
     <EditDataTable
-      v-model="state.varieties"
+      v-model="state.garden.varieties"
       name="Varieties"
       :headers="varietyHeaders"
-      @delete="(item) => state.deleteVariety(item)"
+      @delete="(item) => state.garden.deleteVariety(item)"
     >
       <template #default="props">
         <EditVariety
           :value="props.value"
           @close="props.close"
-          @input="(item) => state.editVariety(item)"
+          @input="(item) => state.garden.editVariety(item)"
         />
       </template>
 
@@ -64,8 +64,7 @@ export default class VarietySettings extends Vue {
   ];
 
   plantCount(variety: Variety): number | undefined {
-    return state.garden?.plants.filter((p) => p.variety?.id === variety.id)
-      .length;
+    return state.garden?.plantCount({ varietyId: variety.id });
   }
 }
 </script>

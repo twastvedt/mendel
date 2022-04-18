@@ -1,4 +1,4 @@
-import { Variety, Plant, Position } from "@mendel/common";
+import { Variety, Position } from "@mendel/common";
 import { Tool } from "./Tool";
 import { AddPlantAction } from "../actions/AddPlantAction";
 import { Action } from "../actions/Action";
@@ -7,53 +7,52 @@ import { Vector } from "../Vector";
 import plantComponent from "../components/PlantComponent.vue";
 
 export class DrawPlantTool implements Tool {
-  public helpText = "Click to draw a plant.";
-
-  public stop(): void {
-    if (this.plant) {
-      state.removePlant(this.plant);
-
-      delete this.plant;
-    }
-  }
-
-  private plant?: Plant;
-
+  private location?: Position;
   private cursor = new Vector(0, 0);
   private tempVec = new Vector(0, 0);
   private lastClosestIndex?: number;
 
-  public constructor(private variety: Variety) {
-    this.cursorProps.variety = variety;
-  }
-
+  public helpText = "Click to draw a plant.";
   public cursorComponent = plantComponent;
   public cursorProps: Record<string, unknown> = {
     transform: "",
     interactive: false,
   };
 
+  public constructor(private variety: Variety) {
+    this.cursorProps.variety = variety;
+  }
+
+  public start(): void {
+    this.location = [0, 0];
+  }
+  public stop(): void {
+    if (this.location) {
+      delete this.location;
+    }
+  }
+
   public setTransform(): void {
-    if (this.plant) {
-      this.cursorProps.transform = state.makeTransform(
-        this.plant.location.coordinates as [number, number]
-      );
+    if (this.location) {
+      this.cursorProps.transform = state.makeTransform(this.location);
     }
   }
 
   public onCursorMove(point: Position): void {
-    if (this.plant?.variety?.family?.spacing !== undefined) {
+    if (this.location && this.variety.family) {
       this.cursor.set(...point);
 
-      if (state.delaunay) {
-        const thisRadius = this.plant.variety.family.spacing / 2;
+      if (state.garden) {
+        const thisRadius = this.variety.family.spacing / 2;
 
-        this.lastClosestIndex = state.delaunay.find(
+        this.lastClosestIndex = state.garden.delaunay.find(
           ...point,
           this.lastClosestIndex
         );
 
-        const neighbors = state.delaunay.neighbors(this.lastClosestIndex);
+        const neighbors = state.garden.delaunay.neighbors(
+          this.lastClosestIndex
+        );
 
         const closestPlants: {
           location: Vector;
@@ -62,12 +61,13 @@ export class DrawPlantTool implements Tool {
         }[] = [];
 
         for (const i of [...neighbors, this.lastClosestIndex]) {
-          const plant = state.garden?.plants[i];
+          const delaunayPoint = state.garden.delaunayPoints[i];
 
-          if (plant?.variety?.family) {
-            const plantVector = Vector.fromArray(plant.location.coordinates);
+          if (delaunayPoint?.planting.variety?.family) {
+            const plantVector = Vector.fromArray(delaunayPoint.point);
 
-            const distance = plant.variety.family.spacing / 2 + thisRadius;
+            const distance =
+              delaunayPoint.planting.variety.family.spacing / 2 + thisRadius;
             const overlap = distance - this.cursor.distanceTo(plantVector);
 
             if (overlap > 0) {
@@ -76,7 +76,7 @@ export class DrawPlantTool implements Tool {
           }
 
           if (closestPlants.length === 0) {
-            this.plant.location.coordinates = point;
+            this.location = point;
           } else if (closestPlants.length === 1) {
             const closest = closestPlants[0];
 
@@ -86,10 +86,7 @@ export class DrawPlantTool implements Tool {
 
             this.cursor.add(this.tempVec);
 
-            [...this.plant.location.coordinates] = [
-              this.cursor.x,
-              this.cursor.y,
-            ];
+            [...this.location] = [this.cursor.x, this.cursor.y] as const;
           } else {
             const r0 = closestPlants[0].distance;
             const r1 = closestPlants[1].distance;
@@ -110,20 +107,20 @@ export class DrawPlantTool implements Tool {
             this.tempVec.length = a;
 
             if (side) {
-              [...this.plant.location.coordinates] = [
+              [...this.location] = [
                 p0.x + this.tempVec.x - (h * (p1.y - p0.y)) / d,
                 p0.y + this.tempVec.y + (h * (p1.x - p0.x)) / d,
-              ];
+              ] as const;
             } else {
-              [...this.plant.location.coordinates] = [
+              [...this.location] = [
                 p0.x + this.tempVec.x + (h * (p1.y - p0.y)) / d,
                 p0.y + this.tempVec.y - (h * (p1.x - p0.x)) / d,
-              ];
+              ] as const;
             }
           }
         }
       } else {
-        [...this.plant.location.coordinates] = [this.cursor.x, this.cursor.y];
+        [...this.location] = [this.cursor.x, this.cursor.y] as const;
       }
 
       this.setTransform();
@@ -131,21 +128,10 @@ export class DrawPlantTool implements Tool {
   }
 
   public onClick(): Action {
-    if (this.plant) {
-      return new AddPlantAction(Object.assign({}, this.plant));
+    if (!this.location || this.variety.id === undefined) {
+      throw new Error("No location or variety id?");
     }
 
-    throw new Error("No action to save?");
-  }
-
-  public start(): void {
-    this.plant = new Plant();
-    this.plant.variety = this.variety;
-    this.plant.varietyId = this.variety.id;
-    this.plant.location = {
-      type: "Point",
-      coordinates: [0, 0],
-    };
-    this.plant.gardenId = state.garden?.id;
+    return new AddPlantAction(this.location, this.variety.id);
   }
 }
