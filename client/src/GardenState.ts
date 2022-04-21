@@ -150,25 +150,28 @@ export class GardenState {
 
     this.garden?.plantings.push(planting);
 
-    const newPlanting = await plantingApi.create.request({
+    const newPlanting = (await plantingApi.create.request({
       data: Planting.cleanCopy(planting),
-    });
+    })) as EntityId<Planting>;
 
     Object.assign(planting, newPlanting);
 
-    const plantToDelaunay = this.plantToDelaunay.get(planting.id!);
+    let plantToDelaunay = this.plantToDelaunay.get(newPlanting.id);
 
-    if (plantToDelaunay) {
-      planting.locations.coordinates.forEach((point) => {
-        const delaunayPoint: DelaunayPoint = { planting, point };
-
-        plantToDelaunay.push(delaunayPoint);
-
-        this.delaunayPoints.push(delaunayPoint);
-      });
-
-      this.updateDelaunay();
+    if (!plantToDelaunay) {
+      plantToDelaunay = [];
+      this.plantToDelaunay.set(newPlanting.id, plantToDelaunay);
     }
+
+    planting.locations.coordinates.forEach((point) => {
+      const delaunayPoint: DelaunayPoint = { planting, point };
+
+      plantToDelaunay?.push(delaunayPoint);
+
+      this.delaunayPoints.push(delaunayPoint);
+    });
+
+    this.updateDelaunay();
 
     return planting as EntityId<Planting>;
   }
@@ -226,8 +229,6 @@ export class GardenState {
     if (i !== -1) {
       const planting = this.garden.plantings[i];
 
-      this.garden.plantings.splice(i, 1);
-
       if (planting.id !== undefined) {
         await plantingApi.delete.request({ routeParams: { id: planting.id } });
 
@@ -241,7 +242,11 @@ export class GardenState {
         });
 
         this.updateDelaunay();
+
+        this.plantToDelaunay.delete(planting.id);
       }
+
+      this.garden.plantings.splice(i, 1);
     }
   }
 

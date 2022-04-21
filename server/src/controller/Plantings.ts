@@ -18,11 +18,18 @@ addWrappedHandler(
   router,
   Planting,
   async (request, repository) => {
-    return (
-      await repository.update(request.params.id, {
-        locations: { coordinates: request.body },
-      })
-    ).generatedMaps[0] as Planting;
+    const planting = await repository.findOne(request.params.id);
+
+    if (planting) {
+      return (
+        await repository.update(request.params.id, {
+          locations: {
+            coordinates: [...planting.locations.coordinates, ...request.body],
+            type: "MultiPoint",
+          },
+        })
+      ).generatedMaps[0] as Planting;
+    }
   }
 );
 

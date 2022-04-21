@@ -21,6 +21,12 @@
       :variety="variety"
       class="icon"
     />
+    <PlantComponent
+      v-for="(location, i) in planting.locations.coordinates"
+      :key="i"
+      :variety="variety"
+      :transform="state.makeTransform(location)"
+    />
     <title>
       {{ variety.name }} <span v-if="variety.family">{{
         variety.family.name
