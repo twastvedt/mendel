@@ -1,3 +1,56 @@
+<script setup lang="ts">
+import type { DataTableHeader } from "vuetify";
+
+const props = defineProps<{
+  value: unknown[];
+  name: string;
+  headers: DataTableHeader[];
+  showExpand?: boolean;
+}>();
+
+let expanded = [] as unknown[];
+let search = "";
+let showDialog = false;
+let currentIndex = null as number | null;
+
+function fullHeaders(): DataTableHeader[] {
+  const headers: DataTableHeader[] = [
+    ...props.headers,
+    {
+      text: "",
+      value: "actions",
+      align: "end",
+      groupable: false,
+      sortable: false,
+      cellClass: "smallColumn",
+    },
+  ];
+
+  if (props.showExpand) {
+    headers.push({
+      text: "",
+      value: "data-table-expand",
+      cellClass: "smallColumn",
+    });
+  }
+
+  return headers;
+}
+
+function editItem(item: unknown): void {
+  currentIndex = props.value.indexOf(item);
+
+  showDialog = true;
+}
+
+function expandAll(v: Event): void {
+  if (v) {
+    expanded = props.value;
+  } else {
+    expanded = [];
+  }
+}
+</script>
 <template>
   <v-card>
     <v-card-title>
@@ -13,12 +66,12 @@
       >
         <template #append-outer>
           <v-dialog v-model="showDialog">
-            <template #activator="{ on }">
+            <template #activator="{ props }">
               <v-btn
                 fab
                 small
                 class="mx-2"
-                v-on="on"
+                v-bind="props"
                 @click="currentIndex = null"
               >
                 <v-icon color="primary">mdi-plus</v-icon>
@@ -61,80 +114,17 @@
         <slot name="expanded-item" v-bind="props" />
       </template>
 
-      <template v-for="(index, name) in $slots" #[name]>
+      <template v-for="name in $slots" #[name]>
         <slot :name="name" />
       </template>
 
-      <template v-for="(index, name) in $scopedSlots" #[name]="data">
+      <template v-for="name in $scopedSlots" #[name]="data">
         <slot :name="name" v-bind="data" />
       </template>
     </v-data-table>
   </v-card>
 </template>
 
-<script lang="ts">
-import { Component, Vue, Prop } from "vue-property-decorator";
-import type { DataTableHeader } from "vuetify";
-
-@Component({})
-export default class EditDataTable extends Vue {
-  @Prop()
-  value!: unknown[];
-
-  @Prop()
-  name!: string;
-
-  @Prop()
-  headers!: DataTableHeader[];
-
-  @Prop({ default: false })
-  showExpand?: boolean;
-
-  expanded = [] as unknown[];
-
-  search = "";
-  showDialog = false;
-  currentIndex = null as number | null;
-
-  get fullHeaders(): DataTableHeader[] {
-    const headers: DataTableHeader[] = [
-      ...this.headers,
-      {
-        text: "",
-        value: "actions",
-        align: "end",
-        groupable: false,
-        sortable: false,
-        cellClass: "smallColumn",
-      },
-    ];
-
-    if (this.showExpand) {
-      headers.push({
-        text: "",
-        value: "data-table-expand",
-        cellClass: "smallColumn",
-      });
-    }
-
-    return headers;
-  }
-
-  editItem(item: unknown): void {
-    this.currentIndex = this.value.indexOf(item);
-
-    this.showDialog = true;
-  }
-
-  expandAll(v: boolean): void {
-    if (v) {
-      this.expanded = this.value;
-    } else {
-      this.expanded = [];
-    }
-  }
-}
-</script>
 <style>
 .smallColumn {
   width: 1px;

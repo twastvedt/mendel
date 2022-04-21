@@ -16,7 +16,8 @@
 import { Component, Vue } from "vue-property-decorator";
 
 @Component({})
-export default class SettingsMenu extends Vue {
+export defineComponent({
+  name: "SettingsMenu",
   items = [
     {
       title: "Home",

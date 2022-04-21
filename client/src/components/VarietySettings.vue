@@ -41,7 +41,8 @@ import { Variety } from "@mendel/common";
     EditDataTable,
   },
 })
-export default class VarietySettings extends Vue {
+export defineComponent({
+  name: "VarietySettings",
   state = state;
 
   varietyHeaders: DataTableHeader[] = [

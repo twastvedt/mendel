@@ -34,7 +34,8 @@ import { state } from "../Store";
 import { Family, Variety } from "@mendel/common";
 
 @Component({})
-export default class PlantComponent extends Vue {
+export defineComponent({
+  name: "PlantComponent",
   @Prop() readonly variety!: Variety;
   @Prop({ default: true }) readonly interactive!: boolean;
   @Prop({ default: true }) readonly drawSpacing!: boolean;
@@ -47,7 +48,7 @@ export default class PlantComponent extends Vue {
     throw new Error("Variety has no family");
   }
 
-  get iconSize(): number {
+ iconSize(): number {
     return Math.min(40 / state.scale, (this.family.spacing * 2) / 3);
   }
 

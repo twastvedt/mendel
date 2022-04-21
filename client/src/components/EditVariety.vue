@@ -63,7 +63,8 @@ import { state } from "../Store";
 import type { VueForm } from "../types/vueTypes";
 
 @Component({})
-export default class EditVariety extends Vue {
+export defineComponent({
+  name: "EditVariety",
   $refs!: {
     form: VueForm;
   };
@@ -88,7 +89,7 @@ export default class EditVariety extends Vue {
     return !this.value;
   }
 
-  created(): void {
+: void {
     this.resetForm();
   }
 

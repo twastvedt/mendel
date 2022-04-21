@@ -15,7 +15,8 @@ import { Family, Variety } from "@mendel/common";
 import { Component, Prop, Vue } from "vue-property-decorator";
 
 @Component({})
-export default class SeedPack extends Vue {
+export defineComponent({
+  name: "SeedPack",
   @Prop() variety!: Variety;
 
   get family(): Family {

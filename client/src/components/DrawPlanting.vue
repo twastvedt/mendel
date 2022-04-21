@@ -1,3 +1,70 @@
+<script setup lang="ts">
+import { Planting, Variety, Position } from "@mendel/common";
+import { state } from "../Store";
+import PlantingComponent from "./PlantingComponent.vue";
+import PlantComponent from "./PlantComponent.vue";
+import { GridPoints } from "../services/polygonGrid";
+import { Stage } from "../tools/DrawPlantingTool";
+
+const props = defineProps<{
+  planting: Planting;
+  cursor?: Position;
+  plants?: GridPoints;
+  rotationCenter?: Position;
+  dividingLine: Position[];
+  stage: Stage;
+  snapped: boolean;
+}>();
+
+function variety(): Variety {
+  if (props.planting.variety) {
+    return props.planting.variety;
+  }
+
+  throw new Error("Planting has no variety");
+}
+
+function radius(): number | undefined {
+  const v = variety();
+  if (v.family) {
+    return v.family.spacing / 2;
+  }
+
+  return undefined;
+}
+
+function projectedRotationCenter(): Position | null {
+  if (props.rotationCenter) {
+    return state.projection(props.rotationCenter);
+  }
+
+  return null;
+}
+
+function projectedCursor(): Position | null {
+  if (props.cursor) {
+    return state.projection(props.cursor);
+  }
+
+  return null;
+}
+
+function projectedLineHead(): Position | null {
+  if (props.dividingLine[0] && props.stage !== Stage.selectingAfterLine) {
+    return state.projection(props.dividingLine[0]);
+  }
+
+  return null;
+}
+
+function plantsClass(): Record<string, boolean> {
+  return {
+    faded:
+      (props.stage === Stage.selecting && !!props.dividingLine[0]) ||
+      props.stage === Stage.drawingLine,
+  };
+}
+</script>
 <template>
   <g>
     <PlantingComponent :planting="planting" :is-cursor="true" />
@@ -10,7 +77,7 @@
       <circle
         v-for="(point, i) in plants.interiorPoints"
         :key="`interior${i}`"
-        :fill="variety.color"
+        :fill="variety().color"
         :cx="point[0]"
         :cy="-point[1]"
         :r="radius"
@@ -20,7 +87,7 @@
         v-for="(p, i) in plants.edgePoints"
         v-show="p.display"
         :key="`exterior${i}`"
-        :fill="variety.color"
+        :fill="variety().color"
         :cx="p.point[0]"
         :cy="-p.point[1]"
         :r="radius"
@@ -48,7 +115,7 @@
     <path
       v-if="dividingLine.length > 1"
       class="dividingLine"
-      :d="state.pathFromPoints(dividingLine)"
+      :d="state.pathFromPoints(dividingLine) || undefined"
     />
 
     <circle
@@ -61,82 +128,6 @@
   </g>
 </template>
 
-<script lang="ts">
-import { Planting, Variety, Position } from "@mendel/common";
-import { Component, Prop, Vue } from "vue-property-decorator";
-import { state } from "../Store";
-import PlantingComponent from "./PlantingComponent.vue";
-import PlantComponent from "./PlantComponent.vue";
-import { GridPoints } from "../services/polygonGrid";
-import { Stage } from "../tools/DrawPlantingTool";
-
-@Component({
-  components: {
-    PlantingComponent,
-    PlantComponent,
-  },
-})
-export default class DrawPlanting extends Vue {
-  @Prop() readonly planting!: Planting;
-  @Prop() readonly cursor?: Position;
-  @Prop() readonly plants?: GridPoints;
-  @Prop() readonly rotationCenter?: Position;
-  @Prop() readonly dividingLine!: Position[];
-  @Prop() readonly stage!: Stage;
-  @Prop() readonly snapped!: boolean;
-
-  get radius(): number | undefined {
-    if (this.variety.family) {
-      return this.variety.family.spacing / 2;
-    }
-
-    return undefined;
-  }
-
-  get projectedRotationCenter(): Position | null {
-    if (this.rotationCenter) {
-      return state.projection(this.rotationCenter);
-    }
-
-    return null;
-  }
-
-  get projectedCursor(): Position | null {
-    if (this.cursor) {
-      return state.projection(this.cursor);
-    }
-
-    return null;
-  }
-
-  get projectedLineHead(): Position | null {
-    if (this.dividingLine[0] && this.stage !== Stage.selectingAfterLine) {
-      return state.projection(this.dividingLine[0]);
-    }
-
-    return null;
-  }
-
-  get variety(): Variety {
-    if (this.planting.variety) {
-      return this.planting.variety;
-    }
-
-    throw new Error("Planting has no variety");
-  }
-
-  get plantsClass(): Record<string, boolean> {
-    return {
-      faded:
-        (this.stage === Stage.selecting && !!this.dividingLine[0]) ||
-        this.stage === Stage.drawingLine,
-    };
-  }
-
-  state = state;
-  Stage = Stage;
-}
-</script>
 <style lang="scss" scoped>
 g {
   pointer-events: none;

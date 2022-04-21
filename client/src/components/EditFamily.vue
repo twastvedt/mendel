@@ -60,7 +60,8 @@ import { state } from "../Store";
 import type { VueForm } from "../types/vueTypes";
 
 @Component({})
-export default class EditFamily extends Vue {
+export defineComponent({
+  name: "EditFamily",
   $refs!: {
     form: VueForm;
   };
@@ -78,7 +79,7 @@ export default class EditFamily extends Vue {
     return !this.value;
   }
 
-  get icon(): string {
+ icon(): string {
     return this.formValue.icon.replace("symbol ", `symbol id="edit-icon" `);
   }
 

@@ -64,7 +64,8 @@ import { Variety } from "@mendel/common";
     EditDataTable,
   },
 })
-export default class Summary extends Vue {
+export defineComponent({
+  name: "Summary",
   state = state;
 
   headers: DataTableHeader[] = [

@@ -12,7 +12,7 @@
 
       <v-divider></v-divider>
 
-      <MainMenu />
+      <mainMenu />
     </v-navigation-drawer>
 
     <v-main>
@@ -32,22 +32,21 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue } from "vue-property-decorator";
+import { defineComponent } from "vue";
 import toolbar from "./components/Toolbar.vue";
 import { state } from "./Store";
-import MainMenu from "./components/MainMenu.vue";
+import mainMenu from "./components/MainMenu.vue";
 
-@Component({
+export default defineComponent({
+  name: "App",
   components: {
     toolbar,
-    MainMenu,
+    mainMenu,
   },
-})
-export default class App extends Vue {
-  constructor() {
-    super();
-  }
-
-  state = state;
-}
+  setup() {
+    return {
+      state,
+    };
+  },
+});
 </script>

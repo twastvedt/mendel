@@ -14,7 +14,7 @@
   "extensions": [
     "EditorConfig.editorconfig",
     "dbaeumer.vscode-eslint",
-    "octref.vetur",
+    "johnsoncodehk.volar",
     "visualstudioexptteam.vscodeintellicode",
     "esbenp.prettier-vscode",
     "ms-azuretools.vscode-docker"

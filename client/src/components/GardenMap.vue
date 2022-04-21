@@ -75,7 +75,8 @@ import PlantingComponent from "./PlantingComponent.vue";
     PlantingComponent,
   },
 })
-export default class GardenMap extends Vue {
+export defineComponent({
+  name: "GardenMap",
   $refs!: {
     map: SVGSVGElement;
     content: SVGGElement;

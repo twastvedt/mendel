@@ -50,7 +50,8 @@ import polylabel from "polylabel";
     PlantComponent,
   },
 })
-export default class PlantingComponent extends Vue {
+export defineComponent({
+  name: "PlantingComponent",
   @Prop() readonly planting!: Planting;
   @Prop({ default: false }) readonly isCursor!: boolean;
 
@@ -62,7 +63,7 @@ export default class PlantingComponent extends Vue {
     throw new Error("Planting has no variety");
   }
 
-  get classList(): Record<string, unknown> {
+ classList(): Record<string, unknown> {
     return { cursor: this.isCursor };
   }
 

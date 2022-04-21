@@ -68,7 +68,8 @@ import { Variety, Family } from "@mendel/common";
 import { DrawPlantingTool } from "../tools/DrawPlantingTool";
 
 @Component({})
-export default class Toolbar extends Vue {
+export defineComponent({
+  name: "Toolbar",
   state = state;
 
   disableVarietySelect = false;

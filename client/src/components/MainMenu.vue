@@ -40,5 +40,6 @@
 import { Component, Vue } from "vue-property-decorator";
 
 @Component({})
-export default class MainMenu extends Vue {}
+export defineComponent({
+  name: "MainMenu",}
 </script>

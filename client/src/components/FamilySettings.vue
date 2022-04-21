@@ -41,7 +41,8 @@ import { Family } from "@mendel/common";
     EditDataTable,
   },
 })
-export default class FamilySettings extends Vue {
+export defineComponent({
+  name: "FamilySettings",
   state = state;
 
   headers: DataTableHeader[] = [
