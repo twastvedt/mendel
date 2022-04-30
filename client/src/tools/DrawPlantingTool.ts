@@ -77,11 +77,7 @@ export class DrawPlantingTool implements Tool {
 
     removeEventListener("keyup", this.onKeyUp);
 
-    if (this.planting) {
-      state.db?.removePlanting(this.planting);
-
-      delete this.planting;
-    }
+    delete this.planting;
   }
 
   public onCursorMove(point: Position): void {
@@ -223,13 +219,13 @@ export class DrawPlantingTool implements Tool {
   }
 
   private clearDisplay(): void {
-    if (this.planting) {
-      delete this.planting.shape;
-
-      this.cursorProps.plants = null;
-
-      delete this.index;
+    if (this.planting?.shape) {
+      this.planting.shape.coordinates = [[[0, 0]]];
     }
+
+    this.cursorProps.plants = null;
+
+    delete this.index;
   }
 
   private onKeyDown = (event: KeyboardEvent) => {
