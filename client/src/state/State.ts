@@ -1,4 +1,4 @@
-import { gardenApi, varietyApi, Position } from "@mendel/common";
+import { gardenApi, varietyApi, Position, Bed, Planting } from "@mendel/common";
 import { Tool } from "../tools/Tool";
 import { Action } from "../actions/Action";
 import { geoIdentity, geoPath } from "d3-geo";
@@ -7,7 +7,14 @@ import axios from "axios";
 
 axios.defaults.baseURL = "http://localhost:3000";
 
-export type ElementType = "bed" | "planting" | "area";
+export interface ClickData {
+  bed: Bed;
+  planting: Planting;
+  area: unknown;
+  plant: { planting: Planting; position: Position };
+}
+
+export type ElementType = keyof ClickData;
 
 export class State {
   // TODO: We assume data is stored in inches relative to garden origin.
@@ -63,9 +70,9 @@ export class State {
     this.loading = false;
   }
 
-  onClick(element?: unknown): void {
+  onClick<T extends ElementType>(type?: T, data?: ClickData[T]): void {
     if (this.tool) {
-      const action = this.tool.onClick(this.cursorPosition, element);
+      const action = this.tool.onClick(this.cursorPosition, data);
 
       if (action) {
         action.Do(this);

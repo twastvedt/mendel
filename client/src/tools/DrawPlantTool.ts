@@ -2,12 +2,13 @@ import { Variety, Position } from "@mendel/common";
 import { Tool } from "./Tool";
 import { AddPlantAction } from "../actions/AddPlantAction";
 import { Action } from "../actions/Action";
-import { state } from "../state/State";
+import { ElementType, state } from "../state/State";
 import { Vector } from "../Vector";
 import plantComponent from "../components/PlantComponent.vue";
 
 export class DrawPlantTool implements Tool {
   private location?: Position;
+  private active = false;
   private cursor = new Vector(0, 0);
   private tempVec = new Vector(0, 0);
   private lastClosestIndex?: number;
@@ -18,6 +19,8 @@ export class DrawPlantTool implements Tool {
     transform: "",
     interactive: false,
   };
+
+  public interactiveElements = new Set<ElementType>(["bed"]);
 
   public constructor(private variety: Variety) {
     this.cursorProps.variety = variety;
@@ -38,11 +41,15 @@ export class DrawPlantTool implements Tool {
     }
   }
 
+  public onHover(point: Position, index?: number): void {
+    this.active = index != undefined;
+  }
+
   public onCursorMove(point: Position): void {
-    if (this.location && this.variety.family) {
+    if (this.location && this.variety.family && this.active) {
       this.cursor.set(...point);
 
-      if (state.db) {
+      if (state.db?.delaunay) {
         const thisRadius = this.variety.family.spacing / 2;
 
         this.lastClosestIndex = state.db.delaunay.find(

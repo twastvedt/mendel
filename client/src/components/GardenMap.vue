@@ -8,7 +8,7 @@
       xmlns="http://www.w3.org/2000/svg"
       xmlns:xlink="http://www.w3.org/1999/xlink"
       @mousemove="onMouseMove"
-      @click="onClick"
+      @click="state.onClick()"
       @mouseleave="onHover"
     >
       <g ref="content" class="content">
@@ -18,7 +18,7 @@
               class="bed"
               :style="elementStyle('bed')"
               :d="state.pathGenerator(bed.shape)"
-              @click.stop="onClick($event, bed)"
+              @click.stop="state.onClick('bed', bed)"
               @mouseenter="onHover($event, bed, i)"
               @mouseleave="onHover($event)"
             />
@@ -39,7 +39,7 @@
               class="area"
               :style="elementStyle('area')"
               :d="state.pathFromPoints(area.polygon)"
-              @click.stop="onClick($event, area)"
+              @click.stop="state.onClick('area', area)"
               @mouseenter="onHover($event, area, i)"
               @mouseleave="onHover($event)"
             />
@@ -49,8 +49,9 @@
             v-for="(planting, index) in state.db.garden.plantings"
             :key="`${index}-planting`"
             :planting="planting"
+            :plants-interactive="isInteractive('plant')"
             :style="elementStyle('planting')"
-            @click.stop="onClick($event, planting)"
+            @click.stop="state.onClick('planting', planting)"
             @mouseover="onHover($event, planting, index)"
             @mouseleave="onHover($event)"
           />
@@ -171,10 +172,6 @@ export default class GardenMap extends Vue {
     }
   }
 
-  onClick(event: MouseEvent, element?: unknown): void {
-    state.onClick(element);
-  }
-
   onHover(event: MouseEvent, element?: unknown, index?: number): void {
     state.tool?.onHover?.(state.cursorPosition, index, element);
   }
@@ -190,12 +187,16 @@ export default class GardenMap extends Vue {
     }
   }
 
+  isInteractive(elementType: ElementType): boolean {
+    return (
+      (!state.tool || state.tool?.interactiveElements?.has(elementType)) ??
+      false
+    );
+  }
+
   elementStyle(elementType: ElementType): Record<string, string> {
     return {
-      "pointer-events":
-        !state.tool || state.tool?.interactiveElements?.has(elementType)
-          ? "auto"
-          : "none",
+      "pointer-events": this.isInteractive(elementType) ? "auto" : "none",
     };
   }
 }

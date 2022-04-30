@@ -17,15 +17,16 @@
       "
       :transform="labelTransform"
       :draw-spacing="false"
-      :interactive="false"
       :variety="variety"
-      class="icon"
+      :interactive="false"
     />
     <PlantComponent
-      v-for="(location, i) in planting.locations.coordinates"
+      v-for="(position, i) in planting.locations.coordinates"
       :key="i"
       :variety="variety"
-      :transform="state.makeTransform(location)"
+      :transform="state.makeTransform(position)"
+      :interactive="plantsInteractive"
+      @click.stop="plantClick(position)"
     />
     <title>
       {{ variety.name }} <span v-if="variety.family">{{
@@ -39,7 +40,7 @@
 </template>
 
 <script lang="ts">
-import { Planting, Variety } from "@mendel/common";
+import { Planting, Position, Variety } from "@mendel/common";
 import { Component, Prop, Vue } from "vue-property-decorator";
 import { state } from "../state/State";
 import PlantComponent from "./PlantComponent.vue";
@@ -53,6 +54,9 @@ import polylabel from "polylabel";
 export default class PlantingComponent extends Vue {
   @Prop() readonly planting!: Planting;
   @Prop({ default: false }) readonly isCursor!: boolean;
+  @Prop() readonly plantsInteractive!: boolean;
+
+  state = state;
 
   get variety(): Variety {
     if (this.planting.variety) {
@@ -76,7 +80,9 @@ export default class PlantingComponent extends Vue {
     return undefined;
   }
 
-  state = state;
+  plantClick(position: Position): void {
+    state.onClick("plant", { planting: this.planting, position });
+  }
 }
 </script>
 
@@ -94,8 +100,7 @@ export default class PlantingComponent extends Vue {
   fill-opacity: 0.7;
 }
 
-.cursor,
-.icon {
+.cursor {
   pointer-events: none;
 }
 </style>

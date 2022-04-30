@@ -1,5 +1,8 @@
 <template>
-  <g :class="classList" @click="onClick">
+  <g
+    :class="interactive ? 'interactive' : 'non-interactive'"
+    @click="$emit('click', $event)"
+  >
     <template v-if="state.scaleRange > 1">
       <circle
         v-if="drawSpacing"
@@ -24,7 +27,7 @@
       class="solidCircle"
     />
 
-    <title v-if="interactive">{{ title }}</title>
+    <title>{{ title }}</title>
   </g>
 </template>
 
@@ -36,8 +39,8 @@ import { Family, Variety } from "@mendel/common";
 @Component({})
 export default class PlantComponent extends Vue {
   @Prop() readonly variety!: Variety;
-  @Prop({ default: true }) readonly interactive!: boolean;
   @Prop({ default: true }) readonly drawSpacing!: boolean;
+  @Prop({ default: true }) readonly interactive!: boolean;
 
   get family(): Family {
     if (this.variety.family) {
@@ -55,27 +58,24 @@ export default class PlantComponent extends Vue {
     return `${this.variety.name} ${this.family.name}`;
   }
 
-  get classList(): Record<string, unknown> {
-    return { interactive: this.interactive, notInteractive: !this.interactive };
-  }
-
   state = state;
-
-  onClick(event: PointerEvent): void {
-    if (this.interactive) {
-      this.$emit("click", event);
-    }
-  }
 }
 </script>
 
 <style scoped lang="scss">
+.interactive {
+  pointer-events: auto;
+}
+.non-interactive {
+  pointer-events: none;
+}
+
 .solidCircle {
   opacity: 75%;
   stroke: none;
 }
 
-.interactive .solidCircle:hover {
+.solidCircle:hover {
   opacity: 90%;
 }
 
@@ -86,11 +86,10 @@ export default class PlantComponent extends Vue {
   stroke-dasharray: 5 5;
 }
 
-.interactive .spacingCircle:hover {
+.spacingCircle:hover {
   fill-opacity: 0.5;
 }
 
-.notInteractive,
 .icon {
   pointer-events: none;
 }

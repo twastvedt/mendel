@@ -15,7 +15,7 @@ export function baseApi<T extends EntityBase>(endpoint: string) {
       `/${endpoint}/`
     ),
 
-    update: new Endpoint<undefined, EntityId<T>, undefined>(
+    update: new Endpoint<undefined, EntityId<Partial<T>>, undefined>(
       "put",
       `/${endpoint}`
     ),

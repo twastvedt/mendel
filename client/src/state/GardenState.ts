@@ -25,7 +25,7 @@ export class GardenState {
 
   delaunayPoints: DelaunayPoint[];
 
-  delaunay!: Delaunay<DelaunayPoint>;
+  delaunay?: Delaunay<DelaunayPoint>;
 
   grid: PolygonGrid;
 
@@ -184,7 +184,10 @@ export class GardenState {
       planting.locations.coordinates.splice(index, 1);
 
       await plantingApi.update.request({
-        data: planting,
+        data: {
+          id: planting.id,
+          locations: planting.locations,
+        },
       });
     } else {
       throw new Error(
@@ -207,11 +210,15 @@ export class GardenState {
   }
 
   renewDelaunay(): void {
-    this.delaunay = Delaunay.from(
-      this.delaunayPoints,
-      (p) => p.point[0],
-      (p) => p.point[1]
-    );
+    if (this.delaunayPoints.length) {
+      this.delaunay = Delaunay.from(
+        this.delaunayPoints,
+        (p) => p.point[0],
+        (p) => p.point[1]
+      );
+    } else {
+      delete this.delaunay;
+    }
   }
 
   async removePlanting(id: number): Promise<void>;
