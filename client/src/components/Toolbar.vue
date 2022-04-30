@@ -1,19 +1,17 @@
 <template>
-  <v-app-bar app>
-    <v-app-bar-nav-icon @click.stop="state.drawer = !state.drawer" />
-
-    <v-btn-toggle v-model="state.toolName" @change="newTool">
-      <v-btn value="drawPlant" title="Add plant">
+  <v-toolbar dense floating>
+    <v-btn-toggle v-model="state.toolName" borderless @change="newTool">
+      <v-btn icon value="drawPlant" title="Add plant">
         <v-icon>mdi-sprout</v-icon></v-btn
       >
-      <v-btn value="drawPlanting" title="Add planting">
+      <v-btn icon value="drawPlanting" title="Add planting">
         <v-icon>mdi-dots-hexagon</v-icon></v-btn
       >
-      <v-btn value="deletePlant" title="Delete plant">
+      <v-btn icon value="deletePlant" title="Delete plant">
         <v-icon>mdi-sprout</v-icon>
         <v-icon class="badge" color="red darken-4">mdi-close</v-icon>
       </v-btn>
-      <v-btn value="deletePlanting" title="Delete planting">
+      <v-btn icon value="deletePlanting" title="Delete planting">
         <v-icon>mdi-dots-hexagon</v-icon
         ><v-icon class="badge" color="red darken-4">mdi-close</v-icon>
       </v-btn>
@@ -24,10 +22,6 @@
       class="ml-3"
       :disabled="disableVarietySelect"
       :items="varietyList"
-      dense
-      solo
-      flat
-      outlined
       hide-details
       item-text="name"
       item-value="id"
@@ -55,7 +49,7 @@
         </v-list-item-content>
       </template>
     </v-select>
-  </v-app-bar>
+  </v-toolbar>
 </template>
 
 <script lang="ts">

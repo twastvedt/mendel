@@ -1,65 +1,79 @@
 <template>
-  <svg
-    id="map"
-    ref="map"
-    xmlns="http://www.w3.org/2000/svg"
-    xmlns:xlink="http://www.w3.org/1999/xlink"
-    @mousemove="onMouseMove"
-    @click="onClick"
-    @mouseleave="onHover"
-  >
-    <g ref="content" class="content">
-      <g v-if="state.db">
-        <g v-for="(bed, i) in state.db.garden.beds" :key="bed.id">
-          <path
-            class="bed"
-            :style="elementStyle('bed')"
-            :d="state.pathGenerator(bed.shape)"
-            @click.stop="onClick($event, bed)"
-            @mouseenter="onHover($event, bed, i)"
-            @mouseleave="onHover($event)"
-          />
+  <div class="mapContainer">
+    <Toolbar class="ma-3 toolbar" />
 
-          <!-- <circle
+    <svg
+      id="map"
+      ref="map"
+      xmlns="http://www.w3.org/2000/svg"
+      xmlns:xlink="http://www.w3.org/1999/xlink"
+      @mousemove="onMouseMove"
+      @click="onClick"
+      @mouseleave="onHover"
+    >
+      <g ref="content" class="content">
+        <g v-if="state.db">
+          <g v-for="(bed, i) in state.db.garden.beds" :key="bed.id">
+            <path
+              class="bed"
+              :style="elementStyle('bed')"
+              :d="state.pathGenerator(bed.shape)"
+              @click.stop="onClick($event, bed)"
+              @mouseenter="onHover($event, bed, i)"
+              @mouseleave="onHover($event)"
+            />
+
+            <!-- <circle
             v-for="(point, i) in bed.shape.coordinates[0]"
             :key="`p${i}`"
             :cx="point[0]"
             :cy="point[1]"
             r="0.5"
           /> -->
-        </g>
+          </g>
 
-        <g v-if="state.db.grid">
-          <path
-            v-for="(area, i) in state.db.grid.areas"
-            :key="i"
-            class="area"
-            :style="elementStyle('area')"
-            :d="state.pathFromPoints(area.polygon)"
-            @click.stop="onClick($event, area)"
-            @mouseenter="onHover($event, area, i)"
+          <g v-if="state.db.grid">
+            <path
+              v-for="(area, i) in state.db.grid.areas"
+              :key="i"
+              class="area"
+              :style="elementStyle('area')"
+              :d="state.pathFromPoints(area.polygon)"
+              @click.stop="onClick($event, area)"
+              @mouseenter="onHover($event, area, i)"
+              @mouseleave="onHover($event)"
+            />
+          </g>
+
+          <PlantingComponent
+            v-for="(planting, index) in state.db.garden.plantings"
+            :key="`${index}-planting`"
+            :planting="planting"
+            :style="elementStyle('planting')"
+            @click.stop="onClick($event, planting)"
+            @mouseover="onHover($event, planting, index)"
             @mouseleave="onHover($event)"
           />
+
+          <dynamic
+            :is="state.tool.cursorComponent"
+            v-if="state.tool && state.tool.cursorComponent"
+            v-bind="state.tool.cursorProps"
+          />
         </g>
-
-        <PlantingComponent
-          v-for="(planting, index) in state.db.garden.plantings"
-          :key="`${index}-planting`"
-          :planting="planting"
-          :style="elementStyle('planting')"
-          @click.stop="onClick($event, planting)"
-          @mouseover="onHover($event, planting, index)"
-          @mouseleave="onHover($event)"
-        />
-
-        <dynamic
-          :is="state.tool.cursorComponent"
-          v-if="state.tool && state.tool.cursorComponent"
-          v-bind="state.tool.cursorProps"
-        />
       </g>
-    </g>
-  </svg>
+    </svg>
+
+    <v-footer app>
+      <template v-if="state.tool">
+        {{ state.tool.helpText }}
+      </template>
+      <v-spacer />
+      {{
+        state.cursorPosition.map((c) => Math.round(c * 100) / 100).join(", ")
+      }}
+    </v-footer>
+  </div>
 </template>
 
 <script lang="ts">
@@ -69,9 +83,11 @@ import * as d3 from "d3";
 import { zoom, D3ZoomEvent } from "d3-zoom";
 
 import PlantingComponent from "./PlantingComponent.vue";
+import Toolbar from "./Toolbar.vue";
 
 @Component({
   components: {
+    Toolbar,
     PlantingComponent,
   },
 })
@@ -186,11 +202,22 @@ export default class GardenMap extends Vue {
 </script>
 
 <style scoped lang="scss">
-#map {
+.mapContainer {
   width: 100%;
   height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.toolbar {
+  position: absolute;
+  right: 0;
+}
+
+#map {
+  width: 100%;
+  flex: 1 0 auto;
   display: block;
-  z-index: 0;
 
   &::v-deep * {
     vector-effect: non-scaling-stroke;

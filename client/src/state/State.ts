@@ -15,8 +15,6 @@ export class State {
 
   pathGenerator = geoPath(this.projection);
 
-  drawer = false;
-
   loading = false;
   scale = 1;
 
