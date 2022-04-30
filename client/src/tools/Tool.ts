@@ -1,7 +1,7 @@
 import { Position } from "@mendel/common";
 import { VueConstructor } from "vue";
 import { Action } from "../actions/Action";
-import { ElementType } from "../Store";
+import { ElementType } from "../state/State";
 
 export interface Tool {
   helpText: string;

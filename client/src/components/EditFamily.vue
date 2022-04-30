@@ -56,7 +56,7 @@
 import { Component, Vue, Watch, Prop } from "vue-property-decorator";
 
 import { Family } from "@mendel/common";
-import { state } from "../Store";
+import { state } from "../state/State";
 import type { VueForm } from "../types/vueTypes";
 
 @Component({})

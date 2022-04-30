@@ -2,7 +2,7 @@ import { Variety, Position } from "@mendel/common";
 import { Tool } from "./Tool";
 import { AddPlantAction } from "../actions/AddPlantAction";
 import { Action } from "../actions/Action";
-import { state } from "../Store";
+import { state } from "../state/State";
 import { Vector } from "../Vector";
 import plantComponent from "../components/PlantComponent.vue";
 
@@ -42,17 +42,15 @@ export class DrawPlantTool implements Tool {
     if (this.location && this.variety.family) {
       this.cursor.set(...point);
 
-      if (state.garden) {
+      if (state.db) {
         const thisRadius = this.variety.family.spacing / 2;
 
-        this.lastClosestIndex = state.garden.delaunay.find(
+        this.lastClosestIndex = state.db.delaunay.find(
           ...point,
           this.lastClosestIndex
         );
 
-        const neighbors = state.garden.delaunay.neighbors(
-          this.lastClosestIndex
-        );
+        const neighbors = state.db.delaunay.neighbors(this.lastClosestIndex);
 
         const closestPlants: {
           location: Vector;
@@ -61,7 +59,7 @@ export class DrawPlantTool implements Tool {
         }[] = [];
 
         for (const i of [...neighbors, this.lastClosestIndex]) {
-          const delaunayPoint = state.garden.delaunayPoints[i];
+          const delaunayPoint = state.db.delaunayPoints[i];
 
           if (delaunayPoint?.planting.variety?.family) {
             const plantVector = Vector.fromArray(delaunayPoint.point);

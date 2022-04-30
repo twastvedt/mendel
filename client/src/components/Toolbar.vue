@@ -60,7 +60,7 @@
 
 <script lang="ts">
 import { Component, Vue } from "vue-property-decorator";
-import { state } from "../Store";
+import { state } from "../state/State";
 import { DrawPlantTool } from "../tools/DrawPlantTool";
 import { DeletePlantTool } from "../tools/DeletePlantTool";
 import { DeletePlantingTool } from "../tools/DeletePlantingTool";
@@ -77,7 +77,7 @@ export default class Toolbar extends Vue {
 
   get varietyList(): (Variety | { divider: boolean })[] {
     return (
-      state.garden?.families
+      state.db?.families
         .sort((a, b) => a.name.localeCompare(b.name))
         .filter(
           (f): f is Family & Required<Pick<Family, "varieties">> =>
@@ -105,7 +105,7 @@ export default class Toolbar extends Vue {
   }
 
   newTool(newTool: string): void {
-    if (state.garden) {
+    if (state.db) {
       switch (newTool) {
         case "drawPlant":
           if (this.variety) {
@@ -114,10 +114,8 @@ export default class Toolbar extends Vue {
 
           break;
         case "drawPlanting":
-          if (this.variety && state.garden.grid) {
-            state.setTool(
-              new DrawPlantingTool(this.variety, state.garden.grid)
-            );
+          if (this.variety && state.db.grid) {
+            state.setTool(new DrawPlantingTool(this.variety, state.db.grid));
           }
           break;
         case "deletePlant":

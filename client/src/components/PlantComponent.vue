@@ -30,7 +30,7 @@
 
 <script lang="ts">
 import { Component, Prop, Vue } from "vue-property-decorator";
-import { state } from "../Store";
+import { state } from "../state/State";
 import { Family, Variety } from "@mendel/common";
 
 @Component({})

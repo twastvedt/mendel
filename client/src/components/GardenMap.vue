@@ -9,8 +9,8 @@
     @mouseleave="onHover"
   >
     <g ref="content" class="content">
-      <g v-if="state.garden">
-        <g v-for="(bed, i) in state.garden.garden.beds" :key="bed.id">
+      <g v-if="state.db">
+        <g v-for="(bed, i) in state.db.garden.beds" :key="bed.id">
           <path
             class="bed"
             :style="elementStyle('bed')"
@@ -29,9 +29,9 @@
           /> -->
         </g>
 
-        <g v-if="state.garden.grid">
+        <g v-if="state.db.grid">
           <path
-            v-for="(area, i) in state.garden.grid.areas"
+            v-for="(area, i) in state.db.grid.areas"
             :key="i"
             class="area"
             :style="elementStyle('area')"
@@ -43,7 +43,7 @@
         </g>
 
         <PlantingComponent
-          v-for="(planting, index) in state.garden.garden.plantings"
+          v-for="(planting, index) in state.db.garden.plantings"
           :key="`${index}-planting`"
           :planting="planting"
           :style="elementStyle('planting')"
@@ -64,7 +64,7 @@
 
 <script lang="ts">
 import { Component, Vue } from "vue-property-decorator";
-import { ElementType, state } from "../Store";
+import { ElementType, state } from "../state/State";
 import * as d3 from "d3";
 import { zoom, D3ZoomEvent } from "d3-zoom";
 
@@ -101,7 +101,7 @@ export default class GardenMap extends Vue {
 
     await state.ready;
 
-    if (!state.garden) {
+    if (!state.db) {
       return;
     }
 

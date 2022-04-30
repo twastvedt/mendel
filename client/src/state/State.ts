@@ -1,6 +1,6 @@
 import { gardenApi, varietyApi, Position } from "@mendel/common";
-import { Tool } from "./tools/Tool";
-import { Action } from "./actions/Action";
+import { Tool } from "../tools/Tool";
+import { Action } from "../actions/Action";
 import { geoIdentity, geoPath } from "d3-geo";
 import { GardenState } from "./GardenState";
 import axios from "axios";
@@ -9,7 +9,7 @@ axios.defaults.baseURL = "http://localhost:3000";
 
 export type ElementType = "bed" | "planting" | "area";
 
-export class Store {
+export class State {
   // TODO: We assume data is stored in inches relative to garden origin.
   projection = geoIdentity().reflectY(true);
 
@@ -20,7 +20,7 @@ export class Store {
   loading = false;
   scale = 1;
 
-  garden?: GardenState = undefined;
+  db?: GardenState = undefined;
 
   actions: Action[] = [];
 
@@ -60,7 +60,7 @@ export class Store {
 
     const garden = await gardenApi.one.request({ routeParams: { id: 1 } });
 
-    this.garden = new GardenState(garden, families);
+    this.db = new GardenState(garden, families);
 
     this.loading = false;
   }
@@ -108,4 +108,4 @@ export class Store {
   }
 }
 
-export const state = new Store();
+export const state = new State();

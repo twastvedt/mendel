@@ -1,5 +1,5 @@
 import { Planting, EntityId, Position } from "@mendel/common";
-import { Store } from "../Store";
+import { State } from "../state/State";
 import { Action } from "./Action";
 
 export class DeletePlantAction extends Action {
@@ -10,15 +10,15 @@ export class DeletePlantAction extends Action {
     super();
   }
 
-  public async Do(state: Store): Promise<void> {
+  public async Do(state: State): Promise<void> {
     await super.Do(state);
 
-    await state.garden?.removePlant(this.planting, this.location);
+    await state.db?.removePlant(this.planting, this.location);
   }
 
-  public async Undo(state: Store): Promise<void> {
+  public async Undo(state: State): Promise<void> {
     await super.Undo(state);
 
-    state.garden?.addPlantToPlanting(this.location, this.planting);
+    state.db?.addPlantToPlanting(this.location, this.planting);
   }
 }

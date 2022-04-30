@@ -64,7 +64,7 @@
 <script lang="ts">
 import { Planting, Variety, Position } from "@mendel/common";
 import { Component, Prop, Vue } from "vue-property-decorator";
-import { state } from "../Store";
+import { state } from "../state/State";
 import PlantingComponent from "./PlantingComponent.vue";
 import PlantComponent from "./PlantComponent.vue";
 import { GridPoints } from "../services/polygonGrid";

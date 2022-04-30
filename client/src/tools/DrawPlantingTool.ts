@@ -2,7 +2,7 @@ import { Variety, Planting, Position } from "@mendel/common";
 import { Tool } from "./Tool";
 import { AddPlantingAction } from "../actions/AddPlantingAction";
 import { Action } from "../actions/Action";
-import { ElementType, state } from "../Store";
+import { ElementType, state } from "../state/State";
 import drawPlanting from "../components/DrawPlanting.vue";
 import { GridPoints, PolygonGrid } from "../services/polygonGrid";
 
@@ -78,7 +78,7 @@ export class DrawPlantingTool implements Tool {
     removeEventListener("keyup", this.onKeyUp);
 
     if (this.planting) {
-      state.garden?.removePlanting(this.planting);
+      state.db?.removePlanting(this.planting);
 
       delete this.planting;
     }

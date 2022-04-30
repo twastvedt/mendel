@@ -1,5 +1,5 @@
 import { EntityId, plantingApi, Planting } from "@mendel/common";
-import { Store } from "../Store";
+import { State } from "../state/State";
 import { Action } from "./Action";
 
 export class DeletePlantingAction extends Action {
@@ -7,23 +7,23 @@ export class DeletePlantingAction extends Action {
     super();
   }
 
-  public async Do(state: Store): Promise<void> {
+  public async Do(state: State): Promise<void> {
     await super.Do(state);
 
-    state.garden?.removePlanting(this.planting.id);
+    state.db?.removePlanting(this.planting.id);
 
     await plantingApi.delete.request({
       routeParams: { id: this.planting.id },
     });
   }
 
-  public async Undo(state: Store): Promise<void> {
+  public async Undo(state: State): Promise<void> {
     await super.Undo(state);
 
     const newPlanting = (await plantingApi.create.request({
       data: this.planting,
     })) as Planting;
 
-    state.garden?.addPlanting(Object.assign(this.planting, newPlanting));
+    state.db?.addPlanting(Object.assign(this.planting, newPlanting));
   }
 }

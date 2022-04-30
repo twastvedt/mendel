@@ -1,6 +1,6 @@
 import { Tool } from "./Tool";
 import { Action } from "../actions/Action";
-import { ElementType } from "../Store";
+import { ElementType } from "../state/State";
 import { DeletePlantingAction } from "../actions/DeletePlantingAction";
 import { EntityId, Planting, Position } from "@mendel/common";
 

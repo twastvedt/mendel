@@ -41,7 +41,7 @@
 <script lang="ts">
 import { Planting, Variety } from "@mendel/common";
 import { Component, Prop, Vue } from "vue-property-decorator";
-import { state } from "../Store";
+import { state } from "../state/State";
 import PlantComponent from "./PlantComponent.vue";
 import polylabel from "polylabel";
 

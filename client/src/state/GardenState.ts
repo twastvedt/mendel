@@ -10,7 +10,7 @@ import {
   varietyApi,
 } from "@mendel/common";
 import { Delaunay } from "d3-delaunay";
-import { PolygonGrid } from "./services/polygonGrid";
+import { PolygonGrid } from "../services/polygonGrid";
 
 interface DelaunayPoint {
   point: Position;
@@ -25,7 +25,7 @@ export class GardenState {
 
   delaunayPoints: DelaunayPoint[];
 
-  delaunay: Delaunay<DelaunayPoint>;
+  delaunay!: Delaunay<DelaunayPoint>;
 
   grid: PolygonGrid;
 
@@ -73,13 +73,9 @@ export class GardenState {
       }
     });
 
-    this.delaunay = Delaunay.from(
-      delaunayPoints,
-      (p) => p.point[0],
-      (p) => p.point[1]
-    );
-
     this.delaunayPoints = delaunayPoints;
+
+    this.renewDelaunay();
 
     this.grid = new PolygonGrid(
       garden.beds.map((b) => b.shape.coordinates[0]),
@@ -124,7 +120,7 @@ export class GardenState {
 
     this.delaunayPoints.push(delaunayPoint);
 
-    this.updateDelaunay();
+    this.renewDelaunay();
 
     await plantingApi.addPlant.request({
       data: [location],
@@ -171,7 +167,7 @@ export class GardenState {
       this.delaunayPoints.push(delaunayPoint);
     });
 
-    this.updateDelaunay();
+    this.renewDelaunay();
 
     return planting as EntityId<Planting>;
   }
@@ -207,12 +203,15 @@ export class GardenState {
       delaunayPoints.splice(delaunayIndex, 1);
     }
 
-    this.updateDelaunay();
+    this.renewDelaunay();
   }
 
-  updateDelaunay(): void {
-    this.delaunay.points = this.delaunayPoints.flatMap((p) => p.point);
-    this.delaunay.update();
+  renewDelaunay(): void {
+    this.delaunay = Delaunay.from(
+      this.delaunayPoints,
+      (p) => p.point[0],
+      (p) => p.point[1]
+    );
   }
 
   async removePlanting(id: number): Promise<void>;
@@ -241,7 +240,7 @@ export class GardenState {
           delaunayPoints.splice(delaunayIndex, 1);
         });
 
-        this.updateDelaunay();
+        this.renewDelaunay();
 
         this.plantToDelaunay.delete(planting.id);
       }

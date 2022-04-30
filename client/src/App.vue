@@ -34,7 +34,7 @@
 <script lang="ts">
 import { Component, Vue } from "vue-property-decorator";
 import toolbar from "./components/Toolbar.vue";
-import { state } from "./Store";
+import { state } from "./state/State";
 import MainMenu from "./components/MainMenu.vue";
 
 @Component({
