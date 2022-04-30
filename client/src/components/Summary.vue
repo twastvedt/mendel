@@ -5,6 +5,7 @@
         <v-card>
           <v-card-title>Varieties</v-card-title>
           <v-data-table
+            v-if="state.db"
             :items="state.db.varieties"
             name="Varieties"
             :headers="headers"

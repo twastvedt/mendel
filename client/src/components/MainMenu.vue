@@ -20,16 +20,12 @@
       </template>
 
       <v-list-item link to="/settings/families">
-        <v-list-item-icon>
-          <v-icon>mdi-sprout</v-icon>
-        </v-list-item-icon>
+        <v-list-item-icon />
         <v-list-item-title>Families</v-list-item-title>
       </v-list-item>
 
       <v-list-item link to="/settings/varieties">
-        <v-list-item-icon>
-          <v-icon>mdi-dots-hexagon</v-icon>
-        </v-list-item-icon>
+        <v-list-item-icon />
         <v-list-item-title>Varieties</v-list-item-title>
       </v-list-item>
     </v-list-group>
