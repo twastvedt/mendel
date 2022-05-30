@@ -5,6 +5,7 @@
       ref="shape"
       :d="state.pathGenerator(planting.shape)"
       :fill="variety.color"
+      :stroke="variety.color"
       class="shape"
       @click="$emit('click', $event)"
     />
@@ -66,15 +67,24 @@ export default class PlantingComponent extends Vue {
     throw new Error("Planting has no variety");
   }
 
-  get classList(): Record<string, unknown> {
-    return { cursor: this.isCursor };
+  get classList(): (Record<string, unknown> | string | undefined)[] {
+    return [this.planting.shape?.type, { cursor: this.isCursor }];
   }
 
   get labelTransform(): string | undefined {
     if (this.planting.shape) {
-      return state.makeTransform(
-        polylabel(this.planting.shape.coordinates) as [number, number]
-      );
+      if (this.planting.shape.type === "LineString") {
+        const coordinates = this.planting.shape.coordinates;
+
+        return state.makeTransform([
+          (coordinates[1][0] + coordinates[0][0]) / 2,
+          (coordinates[1][1] + coordinates[0][1]) / 2,
+        ]);
+      } else {
+        return state.makeTransform(
+          polylabel(this.planting.shape.coordinates) as [number, number]
+        );
+      }
     }
 
     return undefined;
@@ -88,12 +98,21 @@ export default class PlantingComponent extends Vue {
 
 <style scoped lang="scss">
 .shape {
-  fill-opacity: 0.5;
-  stroke: none;
+  opacity: 0.5;
+  stroke-width: 10px;
+  stroke-linecap: round;
 
   &:hover {
-    fill-opacity: 0.3;
+    opacity: 0.3;
   }
+}
+
+.Polygon .shape {
+  stroke: none;
+}
+
+.LineString .shape {
+  fill: none;
 }
 
 .cursor .shape {

@@ -1,7 +1,7 @@
 import { Entity, Column, ManyToOne } from "typeorm";
 import { EntityBase } from "./EntityBase";
 import { Garden } from "./Garden";
-import { MultiPoint, Polygon } from "./geoJson";
+import { MultiPoint, Polygon, LineString } from "./geoJson";
 import { Variety } from "./Variety";
 
 @Entity()
@@ -9,8 +9,8 @@ export class Planting extends EntityBase {
   @Column("geometry", { spatialFeatureType: "MultiPoint" })
   locations!: MultiPoint;
 
-  @Column("geometry", { nullable: true, spatialFeatureType: "Polygon" })
-  shape?: Polygon;
+  @Column("geometry", { nullable: true, spatialFeatureType: "Geometry" })
+  shape?: Polygon | LineString;
 
   @Column({ nullable: true })
   plantDate?: Date;

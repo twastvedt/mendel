@@ -116,6 +116,13 @@ export class Vector {
     return this.x * b.x + this.y * b.y;
   }
 
+  /**
+   * 2-dimensional vector cross product v × w = vx wy − vy wx
+   */
+  public cross(b: Vector): number {
+    return this.x * b.y - this.y * b.x;
+  }
+
   public static fromArray(numbers: number[]): Vector {
     return new Vector(numbers[0], numbers[1]);
   }
@@ -123,28 +130,32 @@ export class Vector {
   public static subtract(a: Vector, b: Vector, target?: Vector): Vector {
     if (target) {
       return target.set(a.x - b.x, a.y - b.y);
-    } else {
-      return new Vector(a.x - b.x, a.y - b.y);
     }
+
+    return new Vector(a.x - b.x, a.y - b.y);
   }
 
   public static add(a: Vector, b: Vector, target?: Vector): Vector {
     if (target) {
       return target.set(a.x + b.x, a.y + b.y);
-    } else {
-      return new Vector(a.x + b.x, a.y + b.y);
     }
+
+    return new Vector(a.x + b.x, a.y + b.y);
   }
 
   public static scale(a: Vector, b: number, target?: Vector): Vector {
     if (target) {
       return target.set(a.x * b, a.y * b);
-    } else {
-      return new Vector(a.x * b, a.y * b);
     }
+
+    return new Vector(a.x * b, a.y * b);
   }
 
-  public static fromPolar(r: number, theta: number): Vector {
+  public static fromPolar(r: number, theta: number, target?: Vector): Vector {
+    if (target) {
+      return target.set(r * Math.cos(theta), r * Math.sin(theta));
+    }
+
     return new Vector(r * Math.cos(theta), r * Math.sin(theta));
   }
 }

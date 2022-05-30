@@ -183,3 +183,90 @@ export function splitPolygon(
 
   return [polygon1, polygon2];
 }
+
+/**
+ * Trim a ray to a line segment bounded by a polygon.
+ * Based on this SO answer: https://stackoverflow.com/a/565282/890132.
+ * Intersect a segment [p (`point`) -> p + r (vector in direction of `rotation`)] with each segment in the polygon [q -> q + s].
+ * Intersection of each is p + tr = q + us.
+ *
+ * Note: one difference from the linked answer: We have a ray and a segment instead of two segments,
+ * thus we don't care if the intersection is on [p -> p + r] and t is not necessarily in [0,1] (but u still needs to be).
+ * @param point Origin of ray.
+ * @param ray Normalized ray vector.
+ */
+export function polygonTrimRay(
+  polygon: Position[],
+  point: Position,
+  r: Vector
+): [number, number] | undefined {
+  const p = new Vector(...point);
+
+  const q = new Vector(...polygon[0]);
+  const s = new Vector(0, 0);
+
+  const rDotr = r.dot(r);
+
+  let startT: number | undefined = undefined;
+  let endT: number | undefined = undefined;
+  let vertex = polygon[0];
+
+  // Start with the second vertex. The current segment is the current vertex and the one before it.
+  for (let n = 1; n < polygon.length; n++) {
+    vertex = polygon[n];
+    let t;
+
+    q.add(s);
+    s.set(vertex[0] - q.x, vertex[1] - q.y);
+
+    // tempVec1 = q - p.
+    Vector.subtract(q, p, tempVec1);
+    const rXs = r.cross(s);
+
+    if (!rXs) {
+      // Parallel lines.
+
+      const test = tempVec1.cross(r);
+
+      if (!test) {
+        // Case 1: collinear.
+
+        const t0 = tempVec1.dot(r) / rDotr;
+        const t1 = t0 + s.dot(r) / rDotr;
+
+        if (Math.abs(t0) < Math.abs(t1)) {
+          t = t0;
+        } else {
+          t = t1;
+        }
+      }
+
+      // Case 2: parallel, non-intersecting.
+    } else {
+      // Non-parallel lines.
+
+      const u = tempVec1.cross(r) / rXs;
+
+      if (u >= 0 && u <= 1) {
+        // Case 3: intersection on the polygon segment.
+        t = tempVec1.cross(s) / rXs;
+      }
+    }
+
+    if (t !== undefined) {
+      if (t < 0) {
+        if (startT === undefined || t > startT) {
+          startT = t;
+        }
+      } else if (endT === undefined || t < endT) {
+        endT = t;
+      }
+    }
+  }
+
+  if (startT === undefined || endT === undefined) {
+    return undefined;
+  }
+
+  return [startT, endT];
+}

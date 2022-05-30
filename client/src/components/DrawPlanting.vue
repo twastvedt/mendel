@@ -1,6 +1,10 @@
 <template>
   <g>
-    <PlantingComponent :planting="planting" :is-cursor="true" />
+    <PlantingComponent
+      :planting="planting"
+      :is-cursor="true"
+      :plants-interactive="false"
+    />
 
     <g
       v-if="plants"
@@ -28,22 +32,7 @@
       />
     </g>
 
-    <template v-if="projectedRotationCenter && projectedCursor">
-      <line
-        class="rotationLine"
-        :x1="projectedRotationCenter[0]"
-        :y1="projectedRotationCenter[1]"
-        :x2="projectedCursor[0]"
-        :y2="projectedCursor[1]"
-      />
-
-      <circle
-        class="point"
-        r="1"
-        :cx="projectedRotationCenter[0]"
-        :cy="projectedRotationCenter[1]"
-      />
-    </template>
+    <RotationTool :cursor="cursor" :rotation-center="rotationCenter" />
 
     <path
       v-if="dividingLine.length > 1"
@@ -69,11 +58,13 @@ import PlantingComponent from "./PlantingComponent.vue";
 import PlantComponent from "./PlantComponent.vue";
 import { GridPoints } from "../services/polygonGrid";
 import { Stage } from "../tools/DrawPlantingTool";
+import RotationTool from "./RotationTool.vue";
 
 @Component({
   components: {
     PlantingComponent,
     PlantComponent,
+    RotationTool,
   },
 })
 export default class DrawPlanting extends Vue {
@@ -91,22 +82,6 @@ export default class DrawPlanting extends Vue {
     }
 
     return undefined;
-  }
-
-  get projectedRotationCenter(): Position | null {
-    if (this.rotationCenter) {
-      return state.projection(this.rotationCenter);
-    }
-
-    return null;
-  }
-
-  get projectedCursor(): Position | null {
-    if (this.cursor) {
-      return state.projection(this.cursor);
-    }
-
-    return null;
   }
 
   get projectedLineHead(): Position | null {
@@ -146,11 +121,6 @@ g {
   fill-opacity: 0.2;
   stroke: gray;
   stroke-width: 1px;
-}
-
-.rotationLine {
-  stroke: black;
-  stroke-width: 2px;
 }
 
 .point {
