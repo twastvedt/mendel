@@ -1,20 +1,12 @@
-import { gardenApi, varietyApi, Position, Bed, Planting } from "@mendel/common";
+import { gardenApi, varietyApi, Position } from "@mendel/common";
 import { Tool } from "../tools/Tool";
 import { Action } from "../actions/Action";
 import { geoIdentity, geoPath } from "d3-geo";
 import { GardenState } from "./GardenState";
 import axios from "axios";
+import { UiElement } from "../types/entityTypes";
 
 axios.defaults.baseURL = "http://localhost:3000";
-
-export interface ClickData {
-  bed: Bed;
-  planting: Planting;
-  area: unknown;
-  plant: { planting: Planting; position: Position };
-}
-
-export type ElementType = keyof ClickData;
 
 export class State {
   // TODO: We assume data is stored in inches relative to garden origin.
@@ -24,6 +16,8 @@ export class State {
 
   loading = false;
   scale = 1;
+
+  selection: UiElement[] = [];
 
   db?: GardenState = undefined;
 
@@ -50,10 +44,14 @@ export class State {
     this.ready = this.initialize();
 
     addEventListener("keyup", (event) => {
-      if (event.key === "Escape" && this.tool) {
-        this.clearTool();
+      if (event.key === "Escape") {
+        if (this.tool) {
+          this.clearTool();
 
-        this.toolName = "";
+          this.toolName = "";
+        } else {
+          this.selection = [];
+        }
       }
     });
   }
@@ -70,14 +68,24 @@ export class State {
     this.loading = false;
   }
 
-  onClick<T extends ElementType>(type?: T, data?: ClickData[T]): void {
+  onClick(event: PointerEvent, element?: UiElement): void {
     if (this.tool) {
-      const action = this.tool.onClick(this.cursorPosition, data);
+      const action = this.tool.onClick(this.cursorPosition, element);
 
       if (action) {
         action.Do(this);
 
         this.actions.push(action);
+      }
+    } else if (event.ctrlKey || event.shiftKey) {
+      if (element) {
+        this.selection.push(element);
+      }
+    } else {
+      if (element) {
+        this.selection = [element];
+      } else {
+        this.selection = [];
       }
     }
   }

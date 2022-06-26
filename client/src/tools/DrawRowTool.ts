@@ -2,10 +2,11 @@ import { Variety, Planting, Position } from "@mendel/common";
 import { Tool } from "./Tool";
 import { AddPlantingAction } from "../actions/AddPlantingAction";
 import { Action } from "../actions/Action";
-import { ElementType, state } from "../state/State";
+import { state } from "../state/State";
 import drawPlantRow from "../components/DrawPlantRow.vue";
 import { polygonTrimRay } from "../geometry/polygonTools";
 import { Vector } from "../Vector";
+import { UiElementType } from "../types/entityTypes";
 
 export class DrawRowTool implements Tool {
   private planting?: Planting;
@@ -16,7 +17,7 @@ export class DrawRowTool implements Tool {
 
   public constructor(private variety: Variety) {}
 
-  public interactiveElements = new Set<ElementType>(["area"]);
+  public interactiveElements = new Set<UiElementType>(["area"]);
 
   public cursorComponent = drawPlantRow;
   public cursorProps = {
@@ -143,8 +144,9 @@ export class DrawRowTool implements Tool {
           plants.push(this.pointOnRow(t));
         }
 
-        this.planting.shape.coordinates[0] = this.pointOnRow(this.segment[0]);
-        this.planting.shape.coordinates[1] = this.pointOnRow(this.segment[1]);
+        this.planting.shape.coordinates = this.segment.map((p) =>
+          this.pointOnRow(p)
+        );
       }
     }
   }

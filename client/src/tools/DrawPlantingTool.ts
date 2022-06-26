@@ -2,9 +2,11 @@ import { Variety, Planting, Position } from "@mendel/common";
 import { Tool } from "./Tool";
 import { AddPlantingAction } from "../actions/AddPlantingAction";
 import { Action } from "../actions/Action";
-import { ElementType, state } from "../state/State";
+import { state } from "../state/State";
 import drawPlanting from "../components/DrawPlanting.vue";
 import { GridPoints, PolygonGrid } from "../services/polygonGrid";
+import { UiElementType } from "../types/entityTypes";
+import { Plant } from "@mendel/common/src/entity/Plant";
 
 export enum Stage {
   selecting,
@@ -18,7 +20,7 @@ export class DrawPlantingTool implements Tool {
 
   public constructor(private variety: Variety, private grid: PolygonGrid) {}
 
-  public interactiveElements = new Set<ElementType>(["area"]);
+  public interactiveElements = new Set<UiElementType>(["area"]);
 
   public cursorComponent = drawPlanting;
   public cursorProps = {
@@ -270,16 +272,19 @@ export class DrawPlantingTool implements Tool {
       const plants = this.cursorProps.plants;
 
       if (plants) {
-        this.planting.locations.coordinates.push(
-          ...plants.interiorPoints
-            .concat(
-              plants.edgePoints.filter((e) => e.display).map((e) => e.point)
-            )
-            .map(
-              (p) =>
-                [p[0] + plants.offset[0], p[1] + plants.offset[1]] as Position
-            )
-        );
+        this.planting.plants = plants.interiorPoints
+          .concat(
+            plants.edgePoints.filter((e) => e.display).map((e) => e.point)
+          )
+          .map((p) => {
+            const plant = new Plant();
+            plant.location = {
+              type: "Point",
+              coordinates: [p[0] + plants.offset[0], p[1] + plants.offset[1]],
+            };
+
+            return plant;
+          });
       }
 
       return new AddPlantingAction(Planting.cleanCopy(this.planting));

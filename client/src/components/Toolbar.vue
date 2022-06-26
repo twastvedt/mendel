@@ -20,95 +20,42 @@
       </v-btn>
     </v-btn-toggle>
 
-    <v-select
-      v-model="variety"
-      class="ml-3"
-      :disabled="disableVarietySelect"
-      :items="varietyList"
-      hide-details
-      item-text="name"
-      item-value="id"
-      no-data-text="Add a plant variety"
-      return-object
-      :filter="varietyFilter"
-      @change="newVariety"
-    >
-      <template #selection="{ item }">
-        <svg class="icon avatar" :style="`fill: ${item.color}`">
-          <use :href="`#family-${item.familyId}`" />
-        </svg>
-        {{ item.name }} - {{ item.family.name }}
-      </template>
-
-      <template #item="{ item }">
-        <v-list-item-avatar class="icon" :style="`fill: ${item.color}`">
-          <svg><use :href="`#family-${item.familyId}`" /></svg>
-        </v-list-item-avatar>
-        <v-list-item-content>
-          <v-list-item-title v-text="item.name"></v-list-item-title>
-          <v-list-item-subtitle
-            v-text="item.family.name"
-          ></v-list-item-subtitle>
-        </v-list-item-content>
-      </template>
-    </v-select>
+    <SelectVariety v-model="variety" :disabled="varietySelectDisabled" />
   </v-toolbar>
 </template>
 
 <script lang="ts">
-import { Component, Vue } from "vue-property-decorator";
+import { Component, Vue, Watch } from "vue-property-decorator";
 import { state } from "../state/State";
 import { DrawPlantTool } from "../tools/DrawPlantTool";
 import { DeletePlantTool } from "../tools/DeletePlantTool";
 import { DrawRowTool } from "../tools/DrawRowTool";
 import { DeletePlantingTool } from "../tools/DeletePlantingTool";
-import { Variety, Family } from "@mendel/common";
+import { Variety } from "@mendel/common";
 import { DrawPlantingTool } from "../tools/DrawPlantingTool";
+import SelectVariety from "./fields/SelectVariety.vue";
 
-@Component({})
+@Component({ components: { SelectVariety } })
 export default class Toolbar extends Vue {
   state = state;
 
-  disableVarietySelect = false;
+  get varietySelectDisabled() {
+    return (
+      state.toolName === "deletePlant" || state.toolName === "deletePlanting"
+    );
+  }
 
   variety: Variety | null = null;
-
-  get varietyList(): (Variety | { divider: boolean })[] {
-    return (
-      state.db?.families
-        .sort((a, b) => a.name.localeCompare(b.name))
-        .filter(
-          (f): f is Family & Required<Pick<Family, "varieties">> =>
-            !!f.varieties?.length
-        )
-        .flatMap((f) => [
-          { divider: true },
-          ...f.varieties.sort((a, b) => a.name.localeCompare(b.name)),
-        ]) ?? []
-    );
-  }
-
-  async mounted(): Promise<void> {
-    await state.ready;
-
-    this.variety = this.varietyList[1] as Variety;
-  }
-
-  varietyFilter(item: Variety, queryText: string): boolean {
-    return (
-      `${item.name} ${item.family?.name}`
-        .toLocaleLowerCase()
-        .indexOf(queryText.toLocaleLowerCase()) > -1
-    );
-  }
 
   newTool(newTool: string): void {
     if (state.db) {
       switch (newTool) {
         case "drawPlant":
-          if (this.variety) {
-            state.setTool(new DrawPlantTool(this.variety));
+          if (!this.variety) {
+            this.variety = state.db.varieties[0];
           }
+
+          state.setTool(new DrawPlantTool(this.variety));
 
           break;
         case "drawRow":
@@ -117,7 +64,11 @@ export default class Toolbar extends Vue {
           }
           break;
         case "drawPlanting":
-          if (this.variety && state.db.grid) {
+          if (!this.variety) {
+            this.variety = state.db.varieties[0];
+          }
+
+          if (state.db.grid) {
             state.setTool(new DrawPlantingTool(this.variety, state.db.grid));
           }
           break;
@@ -131,7 +82,8 @@ export default class Toolbar extends Vue {
     }
   }
 
-  newVariety(newVariety: Variety): void {
+  @Watch("variety")
+  newVariety(newVariety?: Variety): void {
     if (
       newVariety &&
       (state.toolName === "drawPlant" ||

@@ -1,5 +1,5 @@
 <template>
-  <div class="mapContainer">
+  <v-layout class="mapContainer">
     <Toolbar class="ma-3 toolbar" />
 
     <svg
@@ -8,7 +8,7 @@
       xmlns="http://www.w3.org/2000/svg"
       xmlns:xlink="http://www.w3.org/1999/xlink"
       @mousemove="onMouseMove"
-      @click="state.onClick()"
+      @click="state.onClick($event)"
       @mouseleave="onHover"
     >
       <g ref="content" class="content">
@@ -18,7 +18,7 @@
               class="bed"
               :style="elementStyle('bed')"
               :d="state.pathGenerator(bed.shape)"
-              @click.stop="state.onClick('bed', bed)"
+              @click.stop="state.onClick($event, { type: 'bed', item: bed })"
               @mouseenter="onHover($event, bed, i)"
               @mouseleave="onHover($event)"
             />
@@ -39,7 +39,7 @@
               class="area"
               :style="elementStyle('area')"
               :d="state.pathFromPoints(area.polygon)"
-              @click.stop="state.onClick('area', area)"
+              @click.stop="state.onClick($event, { type: 'area', item: area })"
               @mouseenter="onHover($event, area, i)"
               @mouseleave="onHover($event)"
             />
@@ -51,7 +51,9 @@
             :planting="planting"
             :plants-interactive="isInteractive('plant')"
             :style="elementStyle('planting')"
-            @click.stop="state.onClick('planting', planting)"
+            @click.stop="
+              state.onClick($event, { type: 'planting', item: planting })
+            "
             @mouseover="onHover($event, planting, index)"
             @mouseleave="onHover($event)"
           />
@@ -65,6 +67,16 @@
       </g>
     </svg>
 
+    <v-navigation-drawer
+      v-if="state.selection.length"
+      width="300"
+      right
+      absolute
+      permanent
+    >
+      <DetailsPane />
+    </v-navigation-drawer>
+
     <v-footer app>
       <template v-if="state.tool">
         {{ state.tool.helpText }}
@@ -74,22 +86,25 @@
         state.cursorPosition.map((c) => Math.round(c * 100) / 100).join(", ")
       }}
     </v-footer>
-  </div>
+  </v-layout>
 </template>
 
 <script lang="ts">
 import { Component, Vue } from "vue-property-decorator";
-import { ElementType, state } from "../state/State";
+import { state } from "../state/State";
 import * as d3 from "d3";
 import { zoom, D3ZoomEvent } from "d3-zoom";
 
 import PlantingComponent from "./PlantingComponent.vue";
 import Toolbar from "./Toolbar.vue";
+import DetailsPane from "./DetailsPane.vue";
+import { UiElementType } from "../types/entityTypes";
 
 @Component({
   components: {
     Toolbar,
     PlantingComponent,
+    DetailsPane,
   },
 })
 export default class GardenMap extends Vue {
@@ -187,14 +202,14 @@ export default class GardenMap extends Vue {
     }
   }
 
-  isInteractive(elementType: ElementType): boolean {
+  isInteractive(elementType: UiElementType): boolean {
     return (
       (!state.tool || state.tool?.interactiveElements?.has(elementType)) ??
       false
     );
   }
 
-  elementStyle(elementType: ElementType): Record<string, string> {
+  elementStyle(elementType: UiElementType): Record<string, string> {
     return {
       "pointer-events": this.isInteractive(elementType) ? "auto" : "none",
     };
@@ -212,7 +227,7 @@ export default class GardenMap extends Vue {
 
 .toolbar {
   position: absolute;
-  right: 0;
+  left: 0;
 }
 
 #map {

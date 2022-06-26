@@ -4,6 +4,7 @@ export * from "./api/Endpoint";
 export * from "./api/FamilyApi";
 export * from "./api/GardenApi";
 export * from "./api/PlantingApi";
+export * from "./api/PlantApi";
 export * from "./api/VarietyApi";
 export * from "./api/typeHelpers";
 

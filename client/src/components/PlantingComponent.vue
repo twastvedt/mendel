@@ -27,7 +27,7 @@
       :variety="variety"
       :transform="state.makeTransform(position)"
       :interactive="plantsInteractive"
-      @click.stop="plantClick(position)"
+      @click.stop="plantClick($event, position)"
     />
     <title>
       {{ variety.name }} <span v-if="variety.family">{{
@@ -44,6 +44,7 @@
 import { Planting, Position, Variety } from "@mendel/common";
 import { Component, Prop, Vue } from "vue-property-decorator";
 import { state } from "../state/State";
+import { PlantElement } from "../types/entityTypes";
 import PlantComponent from "./PlantComponent.vue";
 import polylabel from "polylabel";
 
@@ -90,8 +91,12 @@ export default class PlantingComponent extends Vue {
     return undefined;
   }
 
-  plantClick(position: Position): void {
-    state.onClick("plant", { planting: this.planting, position });
+  plantClick(event: PointerEvent, position: Position): void {
+    state.onClick(event, {
+      type: "plant",
+      item: this.planting,
+      position,
+    } as PlantElement);
   }
 }
 </script>

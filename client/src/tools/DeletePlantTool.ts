@@ -1,22 +1,22 @@
 import { Tool } from "./Tool";
 import { Action } from "../actions/Action";
 import { DeletePlantAction } from "../actions/DeletePlantAction";
-import { ClickData, ElementType } from "../state/State";
 import { EntityId, Planting, Position } from "@mendel/common";
+import { PlantElement, UiElementType } from "../types/entityTypes";
 
 export class DeletePlantTool implements Tool {
   public helpText = "Click on a plant to delete it.";
 
-  public interactiveElements = new Set<ElementType>(["plant"]);
+  public interactiveElements = new Set<UiElementType>(["plant"]);
 
-  public onClick(point: Position, data?: ClickData["plant"]): Action | void {
-    if (data?.planting.id == undefined) {
+  public onClick(point: Position, plant?: PlantElement): Action | void {
+    if (plant?.item.id == undefined) {
       return;
     }
 
     return new DeletePlantAction(
-      data.planting as EntityId<Planting>,
-      data.position
+      plant.item as EntityId<Planting>,
+      plant.position
     );
   }
 }

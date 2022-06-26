@@ -1,12 +1,12 @@
 import { Position } from "@mendel/common";
 import { VueConstructor } from "vue";
 import { Action } from "../actions/Action";
-import { ElementType } from "../state/State";
+import { UiElement, UiElementType } from "../types/entityTypes";
 
 export interface Tool {
   helpText: string;
 
-  interactiveElements?: Set<ElementType>;
+  interactiveElements?: Set<UiElementType>;
 
   cursorComponent?: VueConstructor;
   cursorProps?: Record<string, unknown>;
@@ -16,5 +16,5 @@ export interface Tool {
 
   onCursorMove?(point: Position): void;
   onHover?(point: Position, index?: number, element?: unknown): void;
-  onClick(point: Position, element?: unknown): Action | void;
+  onClick(point: Position, element?: UiElement): Action | void;
 }

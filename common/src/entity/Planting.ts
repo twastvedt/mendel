@@ -1,14 +1,12 @@
-import { Entity, Column, ManyToOne } from "typeorm";
+import { Entity, Column, ManyToOne, OneToMany } from "typeorm";
 import { EntityBase } from "./EntityBase";
 import { Garden } from "./Garden";
-import { MultiPoint, Polygon, LineString } from "./geoJson";
+import { Polygon, LineString } from "./geoJson";
+import { Plant } from "./Plant";
 import { Variety } from "./Variety";
 
 @Entity()
 export class Planting extends EntityBase {
-  @Column("geometry", { spatialFeatureType: "MultiPoint" })
-  locations!: MultiPoint;
-
   @Column("geometry", { nullable: true, spatialFeatureType: "Geometry" })
   shape?: Polygon | LineString;
 
@@ -44,14 +42,15 @@ export class Planting extends EntityBase {
   })
   garden?: Garden;
 
+  @OneToMany(() => Plant, (plant) => plant.planting, {
+    eager: true,
+  })
+  plants?: Plant[];
+
   constructor() {
     super();
 
     this.areSeedlings = false;
-    this.locations = {
-      type: "MultiPoint",
-      coordinates: [],
-    };
   }
 
   static copy(oldPlanting: Planting): Planting {
@@ -63,6 +62,10 @@ export class Planting extends EntityBase {
 
     delete newPlanting.variety;
     delete newPlanting.garden;
+
+    if (newPlanting.plants) {
+      newPlanting.plants = newPlanting.plants.map((p) => Plant.cleanCopy(p));
+    }
 
     return newPlanting;
   }
