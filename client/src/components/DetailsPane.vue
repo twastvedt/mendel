@@ -25,7 +25,7 @@
             </v-list-item-title>
             <v-list-item-subtitle>
               {{ item.item.variety.family.name }}
-              ({{ item.item.locations.coordinates.length }})
+              ({{ item.item.plants.length }})
             </v-list-item-subtitle>
           </v-list-item-content>
 
@@ -46,19 +46,19 @@
 
           <v-list-item-content>
             <v-list-item-title>
-              {{ item.item.variety.name }}
+              {{ item.item.planting.variety.name }}
             </v-list-item-title>
             <v-list-item-subtitle>
-              {{ item.item.variety.family.name }}
+              {{ item.item.planting.variety.family.name }}
             </v-list-item-subtitle>
           </v-list-item-content>
 
           <v-list-item-avatar>
             <svg
               class="icon avatar"
-              :style="`fill: ${item.item.variety.color}`"
+              :style="`fill: ${item.item.planting.variety.color}`"
             >
-              <use :href="`#family-${item.item.variety.familyId}`" />
+              <use :href="`#family-${item.item.planting.variety.familyId}`" />
             </svg>
           </v-list-item-avatar>
         </template>
@@ -115,19 +115,23 @@ export default class DetailsPane extends Vue {
       area: 0,
     };
 
-    let variety: Variety | null | false = null;
+    let variety: Variety | undefined | false;
 
     for (const item of selection) {
       totals[item.type]++;
 
-      if (
-        variety !== false &&
-        (item.type === "plant" || item.type === "planting") &&
-        item.item.variety
-      ) {
+      let thisVariety: Variety | undefined;
+
+      if (item.type === "plant") {
+        thisVariety = item.item.planting?.variety;
+      } else if (item.type === "planting") {
+        thisVariety = item.item.variety;
+      }
+
+      if (variety !== false) {
         if (!variety) {
-          variety = item.item.variety;
-        } else if (variety !== item.item.variety) {
+          variety = thisVariety;
+        } else if (variety !== thisVariety) {
           variety = false;
         }
       }

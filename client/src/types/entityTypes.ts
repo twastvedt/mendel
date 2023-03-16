@@ -1,4 +1,5 @@
-import { Bed, EntityBase, Planting, Position } from "@mendel/common";
+import { Bed, EntityBase, Planting } from "@mendel/common";
+import { Plant } from "@mendel/common/src/entity/Plant";
 
 export function isPlanting(entity?: EntityBase): entity is Planting {
   return !!(entity as Planting).shape;
@@ -23,8 +24,7 @@ export interface PlantingElement extends UiElementBase {
 
 export interface PlantElement extends UiElementBase {
   type: "plant";
-  item: Planting;
-  position: Position;
+  item: Plant;
 }
 
 export interface AreaElement extends UiElementBase {

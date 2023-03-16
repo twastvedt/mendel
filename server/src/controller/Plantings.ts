@@ -11,24 +11,4 @@ addWrappedHandler(plantingApi.update, router, update(Planting));
 addWrappedHandler(plantingApi.one, router, one(Planting));
 addWrappedHandler(plantingApi.delete, router, remove(Planting));
 
-addWrappedHandler(
-  plantingApi.addPlant,
-  router,
-  Planting,
-  async (request, repository) => {
-    const planting = await repository.findOne(request.params.id);
-
-    if (planting) {
-      return (
-        await repository.update(request.params.id, {
-          locations: {
-            coordinates: [...planting.locations.coordinates, ...request.body],
-            type: "MultiPoint",
-          },
-        })
-      ).generatedMaps[0] as Planting;
-    }
-  }
-);
-
 export default router;

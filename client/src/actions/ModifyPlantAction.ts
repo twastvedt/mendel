@@ -1,41 +1,41 @@
-import { Planting, Position, EntityId } from "@mendel/common";
+import { EntityId } from "@mendel/common";
+import { Plant } from "@mendel/common/src/entity/Plant";
 import { State } from "../state/State";
 import { Action } from "./Action";
 
 export class ModifyPlantAction extends Action {
-  private newPlanting?: EntityId<Planting>;
+  private undoChanges?: Partial<Plant>;
+
   public constructor(
-    private planting: EntityId<Planting>,
-    private location: Position,
-    private changes: Partial<Planting>
+    private plant: EntityId<Plant>,
+    private changes: Partial<Plant>
   ) {
     super();
   }
 
   public async Do(state: State): Promise<void> {
-    if (!this.planting.varietyId || !state.db) {
+    if (!state.db) {
       return;
     }
 
     await super.Do(state);
 
-    await state.db?.removePlant(this.planting, this.location);
+    this.undoChanges = {};
 
-    this.newPlanting = await state.db?.addPlant(
-      this.location,
-      this.planting.varietyId
-    );
+    Object.keys(this.changes).forEach((k) => {
+      this.undoChanges![k as keyof Plant] = this.plant[k as keyof Plant] as any;
+    });
+
+    await state.db.editPlant(this.plant.id, this.changes);
   }
 
   public async Undo(state: State): Promise<void> {
     await super.Undo(state);
 
-    if (this.newPlanting?.id !== undefined) {
-      await state.db?.removePlant(this.newPlanting, this.location);
+    if (this.undoChanges) {
+      await state.db?.editPlant(this.plant.id, this.undoChanges);
 
-      delete this.newPlanting;
-
-      await state.db?.addPlantToPlanting(this.location, this.planting);
+      delete this.undoChanges;
     }
   }
 }

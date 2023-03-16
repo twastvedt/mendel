@@ -13,5 +13,6 @@ export * from "./entity/EntityBase";
 export * from "./entity/Family";
 export * from "./entity/Garden";
 export * from "./entity/Planting";
+export * from "./entity/Plant";
 export * from "./entity/Variety";
 export * from "./entity/geoJson";

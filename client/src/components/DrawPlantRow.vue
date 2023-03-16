@@ -2,6 +2,7 @@
   <g>
     <PlantingComponent
       :planting="planting"
+      :locations="locations"
       :is-cursor="true"
       :plants-interactive="false"
     />
@@ -24,6 +25,7 @@ import RotationTool from "./RotationTool.vue";
 })
 export default class DrawPlantRow extends Vue {
   @Prop() readonly planting!: Planting;
+  @Prop() readonly locations!: Position[];
   @Prop() readonly cursor?: Position;
   @Prop() readonly rotationCenter?: Position;
 

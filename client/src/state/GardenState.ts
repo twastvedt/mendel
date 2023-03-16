@@ -59,7 +59,9 @@ export class GardenState {
       this.inflatePlanting(planting);
 
       if (planting.plants) {
-        this.delaunayPoints.push(...planting.plants);
+        planting.plants.forEach((p) => {
+          this.delaunayPoints.push(this.inflatePlant(p));
+        });
       }
     });
 
@@ -94,7 +96,11 @@ export class GardenState {
     plant.plantingId = planting.id;
     plant.planting = planting;
 
-    planting.plants?.push(plant);
+    if (planting.plants) {
+      planting.plants.push(plant);
+    } else {
+      planting.plants = [plant];
+    }
 
     const newPlant = (await plantApi.create.request({
       data: Plant.cleanCopy(plant),
@@ -107,6 +113,10 @@ export class GardenState {
     this.renewDelaunay();
 
     return plant as EntityId<Plant>;
+  }
+
+  async editPlant(id: number, changes: Partial<Plant>): Promise<void> {
+    await plantApi.update.request({ data: { ...changes, id } });
   }
 
   inflatePlant(plant: Plant): Plant {

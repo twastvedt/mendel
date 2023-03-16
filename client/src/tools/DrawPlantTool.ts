@@ -67,10 +67,16 @@ export class DrawPlantTool implements Tool {
         }[] = [];
 
         for (const i of [...neighbors, this.lastClosestIndex]) {
+          if (i < 0) {
+            continue;
+          }
+
           const delaunayPoint = state.db.delaunayPoints[i];
 
-          if (delaunayPoint?.planting.variety?.family) {
-            const plantVector = Vector.fromArray(delaunayPoint.point);
+          if (delaunayPoint.planting?.variety?.family) {
+            const plantVector = Vector.fromArray(
+              delaunayPoint.location.coordinates
+            );
 
             const distance =
               delaunayPoint.planting.variety.family.spacing / 2 + thisRadius;

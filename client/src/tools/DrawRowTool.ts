@@ -9,7 +9,6 @@ import { Vector } from "../Vector";
 import { UiElementType } from "../types/entityTypes";
 
 export class DrawRowTool implements Tool {
-  private planting?: Planting;
   private index?: number;
   private rotation = 0;
   private ray = new Vector(0, 0);
@@ -22,6 +21,7 @@ export class DrawRowTool implements Tool {
   public cursorComponent = drawPlantRow;
   public cursorProps = {
     cursor: null as Position | null,
+    locations: [] as Position[],
     planting: null as Planting | null,
     rotationCenter: null as Position | null,
   };
@@ -43,7 +43,6 @@ export class DrawRowTool implements Tool {
       throw new Error("No family on variety?");
     }
 
-    this.planting = planting;
     this.cursorProps.planting = planting;
 
     if (!document.hasFocus()) {
@@ -60,7 +59,7 @@ export class DrawRowTool implements Tool {
 
     removeEventListener("keyup", this.onKeyUp);
 
-    delete this.planting;
+    this.cursorProps.planting = null;
   }
 
   public onCursorMove(point: Position): void {
@@ -70,7 +69,7 @@ export class DrawRowTool implements Tool {
   }
 
   public onHover(point: Position, index?: number): void {
-    if (!this.planting?.shape) {
+    if (!this.cursorProps.planting?.shape) {
       return;
     }
 
@@ -92,8 +91,10 @@ export class DrawRowTool implements Tool {
   }
 
   public onClick(): Action | void {
-    if (this.planting && this.index !== undefined) {
-      return new AddPlantingAction(Planting.cleanCopy(this.planting));
+    if (this.cursorProps.planting && this.index !== undefined) {
+      return new AddPlantingAction(
+        Planting.cleanCopy(this.cursorProps.planting)
+      );
     }
   }
 
@@ -112,7 +113,7 @@ export class DrawRowTool implements Tool {
 
     const spacing = this.variety.family?.spacing;
 
-    if (!spacing || !this.planting?.shape || !state.db) {
+    if (!spacing || !props.planting?.shape || !state.db) {
       return;
     }
 
@@ -125,9 +126,9 @@ export class DrawRowTool implements Tool {
 
     props.cursor = point;
 
-    if (this.index !== undefined && this.planting) {
-      const plants = this.planting.locations.coordinates;
-      plants.length = 0;
+    if (this.index !== undefined && props.locations) {
+      const locations = props.locations;
+      locations.length = 0;
 
       const bed = state.db.garden.beds[this.index];
 
@@ -141,10 +142,10 @@ export class DrawRowTool implements Tool {
           t < this.segment[1];
           t += spacing
         ) {
-          plants.push(this.pointOnRow(t));
+          locations.push(this.pointOnRow(t));
         }
 
-        this.planting.shape.coordinates = this.segment.map((p) =>
+        props.planting.shape.coordinates = this.segment.map((p) =>
           this.pointOnRow(p)
         );
       }
@@ -152,9 +153,9 @@ export class DrawRowTool implements Tool {
   }
 
   private clearDisplay(): void {
-    if (this.planting?.shape) {
-      this.planting.shape.coordinates = [[0, 0]];
-      this.planting.locations.coordinates = [];
+    if (this.cursorProps.planting?.shape) {
+      this.cursorProps.planting.shape.coordinates = [[0, 0]];
+      this.cursorProps.locations.length = 0;
     }
 
     delete this.index;

@@ -11,30 +11,36 @@
     />
 
     <PlantComponent
-      v-if="
-        !isCursor &&
-        state.scaleRange > 1 &&
-        !planting.locations.coordinates.length
-      "
+      v-if="!isCursor && state.scaleRange > 1 && !plantLocations.length"
       :transform="labelTransform"
       :draw-spacing="false"
       :variety="variety"
       :interactive="false"
     />
-    <PlantComponent
-      v-for="(position, i) in planting.locations.coordinates"
-      :key="i"
-      :variety="variety"
-      :transform="state.makeTransform(position)"
-      :interactive="plantsInteractive"
-      @click.stop="plantClick($event, position)"
-    />
+    <template v-if="locations">
+      <PlantComponent
+        v-for="(position, i) in locations"
+        :key="i"
+        :variety="variety"
+        :transform="state.makeTransform(position)"
+        :interactive="false"
+      />
+    </template>
+    <template v-if="planting.plants">
+      <PlantComponent
+        v-for="(plant, i) in planting.plants"
+        :key="`plant-${i}`"
+        :variety="variety"
+        :transform="state.makeTransform(plant.location.coordinates)"
+        :interactive="plantsInteractive"
+        @click.stop="plantClick($event, plant)"
+      />
+    </template>
     <title>
       {{ variety.name }} <span v-if="variety.family">{{
         variety.family.name
-      }}</span> <template v-if="planting.locations.coordinates.length"> <br/>
-      &#xA;
-      {{ planting.locations.coordinates.length }}
+      }}</span> <template v-if="plantLocations.length"> <br/> &#xA;
+      {{ plantLocations.length }}
       </template>
     </title>
   </g>
@@ -47,6 +53,7 @@ import { state } from "../state/State";
 import { PlantElement } from "../types/entityTypes";
 import PlantComponent from "./PlantComponent.vue";
 import polylabel from "polylabel";
+import { Plant } from "@mendel/common/dist/entity/Plant";
 
 @Component({
   components: {
@@ -55,6 +62,7 @@ import polylabel from "polylabel";
 })
 export default class PlantingComponent extends Vue {
   @Prop() readonly planting!: Planting;
+  @Prop({ required: false }) readonly locations?: Position[];
   @Prop({ default: false }) readonly isCursor!: boolean;
   @Prop() readonly plantsInteractive!: boolean;
 
@@ -91,11 +99,18 @@ export default class PlantingComponent extends Vue {
     return undefined;
   }
 
-  plantClick(event: PointerEvent, position: Position): void {
+  get plantLocations(): Position[] {
+    return (
+      this.locations ??
+      this.planting.plants?.map((p) => p.location.coordinates) ??
+      []
+    );
+  }
+
+  plantClick(event: PointerEvent, plant: Plant): void {
     state.onClick(event, {
       type: "plant",
-      item: this.planting,
-      position,
+      item: plant,
     } as PlantElement);
   }
 }
