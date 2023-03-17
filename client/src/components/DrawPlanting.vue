@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import { Planting, Variety, Position } from "@mendel/common";
-import { state } from "../Store";
+import { state } from "../state/State";
 import PlantingComponent from "./PlantingComponent.vue";
 import PlantComponent from "./PlantComponent.vue";
+import RotationTool from "./RotationTool.vue";
 import { GridPoints } from "../services/polygonGrid";
 import { Stage } from "../tools/DrawPlantingTool";
 
@@ -33,30 +34,6 @@ function radius(): number | undefined {
   return undefined;
 }
 
-function projectedRotationCenter(): Position | null {
-  if (props.rotationCenter) {
-    return state.projection(props.rotationCenter);
-  }
-
-  return null;
-}
-
-function projectedCursor(): Position | null {
-  if (props.cursor) {
-    return state.projection(props.cursor);
-  }
-
-  return null;
-}
-
-function projectedLineHead(): Position | null {
-  if (props.dividingLine[0] && props.stage !== Stage.selectingAfterLine) {
-    return state.projection(props.dividingLine[0]);
-  }
-
-  return null;
-}
-
 function plantsClass(): Record<string, boolean> {
   return {
     faded:
@@ -64,10 +41,18 @@ function plantsClass(): Record<string, boolean> {
       props.stage === Stage.drawingLine,
   };
 }
+
+const projectedLineHead = (props.dividingLine[0] && props.stage !== Stage.selectingAfterLine) 
+  ? state.projection(props.dividingLine[0])
+  : null;
 </script>
 <template>
   <g>
-    <PlantingComponent :planting="planting" :is-cursor="true" />
+    <PlantingComponent
+      :planting="planting"
+      :is-cursor="true"
+      :plants-interactive="false"
+    />
 
     <g
       v-if="plants"
@@ -95,22 +80,7 @@ function plantsClass(): Record<string, boolean> {
       />
     </g>
 
-    <template v-if="projectedRotationCenter && projectedCursor">
-      <line
-        class="rotationLine"
-        :x1="projectedRotationCenter[0]"
-        :y1="projectedRotationCenter[1]"
-        :x2="projectedCursor[0]"
-        :y2="projectedCursor[1]"
-      />
-
-      <circle
-        class="point"
-        r="1"
-        :cx="projectedRotationCenter[0]"
-        :cy="projectedRotationCenter[1]"
-      />
-    </template>
+    <RotationTool :cursor="cursor" :rotation-center="rotationCenter" />
 
     <path
       v-if="dividingLine.length > 1"
@@ -137,11 +107,6 @@ g {
   fill-opacity: 0.2;
   stroke: gray;
   stroke-width: 1px;
-}
-
-.rotationLine {
-  stroke: black;
-  stroke-width: 2px;
 }
 
 .point {

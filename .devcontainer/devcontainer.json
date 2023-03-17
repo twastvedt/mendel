@@ -8,16 +8,20 @@
   "forwardPorts": [3000, 3001],
   "service": "app",
   "workspaceFolder": "/mendel",
-  "settings": {
-    "terminal.integrated.shell.linux": "/bin/bash"
+  "customizations": {
+    "vscode": {
+      "settings": {
+        "terminal.integrated.defaultProfile.linux": "bash"
+      },
+      "extensions": [
+        "EditorConfig.editorconfig",
+        "dbaeumer.vscode-eslint",
+        "johnsoncodehk.volar",
+        "visualstudioexptteam.vscodeintellicode",
+        "esbenp.prettier-vscode",
+        "ms-azuretools.vscode-docker"
+      ]
+    }
   },
-  "extensions": [
-    "EditorConfig.editorconfig",
-    "dbaeumer.vscode-eslint",
-    "johnsoncodehk.volar",
-    "visualstudioexptteam.vscodeintellicode",
-    "esbenp.prettier-vscode",
-    "ms-azuretools.vscode-docker"
-  ],
   "postCreateCommand": ["npm", "install"]
 }

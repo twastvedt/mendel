@@ -1,24 +1,29 @@
-import { Planting, EntityId, Position } from "@mendel/common";
-import { Store } from "../Store";
+import { EntityId } from "@mendel/common";
+import { Plant } from "@mendel/common/src/entity/Plant";
+import { State } from "../state/State";
 import { Action } from "./Action";
 
 export class DeletePlantAction extends Action {
-  public constructor(
-    private planting: EntityId<Planting>,
-    private location: Position
-  ) {
+  public constructor(private plant: EntityId<Plant>) {
     super();
   }
 
-  public async Do(state: Store): Promise<void> {
+  public async Do(state: State): Promise<void> {
     await super.Do(state);
 
-    await state.garden?.removePlant(this.planting, this.location);
+    await state.db?.removePlant(this.plant);
   }
 
-  public async Undo(state: Store): Promise<void> {
+  public async Undo(state: State): Promise<void> {
     await super.Undo(state);
 
-    state.garden?.addPlantToPlanting(this.location, this.planting);
+    if (this.plant.planting?.varietyId === undefined) {
+      return;
+    }
+
+    state.db?.addPlant(
+      this.plant.location.coordinates,
+      this.plant.planting.varietyId
+    );
   }
 }

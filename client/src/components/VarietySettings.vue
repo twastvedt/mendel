@@ -1,16 +1,16 @@
 <template>
-  <v-container v-if="state.garden">
+  <v-container v-if="state.db">
     <EditDataTable
-      v-model="state.garden.varieties"
+      v-model="state.db.varieties"
       name="Varieties"
       :headers="varietyHeaders"
-      @delete="(item) => state.garden.deleteVariety(item)"
+      @delete="(item) => state.db.deleteVariety(item)"
     >
       <template #default="props">
         <EditVariety
           :value="props.value"
           @close="props.close"
-          @input="(item) => state.garden.editVariety(item)"
+          @input="(item) => state.db.editVariety(item)"
         />
       </template>
 
@@ -29,7 +29,7 @@
 
 <script lang="ts">
 import { Component, Vue } from "vue-property-decorator";
-import { state } from "../Store";
+import { state } from "../state/State";
 import type { DataTableHeader } from "vuetify";
 import EditVariety from "./EditVariety.vue";
 import EditDataTable from "./EditDataTable.vue";
@@ -65,7 +65,7 @@ export defineComponent({
   ];
 
   plantCount(variety: Variety): number | undefined {
-    return state.garden?.plantCount({ varietyId: variety.id });
+    return state.db?.plantCount({ varietyId: variety.id });
   }
 }
 </script>

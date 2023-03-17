@@ -3,8 +3,6 @@ import VueRouter, { RouteConfig } from "vue-router";
 import GardenMap from "../components/GardenMap.vue";
 import VarietySettings from "../components/VarietySettings.vue";
 import FamilySettings from "../components/FamilySettings.vue";
-import MainMenu from "../components/MainMenu.vue";
-import SettingsMenu from "../components/SettingsMenu.vue";
 import Summary from "../components/Summary.vue";
 
 Vue.use(VueRouter);

@@ -8,6 +8,7 @@ import BedRoutes from "./controller/Beds";
 import VarietyRoutes from "./controller/Varieties";
 import GardenRoutes from "./controller/Gardens";
 import PlantingRoutes from "./controller/Plantings";
+import PlantRoutes from "./controller/Plants";
 import FamilyRoutes from "./controller/Families";
 
 createConnection()
@@ -29,6 +30,7 @@ createConnection()
       .use(GardenRoutes)
       .use(VarietyRoutes)
       .use(PlantingRoutes)
+      .use(PlantRoutes)
       .use(FamilyRoutes);
 
     app.use((req, res, next) => {

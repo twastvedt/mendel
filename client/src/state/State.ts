@@ -1,26 +1,25 @@
 import { gardenApi, varietyApi, Position } from "@mendel/common";
-import { Tool } from "./tools/Tool";
-import { Action } from "./actions/Action";
+import { Tool } from "../tools/Tool";
+import { Action } from "../actions/Action";
 import { geoIdentity, geoPath } from "d3-geo";
 import { GardenState } from "./GardenState";
 import axios from "axios";
+import { UiElement } from "../types/entityTypes";
 
 axios.defaults.baseURL = "http://localhost:3000";
 
-export type ElementType = "bed" | "planting" | "area";
-
-export class Store {
+export class State {
   // TODO: We assume data is stored in inches relative to garden origin.
   projection = geoIdentity().reflectY(true);
 
   pathGenerator = geoPath(this.projection);
 
-  drawer = false;
-
   loading = false;
   scale = 1;
 
-  garden?: GardenState = undefined;
+  selection: UiElement[] = [];
+
+  db?: GardenState = undefined;
 
   actions: Action[] = [];
 
@@ -45,10 +44,14 @@ export class Store {
     this.ready = this.initialize();
 
     addEventListener("keyup", (event) => {
-      if (event.key === "Escape" && this.tool) {
-        this.clearTool();
+      if (event.key === "Escape") {
+        if (this.tool) {
+          this.clearTool();
 
-        this.toolName = "";
+          this.toolName = "";
+        } else {
+          this.selection = [];
+        }
       }
     });
   }
@@ -60,12 +63,12 @@ export class Store {
 
     const garden = await gardenApi.one.request({ routeParams: { id: 1 } });
 
-    this.garden = new GardenState(garden, families);
+    this.db = new GardenState(garden, families);
 
     this.loading = false;
   }
 
-  onClick(element?: unknown): void {
+  onClick(event: PointerEvent, element?: UiElement): void {
     if (this.tool) {
       const action = this.tool.onClick(this.cursorPosition, element);
 
@@ -73,6 +76,16 @@ export class Store {
         action.Do(this);
 
         this.actions.push(action);
+      }
+    } else if (event.ctrlKey || event.shiftKey) {
+      if (element) {
+        this.selection.push(element);
+      }
+    } else {
+      if (element) {
+        this.selection = [element];
+      } else {
+        this.selection = [];
       }
     }
   }
@@ -108,4 +121,4 @@ export class Store {
   }
 }
 
-export const state = new Store();
+export const state = new State();

@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "client-build": "npm run -w client build-prod",
+    "client-build": "npm run -w client build",
     "dev-client": "npm run -w client serve",
     "dev-server": "npm run -w server serve",
     "dev": "concurrently \"npm run dev-client\" \"npm run dev-server\"",

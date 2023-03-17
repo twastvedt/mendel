@@ -5,7 +5,8 @@
         <v-card>
           <v-card-title>Varieties</v-card-title>
           <v-data-table
-            :items="state.garden.varieties"
+            v-if="state.db"
+            :items="state.db.varieties"
             name="Varieties"
             :headers="headers"
           >
@@ -52,7 +53,7 @@
 
 <script lang="ts">
 import { Component, Vue } from "vue-property-decorator";
-import { state } from "../Store";
+import { state } from "../state/State";
 import type { DataTableHeader } from "vuetify";
 import EditDataTable from "./EditDataTable.vue";
 import { polygonArea } from "d3-polygon";
@@ -89,7 +90,7 @@ export defineComponent({
 
   areas = {
     Beds:
-      (state.garden?.garden.beds.reduce(
+      (state.db?.garden.beds.reduce(
         (total, bed) => total + polygonArea(bed.shape.coordinates[0]),
         0
       ) ?? 0) / 144,
@@ -97,11 +98,11 @@ export defineComponent({
   };
 
   plantCount(variety: Variety): number | undefined {
-    return state.garden?.plantCount({ varietyId: variety.id });
+    return state.db?.plantCount({ varietyId: variety.id });
   }
 
   get totalArea(): number | undefined {
-    const beds = state.garden?.garden.beds;
+    const beds = state.db?.garden.beds;
 
     if (beds) {
       return (

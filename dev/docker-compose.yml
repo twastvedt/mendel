@@ -10,15 +10,22 @@ services:
       POSTGRES_PASSWORD: mendel
       POSTGRES_USER: mendel
     container_name: db
+    ports:
+      - 5432:5432
     networks:
       - mendelnet
 
-  adminer:
-    image: adminer:latest
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    environment:
+      PGADMIN_DEFAULT_EMAIL: dummy@dummy.com
+      PGADMIN_DEFAULT_PASSWORD: secret
+      PGADMIN_CONFIG_SERVER_MODE: "False"
+      PGADMIN_CONFIG_MASTER_PASSWORD_REQUIRED: "False"
     networks:
       - mendelnet
     ports:
-      - "3001:8080"
+      - "3001:80"
     depends_on:
       - db
   app:

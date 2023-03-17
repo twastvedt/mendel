@@ -1,5 +1,5 @@
 import { Planting } from "@mendel/common";
-import { Store } from "../Store";
+import { State } from "../state/State";
 import { Action } from "./Action";
 
 export class AddPlantingAction extends Action {
@@ -7,15 +7,15 @@ export class AddPlantingAction extends Action {
     super();
   }
 
-  public async Do(state: Store): Promise<void> {
+  public async Do(state: State): Promise<void> {
     await super.Do(state);
 
-    await state.garden?.addPlanting(this.planting);
+    await state.db?.addPlanting(this.planting);
   }
 
-  public async Undo(state: Store): Promise<void> {
+  public async Undo(state: State): Promise<void> {
     await super.Undo(state);
 
-    await state.garden?.removePlanting(this.planting);
+    await state.db?.removePlanting(this.planting);
   }
 }

@@ -10,7 +10,7 @@
         ></v-text-field>
         <v-select
           v-model="formValue.family"
-          :items="state.garden.families"
+          :items="state.db.families"
           item-text="name"
           return-object
           label="Family"
@@ -59,7 +59,7 @@
 import { Component, Vue, Watch, Prop } from "vue-property-decorator";
 
 import { Family, Variety } from "@mendel/common";
-import { state } from "../Store";
+import { state } from "../state/State";
 import type { VueForm } from "../types/vueTypes";
 
 @Component({})
