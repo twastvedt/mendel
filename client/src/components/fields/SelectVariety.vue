@@ -1,9 +1,9 @@
 <script setup lang="ts">
 import { state } from "../../state/State";
-import { Variety } from "@mendel/common";
+import type { Variety } from "@mendel/common";
 
 const props = defineProps<{
-  disabled: boolean;
+  disabled?: boolean;
   value: Variety | null;
 }>();
 

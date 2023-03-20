@@ -1,4 +1,4 @@
-import { BBox, Position } from "@mendel/common";
+import type { BBox, Position } from "@mendel/common";
 import { Vector } from "../Vector";
 
 const tempVec1 = new Vector(0, 0);

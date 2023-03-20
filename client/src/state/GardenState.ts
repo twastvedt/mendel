@@ -1,15 +1,14 @@
 import {
-  EntityId,
   Family,
   familyApi,
   Garden,
   plantApi,
   Planting,
   plantingApi,
-  Position,
   Variety,
   varietyApi,
-} from "@mendel/common";
+} from "@mendel/common/src";
+import type { EntityId, Position } from "@mendel/common";
 import { Plant } from "@mendel/common/src/entity/Plant";
 import { Delaunay } from "d3-delaunay";
 import { PolygonGrid } from "../services/polygonGrid";

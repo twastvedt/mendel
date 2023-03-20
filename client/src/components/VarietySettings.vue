@@ -1,26 +1,27 @@
 <script setup lang="ts">
 import { state } from "../state/State";
-import type { DataTableHeader } from "vuetify";
+// import type { DataTableHeader } from 'vuetify/labs/VDataTable';
+import type { DataTableHeader } from "@/types/vuetifyTypes";
 import EditVariety from "./EditVariety.vue";
 import EditDataTable from "./EditDataTable.vue";
-import { Variety } from "@mendel/common";
+import type { Variety } from "@mendel/common";
 
 const varietyHeaders: DataTableHeader[] = [
   {
-    text: "Name",
-    value: "name",
+    title: "Name",
+    key: "name",
   },
   {
-    text: "Color",
-    value: "color",
+    title: "Color",
+    key: "color",
   },
   {
-    text: "Family",
-    value: "family.name",
+    title: "Family",
+    key: "family.name",
   },
   {
-    text: "Plants",
-    value: "plants",
+    title: "Plants",
+    key: "plants",
   },
 ];
 
@@ -34,13 +35,13 @@ function plantCount(variety: Variety): number | undefined {
       v-model="state.db.varieties"
       name="Varieties"
       :headers="varietyHeaders"
-      @delete="(item) => state.db.deleteVariety(item)"
+      @delete="(item) => state.db?.deleteVariety(item)"
     >
       <template #default="props">
         <EditVariety
           :value="props.value"
           @close="props.close"
-          @input="(item) => state.db.editVariety(item)"
+          @input="(item) => state.db?.editVariety(item)"
         />
       </template>
 

@@ -5,7 +5,7 @@ import { DrawPlantTool } from "../tools/DrawPlantTool";
 import { DeletePlantTool } from "../tools/DeletePlantTool";
 import { DrawRowTool } from "../tools/DrawRowTool";
 import { DeletePlantingTool } from "../tools/DeletePlantingTool";
-import { Variety } from "@mendel/common";
+import type { Variety } from "@mendel/common";
 import { DrawPlantingTool } from "../tools/DrawPlantingTool";
 import SelectVariety from "./fields/SelectVariety.vue";
 

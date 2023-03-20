@@ -1,12 +1,13 @@
 <script setup lang="ts">
 import { state } from "../state/State";
 import * as d3 from "d3";
-import { zoom, D3ZoomEvent } from "d3-zoom";
+import { zoom } from "d3-zoom";
+import type { D3ZoomEvent } from "d3-zoom";
 
 import PlantingComponent from "./PlantingComponent.vue";
 import Toolbar from "./Toolbar.vue";
 import DetailsPane from "./DetailsPane.vue";
-import { UiElementType } from "../types/entityTypes";
+import type { UiElementType } from "../types/entityTypes";
 import { nextTick, onMounted, ref } from "vue";
 
 const map = ref<SVGSVGElement>();

@@ -1,4 +1,4 @@
-import { Position } from "@mendel/common";
+import type { Position } from "@mendel/common";
 import { Vector } from "../Vector";
 import { Hex } from "./Hex";
 import { Matrix } from "./Matrix";

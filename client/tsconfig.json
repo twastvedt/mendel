@@ -1,13 +1,23 @@
 {
   "extends": "../tsconfig-base.json",
   "compilerOptions": {
+    "target": "ESNext",
+    "module": "ESNext",
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"]
+    },
     "outDir": "dist",
     "rootDir": "src",
     "tsBuildInfoFile": "dist/.tsbuildinfo",
     "lib": ["esnext", "dom", "dom.iterable", "esnext.asynciterable"],
     "typeRoots": ["./node_modules/@types", "../node_modules/vuetify/types"],
-    "types": ["node"]
+    "types": ["node"],
+    "isolatedModules": true,
+    "preserveValueImports": true,
+    "importsNotUsedAsValues": "error",
+    "jsx": "preserve"
   },
-  "include": ["src/**/*.ts", "src/**/*.vue"],
+  "include": ["env.d.ts", "src/**/*", "src/**/*.vue"],
   "references": [{ "path": "../common" }]
 }

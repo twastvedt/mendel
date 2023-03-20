@@ -7,15 +7,13 @@ module.exports = {
     nameof: "readonly",
   },
   extends: [
-    "eslint:recommended",
-    "plugin:vue/recommended",
-    "plugin:prettier/recommended",
-    "@vue/typescript/recommended",
+    'plugin:vue/vue3-essential',
+    'eslint:recommended',
+    '@vue/eslint-config-typescript',
+    '@vue/eslint-config-prettier/skip-formatting'
   ],
   parserOptions: {
-    parser: "@typescript-eslint/parser",
-    module: true,
-    ecmaVersion: 2020,
+    ecmaVersion: 'latest',
   },
   rules: {
     "prettier/prettier": "off",

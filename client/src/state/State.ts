@@ -1,10 +1,12 @@
-import { gardenApi, varietyApi, Position } from "@mendel/common";
-import { Tool } from "../tools/Tool";
-import { Action } from "../actions/Action";
-import { geoIdentity, geoPath, GeoPermissibleObjects } from "d3-geo";
+import { gardenApi, varietyApi } from "@mendel/common/src";
+import type { Position } from "@mendel/common";
+import type { Tool } from "../tools/Tool";
+import type { Action } from "../actions/Action";
+import { geoIdentity, geoPath } from "d3-geo";
+import type { GeoPermissibleObjects } from "d3-geo";
 import { GardenState } from "./GardenState";
 import axios from "axios";
-import { UiElement } from "../types/entityTypes";
+import type { UiElement } from "../types/entityTypes";
 
 axios.defaults.baseURL = "http://localhost:3000";
 
@@ -72,7 +74,7 @@ export class State {
     this.loading = false;
   }
 
-  onClick(event: PointerEvent, element?: UiElement): void {
+  onClick(event: MouseEvent, element?: UiElement): void {
     if (this.tool) {
       const action = this.tool.onClick(this.cursorPosition, element);
 

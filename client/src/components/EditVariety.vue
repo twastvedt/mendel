@@ -1,18 +1,18 @@
 <script setup lang="ts">
 import { watch, ref, computed } from "vue";
-import { Variety } from "@mendel/common";
+import { Variety } from "@mendel/common/src";
 import { state } from "../state/State";
-import type { VueForm } from "../types/vueTypes";
+import { VForm } from "vuetify/lib/components/index";
 
 const emit = defineEmits<{
-  (e: 'close'): void, 
-  (e: 'input', formValue: unknown): void,
+  (e: "close"): void;
+  (e: "input", formValue: unknown): void;
 }>();
 
-const form = ref<VueForm>();
+const form = ref<VForm>();
 
 const props = defineProps<{
-  value?: Variety
+  value?: Variety;
 }>();
 
 let formValue = getDefault();
@@ -82,8 +82,8 @@ resetForm();
           <v-col>
             <div class="text-caption">Color</div>
             <v-menu :close-on-content-click="false" :offset-y="true">
-              <template #activator="{ on, attrs }">
-                <v-btn x-large v-bind="attrs" class="bigSquareButton" v-on="on">
+              <template #activator="{ props }">
+                <v-btn x-large v-bind="props" class="bigSquareButton">
                   <svg v-if="formValue.family" class="svgicon">
                     <use
                       :href="`#family-${formValue.family.id}`"

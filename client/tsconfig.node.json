@@ -1,0 +1,16 @@
+{
+  "extends": "../../tsconfig-base.json",
+  "include": [
+    "vite.config.*",
+    "vitest.config.*",
+    "cypress.config.*",
+    "playwright.config.*"
+  ],
+  "compilerOptions": {
+    "module": "ESNext",
+    "lib": [],
+    "tsBuildInfoFile": "build/.tsbuildinfo.config",
+    "outDir": "build",
+    "types": ["node"]
+  }
+}

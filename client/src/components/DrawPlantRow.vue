@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Planting, Position } from "@mendel/common";
+import type { Planting, Position } from "@mendel/common";
 import PlantingComponent from "./PlantingComponent.vue";
 import RotationTool from "./RotationTool.vue";
 

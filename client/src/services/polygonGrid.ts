@@ -1,11 +1,11 @@
-import { BBox, Position } from "@mendel/common";
+import type { BBox, Position } from "@mendel/common";
 import {
   distanceToPolygon,
   pointInBounds,
   polygonBounds,
   splitPolygon,
 } from "../geometry/polygonTools";
-import { Hex } from "../hexGrid/Hex";
+import type { Hex } from "../hexGrid/Hex";
 import { HexGrid } from "../hexGrid/HexGrid";
 import { Vector } from "../Vector";
 

@@ -4,6 +4,9 @@
   "description": "Common library for Mendel client and server.",
   "main": "dist/index.js",
   "private": true,
+  "scripts": {
+    "clean": "rimraf dist/**/*"
+  },
   "dependencies": {
     "axios": "^0.26.1",
     "typeorm": "0.2.45"

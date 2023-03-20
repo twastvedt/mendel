@@ -1,9 +1,9 @@
-import { Tool } from "./Tool";
-import { Action } from "../actions/Action";
+import type { Tool } from "./Tool";
+import type { Action } from "../actions/Action";
 import { DeletePlantAction } from "../actions/DeletePlantAction";
-import { EntityId, Position } from "@mendel/common";
-import { PlantElement, UiElementType } from "../types/entityTypes";
-import { Plant } from "@mendel/common/src/entity/Plant";
+import type { EntityId, Position } from "@mendel/common";
+import type { PlantElement, UiElementType } from "../types/entityTypes";
+import type { Plant } from "@mendel/common/src/entity/Plant";
 
 export class DeletePlantTool implements Tool {
   public helpText = "Click on a plant to delete it.";

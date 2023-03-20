@@ -1,5 +1,5 @@
-import { Bed, EntityBase, Planting } from "@mendel/common";
-import { Plant } from "@mendel/common/src/entity/Plant";
+import type { Bed, EntityBase, Planting } from "@mendel/common";
+import type { Plant } from "@mendel/common/src/entity/Plant";
 
 export function isPlanting(entity?: EntityBase): entity is Planting {
   return !!(entity as Planting).shape;

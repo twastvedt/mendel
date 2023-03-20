@@ -21,6 +21,7 @@
     "typeorm": "0.2.45"
   },
   "scripts": {
+    "clean": "rimraf dist/**/*",
     "serve": "ts-node-dev --compiler ttypescript src/index.ts",
     "start": "ts-node --transpile-only --compiler ttypescript src/index.ts"
   }

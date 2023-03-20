@@ -1,5 +1,5 @@
-import { Planting } from "@mendel/common";
-import { State } from "../state/State";
+import type { Planting } from "@mendel/common";
+import type { State } from "../state/State";
 import { Action } from "./Action";
 
 export class AddPlantingAction extends Action {

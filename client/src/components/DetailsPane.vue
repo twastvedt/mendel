@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { watch } from 'vue'
-import { Variety } from "@mendel/common";
+import type { Variety } from "@mendel/common";
 import { state } from "../state/State";
-import { UiElement, UiElementType } from "../types/entityTypes";
+import type { UiElement, UiElementType } from "../types/entityTypes";
 
 import SelectVariety from "./fields/SelectVariety.vue";
 
@@ -76,7 +76,7 @@ watch(state.selection, (selection: UiElement[]) => {
       </v-btn>
     </v-toolbar>
 
-    <SelectVariety v-model="variety" @change="" />
+    <SelectVariety v-model="variety" />
 
     <v-list two-line>
       <v-list-item v-for="(item, i) of state.selection" :key="i">
@@ -87,20 +87,20 @@ watch(state.selection, (selection: UiElement[]) => {
 
           <v-list-item-content>
             <v-list-item-title>
-              {{ item.item.variety.name }}
+              {{ item.item.variety?.name }}
             </v-list-item-title>
             <v-list-item-subtitle>
-              {{ item.item.variety.family.name }}
-              ({{ item.item.plants.length }})
+              {{ item.item.variety?.family?.name }}
+              ({{ item.item.plants?.length }})
             </v-list-item-subtitle>
           </v-list-item-content>
 
           <v-list-item-avatar>
             <svg
               class="icon avatar"
-              :style="`fill: ${item.item.variety.color}`"
+              :style="`fill: ${item.item.variety?.color}`"
             >
-              <use :href="`#family-${item.item.variety.familyId}`" />
+              <use :href="`#family-${item.item.variety?.familyId}`" />
             </svg>
           </v-list-item-avatar>
         </template>
@@ -112,19 +112,19 @@ watch(state.selection, (selection: UiElement[]) => {
 
           <v-list-item-content>
             <v-list-item-title>
-              {{ item.item.planting.variety.name }}
+              {{ item.item.planting?.variety?.name }}
             </v-list-item-title>
             <v-list-item-subtitle>
-              {{ item.item.planting.variety.family.name }}
+              {{ item.item.planting?.variety?.family?.name }}
             </v-list-item-subtitle>
           </v-list-item-content>
 
           <v-list-item-avatar>
             <svg
               class="icon avatar"
-              :style="`fill: ${item.item.planting.variety.color}`"
+              :style="`fill: ${item.item.planting?.variety?.color}`"
             >
-              <use :href="`#family-${item.item.planting.variety.familyId}`" />
+              <use :href="`#family-${item.item.planting?.variety?.familyId}`" />
             </svg>
           </v-list-item-avatar>
         </template>

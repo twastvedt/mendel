@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Family, Variety } from "@mendel/common";
+import type { Family, Variety } from "@mendel/common";
 import { computed } from "vue";
 
 const props = defineProps<{

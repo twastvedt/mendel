@@ -1,4 +1,4 @@
-import { Garden, Position } from "@mendel/common";
+import type { Garden, Position } from "@mendel/common";
 
 interface Result {
   type: "fill" | "stroke";

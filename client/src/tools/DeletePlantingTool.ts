@@ -1,8 +1,8 @@
-import { Tool } from "./Tool";
-import { Action } from "../actions/Action";
+import type { Tool } from "./Tool";
+import type { Action } from "../actions/Action";
 import { DeletePlantingAction } from "../actions/DeletePlantingAction";
-import { EntityId, Planting, Position } from "@mendel/common";
-import { PlantingElement, UiElementType } from "../types/entityTypes";
+import type { EntityId, Planting, Position } from "@mendel/common";
+import type { PlantingElement, UiElementType } from "../types/entityTypes";
 
 export class DeletePlantingTool implements Tool {
   public interactiveElements = new Set<UiElementType>(["planting"]);

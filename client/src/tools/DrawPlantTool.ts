@@ -1,11 +1,11 @@
-import { Variety, Position } from "@mendel/common";
-import { Tool } from "./Tool";
+import type { Variety, Position } from "@mendel/common";
+import type { Tool } from "./Tool";
 import { AddPlantAction } from "../actions/AddPlantAction";
-import { Action } from "../actions/Action";
+import type { Action } from "../actions/Action";
 import { state } from "../state/State";
 import { Vector } from "../Vector";
 import plantComponent from "../components/PlantComponent.vue";
-import { UiElementType } from "../types/entityTypes";
+import type { UiElementType } from "../types/entityTypes";
 
 export class DrawPlantTool implements Tool {
   private location?: Position;

@@ -1,27 +1,28 @@
 <script setup lang="ts">
 import { state } from "../state/State";
-import type { DataTableHeader } from "vuetify";
+// import type { DataTableHeader } from 'vuetify/labs/VDataTable';
+import type { DataTableHeader } from '@/types/vuetifyTypes';
 import { polygonArea } from "d3-polygon";
 import { bboxArea, polygonBounds } from "../geometry/polygonTools";
-import { Variety } from "@mendel/common";
+import type { Variety } from "@mendel/common";
 import { computed } from "vue";
 
 const headers: DataTableHeader[] = [
   {
-    text: "Name",
-    value: "name",
+    title: "Name",
+    key: "name",
   },
   {
-    text: "Family",
-    value: "family.name",
+    title: "Family",
+    key: "family.name",
   },
   {
-    text: "Spacing",
-    value: "spacing",
+    title: "Spacing",
+    key: "spacing",
   },
   {
-    text: "Plants",
-    value: "plants",
+    title: "Plants",
+    key: "plants",
   },
 ];
 

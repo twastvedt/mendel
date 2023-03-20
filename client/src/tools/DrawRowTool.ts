@@ -1,12 +1,13 @@
-import { Variety, Planting, Position } from "@mendel/common";
-import { Tool } from "./Tool";
+import { Variety, Planting } from "@mendel/common/src";
+import type { Position } from "@mendel/common";
+import type { Tool } from "./Tool";
 import { AddPlantingAction } from "../actions/AddPlantingAction";
-import { Action } from "../actions/Action";
+import type { Action } from "../actions/Action";
 import { state } from "../state/State";
 import drawPlantRow from "../components/DrawPlantRow.vue";
 import { polygonTrimRay } from "../geometry/polygonTools";
 import { Vector } from "../Vector";
-import { UiElementType } from "../types/entityTypes";
+import type { UiElementType } from "../types/entityTypes";
 
 export class DrawRowTool implements Tool {
   private index?: number;

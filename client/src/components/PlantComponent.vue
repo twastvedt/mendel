@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { withDefaults, computed } from "vue";
 import { state } from "../state/State";
-import { Variety } from "@mendel/common";
+import type { Variety } from "@mendel/common";
 
 const props = withDefaults(defineProps<{
   variety: Variety;

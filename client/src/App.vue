@@ -1,3 +1,9 @@
+<script setup lang="ts">
+import MainMenu from "./components/MainMenu.vue";
+import { ref } from "vue";
+
+const drawer = ref(false);
+</script>
 <template>
   <v-app>
     <v-app-bar app>
@@ -15,7 +21,7 @@
 
       <v-divider></v-divider>
 
-      <mainMenu />
+      <MainMenu />
     </v-navigation-drawer>
 
     <v-main>
@@ -23,22 +29,3 @@
     </v-main>
   </v-app>
 </template>
-
-<script lang="ts">
-import { defineComponent } from "vue";
-import { state } from "./state/State";
-import MainMenu from "./components/MainMenu.vue";
-
-export default defineComponent({
-  name: "App",
-  components: {
-    MainMenu,
-  },
-  setup() {
-    return {
-      state,
-      drawer: false
-    };
-  },
-});
-</script>

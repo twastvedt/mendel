@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import { Planting, Variety, Position } from "@mendel/common";
+import type { Planting, Variety, Position } from "@mendel/common";
 import { state } from "../state/State";
 import PlantingComponent from "./PlantingComponent.vue";
 import RotationTool from "./RotationTool.vue";
-import { GridPoints } from "../services/polygonGrid";
+import type { GridPoints } from "../services/polygonGrid";
 import { Stage } from "../tools/DrawPlantingTool";
 
 const props = defineProps<{
@@ -41,9 +41,10 @@ function plantsClass(): Record<string, boolean> {
   };
 }
 
-const projectedLineHead = (props.dividingLine[0] && props.stage !== Stage.selectingAfterLine) 
-  ? state.projection(props.dividingLine[0])
-  : null;
+const projectedLineHead =
+  props.dividingLine[0] && props.stage !== Stage.selectingAfterLine
+    ? state.projection(props.dividingLine[0])
+    : null;
 </script>
 <template>
   <g>

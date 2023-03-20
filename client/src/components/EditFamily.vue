@@ -1,14 +1,14 @@
 <script setup lang="ts">
-import {ref, watch, computed} from "vue";
-import { Family } from "@mendel/common";
-import type { VueForm } from "../types/vueTypes";
+import { ref, watch, computed } from "vue";
+import { Family } from "@mendel/common/src";
+import { VForm } from "vuetify/lib/components/index";
 
 const emit = defineEmits<{
-  (e: 'close'): void, 
-  (e: 'input', formValue: unknown): void,
+  (e: "close"): void;
+  (e: "input", formValue: unknown): void;
 }>();
 
-const form = ref<VueForm>();
+const form = ref<VForm>();
 
 const props = defineProps<{
   value?: Family;
@@ -24,13 +24,15 @@ let formValue = getDefault();
 let valid = true;
 const requiredRule = (v: unknown) => !!v || "Value required";
 
-const icon = computed(() => formValue.icon.replace("symbol ", `symbol id="edit-icon" `));
+const icon = computed(() =>
+  formValue.icon.replace("symbol ", `symbol id="edit-icon" `)
+);
 
 watch(() => props.value, resetForm);
 
 function resetForm(): void {
   formValue = props.value ? Object.assign({}, props.value) : getDefault();
-  
+
   form.value?.resetValidation();
 }
 
@@ -77,8 +79,8 @@ resetForm();
 
         <div class="text-caption">Color</div>
         <v-menu :close-on-content-click="false" :offset-y="true">
-          <template #activator="{ on, attrs }">
-            <v-btn x-large v-bind="attrs" class="bigSquareButton" v-on="on">
+          <template #activator="{ props }">
+            <v-btn x-large v-bind="props" class="bigSquareButton">
               <svg class="svgicon">
                 <!-- eslint-disable-next-line vue/no-v-html -->
                 <defs v-html="icon" />

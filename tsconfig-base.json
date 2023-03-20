@@ -4,16 +4,18 @@
     "target": "esnext",
     "module": "commonjs",
     "strict": true,
-    "jsx": "preserve",
     "importHelpers": true,
     "moduleResolution": "node",
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "skipLibCheck": true,
     "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
     "allowSyntheticDefaultImports": true,
     "resolveJsonModule": true,
     "sourceMap": true,
+    "declaration": true,
+    "declarationMap": true,
     "plugins": [{ "transform": "ts-nameof", "type": "raw" }]
   }
 }

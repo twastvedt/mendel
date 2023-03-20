@@ -1,30 +1,31 @@
 <script setup lang="ts">
 import { state } from "../state/State";
-import type { DataTableHeader } from "vuetify";
+// import type { DataTableHeader } from 'vuetify/labs/VDataTable';
+import type { DataTableHeader } from '@/types/vuetifyTypes';
 import EditFamily from "./EditFamily.vue";
 import EditDataTable from "./EditDataTable.vue";
-import { Family } from "@mendel/common";
+import type { Family } from "@mendel/common";
 
 const headers: DataTableHeader[] = [
   {
-    text: "Name",
-    value: "name",
+    title: "Name",
+    key: "name",
   },
   {
-    text: "Color",
-    value: "color",
+    title: "Color",
+    key: "color",
   },
   {
-    text: "Spacing",
-    value: "spacing",
+    title: "Spacing",
+    key: "spacing",
   },
   {
-    text: "Nitrogen",
-    value: "nitrogen",
+    title: "Nitrogen",
+    key: "nitrogen",
   },
   {
-    text: "Plants",
-    value: "plants",
+    title: "Plants",
+    key: "plants",
   },
 ];
 
@@ -56,7 +57,7 @@ async function deleteFamily(family: Family): Promise<void> {
         <EditFamily
           :value="props.value"
           @close="props.close"
-          @input="(item) => state.db.editFamily(item)"
+          @input="(item) => state.db?.editFamily(item)"
         />
       </template>
 

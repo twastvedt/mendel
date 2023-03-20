@@ -1,6 +1,6 @@
-import { EntityId } from "@mendel/common";
-import { Plant } from "@mendel/common/src/entity/Plant";
-import { State } from "../state/State";
+import type { EntityId } from "@mendel/common";
+import type { Plant } from "@mendel/common/src/entity/Plant";
+import type { State } from "../state/State";
 import { Action } from "./Action";
 
 export class DeletePlantAction extends Action {

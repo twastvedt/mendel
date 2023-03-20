@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Position } from "@mendel/common";
+import type { Position } from "@mendel/common";
 import { computed } from "vue";
 import { state } from "../state/State";
 

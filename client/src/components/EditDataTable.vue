@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import type { DataTableHeader } from "vuetify";
+// import type { DataTableHeader } from 'vuetify/labs/VDataTable';
+import type { DataTableHeader } from '@/types/vuetifyTypes';
 
 const props = defineProps<{
   value: unknown[];
@@ -17,20 +18,19 @@ function fullHeaders(): DataTableHeader[] {
   const headers: DataTableHeader[] = [
     ...props.headers,
     {
-      text: "",
-      value: "actions",
+      title: "",
+      key: "actions",
       align: "end",
-      groupable: false,
       sortable: false,
-      cellClass: "smallColumn",
+      // TODO: cellClass: "smallColumn",
     },
   ];
 
   if (props.showExpand) {
     headers.push({
-      text: "",
-      value: "data-table-expand",
-      cellClass: "smallColumn",
+      title: "",
+      key: "data-table-expand",
+      // TODO: cellClass: "smallColumn",
     });
   }
 
@@ -99,7 +99,7 @@ function expandAll(v: Event): void {
         <v-checkbox
           off-icon="mdi-chevron-down"
           on-icon="mdi-chevron-up"
-          @change="(v) => expandAll(v)"
+          @change="(v: Event) => expandAll(v)"
         />
       </template>
 
@@ -114,12 +114,8 @@ function expandAll(v: Event): void {
         <slot name="expanded-item" v-bind="props" />
       </template>
 
-      <template v-for="name in $slots" #[name]>
-        <slot :name="name" />
-      </template>
-
-      <template v-for="name in $scopedSlots" #[name]="data">
-        <slot :name="name" v-bind="data" />
+      <template v-for="(_, name) in $slots" #[name]="slotData">
+        <slot :name="name" v-bind="slotData" />
       </template>
     </v-data-table>
   </v-card>

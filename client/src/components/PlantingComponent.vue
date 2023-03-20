@@ -1,16 +1,16 @@
 <script setup lang="ts">
-import { Planting, Position, Variety } from "@mendel/common";
+import type { Planting, Position, Variety } from "@mendel/common";
 import { state } from "../state/State";
-import { PlantElement } from "../types/entityTypes";
+import type { PlantElement } from "../types/entityTypes";
 import PlantComponent from "./PlantComponent.vue";
 import polylabel from "polylabel";
-import { Plant } from "@mendel/common/dist/entity/Plant";
+import type { Plant } from "@mendel/common/dist/entity/Plant";
 import { computed } from "vue";
 
 const props = defineProps<{
   planting: Planting;
   locations?: Position[];
-  isCursor: boolean;
+  isCursor?: boolean;
   plantsInteractive: boolean;
 }>();
 
@@ -101,7 +101,7 @@ function plantClick(event: PointerEvent, plant: Plant): void {
     </template>
     <title>
       {{ variety.name }} <span v-if="variety.family">{{
-        variety.family.name
+        variety.family?.name
       }}</span> <template v-if="plantLocations.length"> <br/> &#xA;
       {{ plantLocations.length }}
       </template>
