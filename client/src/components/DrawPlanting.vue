@@ -2,7 +2,6 @@
 import { Planting, Variety, Position } from "@mendel/common";
 import { state } from "../state/State";
 import PlantingComponent from "./PlantingComponent.vue";
-import PlantComponent from "./PlantComponent.vue";
 import RotationTool from "./RotationTool.vue";
 import { GridPoints } from "../services/polygonGrid";
 import { Stage } from "../tools/DrawPlantingTool";
@@ -85,7 +84,7 @@ const projectedLineHead = (props.dividingLine[0] && props.stage !== Stage.select
     <path
       v-if="dividingLine.length > 1"
       class="dividingLine"
-      :d="state.pathFromPoints(dividingLine) || undefined"
+      :d="state.pathFromPoints(dividingLine)"
     />
 
     <circle

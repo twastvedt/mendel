@@ -1,3 +1,66 @@
+<script setup lang="ts">
+import { Planting, Position, Variety } from "@mendel/common";
+import { state } from "../state/State";
+import { PlantElement } from "../types/entityTypes";
+import PlantComponent from "./PlantComponent.vue";
+import polylabel from "polylabel";
+import { Plant } from "@mendel/common/dist/entity/Plant";
+import { computed } from "vue";
+
+const props = defineProps<{
+  planting: Planting;
+  locations?: Position[];
+  isCursor: boolean;
+  plantsInteractive: boolean;
+}>();
+
+const variety = computed((): Variety => {
+  if (props.planting.variety) {
+    return props.planting.variety;
+  }
+
+  throw new Error("Planting has no variety");
+});
+
+const classList = computed((): (Record<string, unknown> | string | undefined)[] => {
+  return [props.planting.shape?.type, { cursor: props.isCursor }];
+});
+
+const labelTransform = computed((): string | undefined => {
+  if (props.planting.shape) {
+    if (props.planting.shape.type === "LineString") {
+      const coordinates = props.planting.shape.coordinates;
+
+      return state.makeTransform([
+        (coordinates[1][0] + coordinates[0][0]) / 2,
+        (coordinates[1][1] + coordinates[0][1]) / 2,
+      ]);
+    } else {
+      return state.makeTransform(
+        polylabel(props.planting.shape.coordinates) as [number, number]
+      );
+    }
+  }
+
+  return undefined;
+});
+
+const plantLocations = computed((): Position[] => {
+  return (
+    props.locations ??
+    props.planting.plants?.map((p) => p.location.coordinates) ??
+    []
+  );
+});
+
+function plantClick(event: PointerEvent, plant: Plant): void {
+  state.onClick(event, {
+    type: "plant",
+    item: plant,
+  } as PlantElement);
+}
+</script>
+
 <template>
   <g :class="classList">
     <path
@@ -45,76 +108,6 @@
     </title>
   </g>
 </template>
-
-<script lang="ts">
-import { Planting, Position, Variety } from "@mendel/common";
-import { Component, Prop, Vue } from "vue-property-decorator";
-import { state } from "../state/State";
-import { PlantElement } from "../types/entityTypes";
-import PlantComponent from "./PlantComponent.vue";
-import polylabel from "polylabel";
-import { Plant } from "@mendel/common/dist/entity/Plant";
-
-@Component({
-  components: {
-    PlantComponent,
-  },
-})
-export default class PlantingComponent extends Vue {
-  @Prop() readonly planting!: Planting;
-  @Prop({ required: false }) readonly locations?: Position[];
-  @Prop({ default: false }) readonly isCursor!: boolean;
-  @Prop() readonly plantsInteractive!: boolean;
-
-  state = state;
-
-  get variety(): Variety {
-    if (this.planting.variety) {
-      return this.planting.variety;
-    }
-
-    throw new Error("Planting has no variety");
-  }
-
-  get classList(): (Record<string, unknown> | string | undefined)[] {
-    return [this.planting.shape?.type, { cursor: this.isCursor }];
-  }
-
-  get labelTransform(): string | undefined {
-    if (this.planting.shape) {
-      if (this.planting.shape.type === "LineString") {
-        const coordinates = this.planting.shape.coordinates;
-
-        return state.makeTransform([
-          (coordinates[1][0] + coordinates[0][0]) / 2,
-          (coordinates[1][1] + coordinates[0][1]) / 2,
-        ]);
-      } else {
-        return state.makeTransform(
-          polylabel(this.planting.shape.coordinates) as [number, number]
-        );
-      }
-    }
-
-    return undefined;
-  }
-
-  get plantLocations(): Position[] {
-    return (
-      this.locations ??
-      this.planting.plants?.map((p) => p.location.coordinates) ??
-      []
-    );
-  }
-
-  plantClick(event: PointerEvent, plant: Plant): void {
-    state.onClick(event, {
-      type: "plant",
-      item: plant,
-    } as PlantElement);
-  }
-}
-</script>
 
 <style scoped lang="scss">
 .shape {

@@ -1,3 +1,33 @@
+<script setup lang="ts">
+import { state } from "../state/State";
+import type { DataTableHeader } from "vuetify";
+import EditVariety from "./EditVariety.vue";
+import EditDataTable from "./EditDataTable.vue";
+import { Variety } from "@mendel/common";
+
+const varietyHeaders: DataTableHeader[] = [
+  {
+    text: "Name",
+    value: "name",
+  },
+  {
+    text: "Color",
+    value: "color",
+  },
+  {
+    text: "Family",
+    value: "family.name",
+  },
+  {
+    text: "Plants",
+    value: "plants",
+  },
+];
+
+function plantCount(variety: Variety): number | undefined {
+  return state.db?.plantCount({ varietyId: variety.id });
+}
+</script>
 <template>
   <v-container v-if="state.db">
     <EditDataTable
@@ -26,46 +56,3 @@
     </EditDataTable>
   </v-container>
 </template>
-
-<script lang="ts">
-import { Component, Vue } from "vue-property-decorator";
-import { state } from "../state/State";
-import type { DataTableHeader } from "vuetify";
-import EditVariety from "./EditVariety.vue";
-import EditDataTable from "./EditDataTable.vue";
-import { Variety } from "@mendel/common";
-
-@Component({
-  components: {
-    EditVariety,
-    EditDataTable,
-  },
-})
-export defineComponent({
-  name: "VarietySettings",
-  state = state;
-
-  varietyHeaders: DataTableHeader[] = [
-    {
-      text: "Name",
-      value: "name",
-    },
-    {
-      text: "Color",
-      value: "color",
-    },
-    {
-      text: "Family",
-      value: "family.name",
-    },
-    {
-      text: "Plants",
-      value: "plants",
-    },
-  ];
-
-  plantCount(variety: Variety): number | undefined {
-    return state.db?.plantCount({ varietyId: variety.id });
-  }
-}
-</script>

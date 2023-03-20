@@ -1,3 +1,19 @@
+<script setup lang="ts">
+import { Family, Variety } from "@mendel/common";
+import { computed } from "vue";
+
+const props = defineProps<{
+  variety: Variety;
+}>();
+
+const family = computed((): Family => {
+  if (props.variety.family) {
+    return props.variety.family;
+  }
+
+  throw new Error("Variety has no family");
+});
+</script>
 <template>
   <v-card class="seedPack d-flex flex-column">
     <v-card-title>{{ variety.name }}</v-card-title>
@@ -9,26 +25,6 @@
     ></v-card-text>
   </v-card>
 </template>
-
-<script lang="ts">
-import { Family, Variety } from "@mendel/common";
-import { Component, Prop, Vue } from "vue-property-decorator";
-
-@Component({})
-export defineComponent({
-  name: "SeedPack",
-  @Prop() variety!: Variety;
-
-  get family(): Family {
-    if (this.variety.family) {
-      return this.variety.family;
-    }
-
-    throw new Error("Variety has no family");
-  }
-}
-</script>
-
 <style scoped lang="scss">
 @import "../styles/variables.scss";
 .icon {

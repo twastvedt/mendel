@@ -1,3 +1,63 @@
+<script setup lang="ts">
+import { watch, ref, computed } from "vue";
+import { Variety } from "@mendel/common";
+import { state } from "../state/State";
+import type { VueForm } from "../types/vueTypes";
+
+const emit = defineEmits<{
+  (e: 'close'): void, 
+  (e: 'input', formValue: unknown): void,
+}>();
+
+const form = ref<VueForm>();
+
+const props = defineProps<{
+  value?: Variety
+}>();
+
+let formValue = getDefault();
+const families = state.db?.families ?? [];
+let valid = true;
+const requiredRule = (v: unknown) => !!v || "Value required";
+
+function updateColor(): void {
+  if (formValue.family) {
+    formValue.color = formValue.family.color;
+  }
+}
+
+const isNew = computed(() => !props.value);
+
+function getDefault(): Variety {
+  return new Variety("", "#FFFFFF");
+}
+
+watch(() => props.value, resetForm);
+
+function resetForm(): void {
+  formValue = props.value ? Object.assign({}, props.value) : getDefault();
+
+  form.value?.resetValidation();
+}
+
+function save(): void {
+  if (form.value?.validate()) {
+    formValue.familyId = formValue.family?.id;
+
+    emit("input", formValue);
+    emit("close");
+
+    resetForm();
+  }
+}
+
+function cancel(): void {
+  emit("close");
+  resetForm();
+}
+
+resetForm();
+</script>
 <template>
   <v-card>
     <v-form ref="form" v-model="valid" lazy-validation>
@@ -10,7 +70,7 @@
         ></v-text-field>
         <v-select
           v-model="formValue.family"
-          :items="state.db.families"
+          :items="families"
           item-text="name"
           return-object
           label="Family"
@@ -54,75 +114,6 @@
     </v-form>
   </v-card>
 </template>
-
-<script lang="ts">
-import { Component, Vue, Watch, Prop } from "vue-property-decorator";
-
-import { Family, Variety } from "@mendel/common";
-import { state } from "../state/State";
-import type { VueForm } from "../types/vueTypes";
-
-@Component({})
-export defineComponent({
-  name: "EditVariety",
-  $refs!: {
-    form: VueForm;
-  };
-
-  @Prop()
-  value?: Variety;
-
-  state = state;
-
-  formValue = this.default;
-  families: Family[] = [];
-  valid = true;
-  requiredRule = (v: unknown) => !!v || "Value required";
-
-  updateColor(): void {
-    if (this.formValue.family) {
-      this.formValue.color = this.formValue.family.color;
-    }
-  }
-
-  get isNew(): boolean {
-    return !this.value;
-  }
-
-: void {
-    this.resetForm();
-  }
-
-  get default(): Variety {
-    return new Variety("", "#FFFFFF");
-  }
-
-  @Watch("value")
-  resetForm(): void {
-    this.formValue = this.value ? Object.assign({}, this.value) : this.default;
-
-    this.$refs.form?.resetValidation();
-  }
-
-  save(): void {
-    if (this.$refs.form.validate()) {
-      this.formValue.familyId = this.formValue.family?.id;
-
-      this.$emit("input", this.formValue);
-      this.$emit("close");
-
-      this.resetForm();
-    }
-  }
-
-  cancel(): void {
-    this.$emit("close");
-
-    this.resetForm();
-  }
-}
-</script>
-
 <style scoped lang="scss">
 .svgicon {
   stroke: black;

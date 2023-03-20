@@ -1,18 +1,22 @@
 import { gardenApi, varietyApi, Position } from "@mendel/common";
 import { Tool } from "../tools/Tool";
 import { Action } from "../actions/Action";
-import { geoIdentity, geoPath } from "d3-geo";
+import { geoIdentity, geoPath, GeoPermissibleObjects } from "d3-geo";
 import { GardenState } from "./GardenState";
 import axios from "axios";
 import { UiElement } from "../types/entityTypes";
 
 axios.defaults.baseURL = "http://localhost:3000";
 
+const projection = geoIdentity().reflectY(true);
+
+const pathGenerator = geoPath(projection);
+
 export class State {
   // TODO: We assume data is stored in inches relative to garden origin.
-  projection = geoIdentity().reflectY(true);
+  projection = projection;
 
-  pathGenerator = geoPath(this.projection);
+  pathGenerator = (o: GeoPermissibleObjects) => pathGenerator(o) ?? undefined;
 
   loading = false;
   scale = 1;
@@ -116,7 +120,7 @@ export class State {
     return `translate(${this.projection(coordinate)?.join(" ")})`;
   }
 
-  pathFromPoints(coordinates: Position[]): string | null {
+  pathFromPoints(coordinates: Position[]): string | undefined {
     return this.pathGenerator({ type: "LineString", coordinates });
   }
 }

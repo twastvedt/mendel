@@ -1,3 +1,55 @@
+<script setup lang="ts">
+import {ref, watch, computed} from "vue";
+import { Family } from "@mendel/common";
+import type { VueForm } from "../types/vueTypes";
+
+const emit = defineEmits<{
+  (e: 'close'): void, 
+  (e: 'input', formValue: unknown): void,
+}>();
+
+const form = ref<VueForm>();
+
+const props = defineProps<{
+  value?: Family;
+}>();
+
+const isNew = computed(() => !props.value);
+
+function getDefault(): Family {
+  return new Family("", "#FFFFFF", "", 6);
+}
+
+let formValue = getDefault();
+let valid = true;
+const requiredRule = (v: unknown) => !!v || "Value required";
+
+const icon = computed(() => formValue.icon.replace("symbol ", `symbol id="edit-icon" `));
+
+watch(() => props.value, resetForm);
+
+function resetForm(): void {
+  formValue = props.value ? Object.assign({}, props.value) : getDefault();
+  
+  form.value?.resetValidation();
+}
+
+function save(): void {
+  if (form.value?.validate()) {
+    emit("input", formValue);
+    emit("close");
+
+    resetForm();
+  }
+}
+
+function cancel(): void {
+  emit("close");
+  resetForm();
+}
+
+resetForm();
+</script>
 <template>
   <v-card>
     <v-form ref="form" v-model="valid" lazy-validation>
@@ -51,69 +103,6 @@
     </v-form>
   </v-card>
 </template>
-
-<script lang="ts">
-import { Component, Vue, Watch, Prop } from "vue-property-decorator";
-
-import { Family } from "@mendel/common";
-import { state } from "../state/State";
-import type { VueForm } from "../types/vueTypes";
-
-@Component({})
-export defineComponent({
-  name: "EditFamily",
-  $refs!: {
-    form: VueForm;
-  };
-
-  @Prop()
-  value?: Family;
-
-  state = state;
-
-  formValue = this.default;
-  valid = true;
-  requiredRule = (v: unknown) => !!v || "Value required";
-
-  get isNew(): boolean {
-    return !this.value;
-  }
-
- icon(): string {
-    return this.formValue.icon.replace("symbol ", `symbol id="edit-icon" `);
-  }
-
-  created(): void {
-    this.resetForm();
-  }
-
-  get default(): Family {
-    return new Family("", "#FFFFFF", "", 6);
-  }
-
-  @Watch("value")
-  resetForm(): void {
-    this.formValue = this.value ? Object.assign({}, this.value) : this.default;
-
-    this.$refs.form?.resetValidation();
-  }
-
-  save(): void {
-    if (this.$refs.form.validate()) {
-      this.$emit("input", this.formValue);
-      this.$emit("close");
-
-      this.resetForm();
-    }
-  }
-
-  cancel(): void {
-    this.$emit("close");
-
-    this.resetForm();
-  }
-}
-</script>
 
 <style scoped lang="scss">
 .svgicon {

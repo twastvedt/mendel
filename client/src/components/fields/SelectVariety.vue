@@ -1,8 +1,37 @@
+<script setup lang="ts">
+import { state } from "../../state/State";
+import { Variety } from "@mendel/common";
+
+const props = defineProps<{
+  disabled: boolean;
+  value: Variety | null;
+}>();
+
+const varietyList: (Variety | { divider: boolean })[] = [];
+
+if (state.db) {
+  for (const variety of state.db.varieties) {
+    if (variety !== varietyList[varietyList.length - 1]) {
+      varietyList.push({ divider: true });
+    }
+  
+    varietyList.push(variety);
+  }
+}
+
+function varietyFilter(item: Variety, queryText: string): boolean {
+  return (
+    `${item.name} ${item.family?.name}`
+      .toLocaleLowerCase()
+      .indexOf(queryText.toLocaleLowerCase()) > -1
+  );
+}
+</script>
 <template>
   <v-select
-    :value="value"
+    :value="props.value"
     class="ml-3"
-    :disabled="disabled"
+    :disabled="props.disabled"
     :items="varietyList"
     hide-details
     item-text="name"
@@ -30,49 +59,6 @@
     </template>
   </v-select>
 </template>
-
-<script lang="ts">
-import { Component, Prop, Vue } from "vue-property-decorator";
-import { state } from "../../state/State";
-import { Variety } from "@mendel/common";
-
-@Component({})
-export default class Toolbar extends Vue {
-  state = state;
-
-  @Prop({ required: false })
-  readonly disabled!: boolean;
-
-  @Prop()
-  readonly value!: Variety | null;
-
-  get varietyList(): (Variety | { divider: boolean })[] {
-    if (!this.state.db) {
-      return [];
-    }
-
-    const list: (Variety | { divider: boolean })[] = [];
-
-    for (const variety of this.state.db.varieties) {
-      if (variety !== list[list.length - 1]) {
-        list.push({ divider: true });
-      }
-
-      list.push(variety);
-    }
-
-    return list;
-  }
-
-  varietyFilter(item: Variety, queryText: string): boolean {
-    return (
-      `${item.name} ${item.family?.name}`
-        .toLocaleLowerCase()
-        .indexOf(queryText.toLocaleLowerCase()) > -1
-    );
-  }
-}
-</script>
 
 <style scoped lang="scss">
 .icon {

@@ -1,3 +1,69 @@
+<script setup lang="ts">
+import { watch } from 'vue'
+import { Variety } from "@mendel/common";
+import { state } from "../state/State";
+import { UiElement, UiElementType } from "../types/entityTypes";
+
+import SelectVariety from "./fields/SelectVariety.vue";
+
+let variety: Variety | null = null;
+let title = "";
+
+watch(state.selection, (selection: UiElement[]) => {
+  const totals: Record<UiElementType, number> = {
+    bed: 0,
+    planting: 0,
+    plant: 0,
+    area: 0,
+  };
+
+  let innerVariety: Variety | undefined | false;
+
+  for (const item of selection) {
+    totals[item.type]++;
+
+    let thisVariety: Variety | undefined;
+
+    if (item.type === "plant") {
+      thisVariety = item.item.planting?.variety;
+    } else if (item.type === "planting") {
+      thisVariety = item.item.variety;
+    }
+
+    if (innerVariety !== false) {
+      if (!innerVariety) {
+        innerVariety = thisVariety;
+      } else if (innerVariety !== thisVariety) {
+        innerVariety = false;
+      }
+    }
+  }
+
+  variety = innerVariety ? innerVariety : null;
+
+  let titleParts = [];
+
+  if (totals.plant) {
+    titleParts.push(`${totals.plant} plant${totals.plant !== 1 ? "s" : ""}`);
+  }
+
+  if (totals.planting) {
+    titleParts.push(
+      `${totals.planting} planting${totals.planting !== 1 ? "s" : ""}`
+    );
+  }
+
+  if (totals.bed) {
+    titleParts.push(`${totals.bed} bed${totals.bed !== 1 ? "s" : ""}`);
+  }
+
+  if (totals.area) {
+    titleParts.push(`${totals.area} area${totals.area !== 1 ? "s" : ""}`);
+  }
+
+  title = titleParts.join(", ");
+}, { immediate: true })
+</script>
 <template>
   <v-card height="100%">
     <v-toolbar dark dense>
@@ -86,80 +152,3 @@
     </v-list>
   </v-card>
 </template>
-
-<script lang="ts">
-import { Variety } from "@mendel/common";
-import { Component, Vue, Watch } from "vue-property-decorator";
-import { state } from "../state/State";
-import { UiElement, UiElementType } from "../types/entityTypes";
-
-import SelectVariety from "./fields/SelectVariety.vue";
-
-@Component({
-  components: {
-    SelectVariety,
-  },
-})
-export default class DetailsPane extends Vue {
-  state = state;
-
-  variety: Variety | null = null;
-  title = "";
-
-  @Watch("state.selection", { immediate: true })
-  newSelection(selection: UiElement[]) {
-    const totals: Record<UiElementType, number> = {
-      bed: 0,
-      planting: 0,
-      plant: 0,
-      area: 0,
-    };
-
-    let variety: Variety | undefined | false;
-
-    for (const item of selection) {
-      totals[item.type]++;
-
-      let thisVariety: Variety | undefined;
-
-      if (item.type === "plant") {
-        thisVariety = item.item.planting?.variety;
-      } else if (item.type === "planting") {
-        thisVariety = item.item.variety;
-      }
-
-      if (variety !== false) {
-        if (!variety) {
-          variety = thisVariety;
-        } else if (variety !== thisVariety) {
-          variety = false;
-        }
-      }
-    }
-
-    this.variety = variety ? variety : null;
-
-    let titleParts = [];
-
-    if (totals.plant) {
-      titleParts.push(`${totals.plant} plant${totals.plant !== 1 ? "s" : ""}`);
-    }
-
-    if (totals.planting) {
-      titleParts.push(
-        `${totals.planting} planting${totals.planting !== 1 ? "s" : ""}`
-      );
-    }
-
-    if (totals.bed) {
-      titleParts.push(`${totals.bed} bed${totals.bed !== 1 ? "s" : ""}`);
-    }
-
-    if (totals.area) {
-      titleParts.push(`${totals.area} area${totals.area !== 1 ? "s" : ""}`);
-    }
-
-    this.title = titleParts.join(", ");
-  }
-}
-</script>

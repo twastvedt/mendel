@@ -1,3 +1,29 @@
+<script setup lang="ts">
+import { Position } from "@mendel/common";
+import { computed } from "vue";
+import { state } from "../state/State";
+
+const props = defineProps<{
+  cursor?: Position;
+  rotationCenter?: Position;
+}>();
+
+const projectedRotationCenter = computed((): Position | null => {
+  if (props.rotationCenter) {
+    return state.projection(props.rotationCenter);
+  }
+
+  return null;
+});
+
+const projectedCursor = computed((): Position | null => {
+  if (props.cursor) {
+    return state.projection(props.cursor);
+  }
+
+  return null;
+});
+</script>
 <template>
   <g v-if="projectedRotationCenter && projectedCursor">
     <line
@@ -16,34 +42,6 @@
     />
   </g>
 </template>
-
-<script lang="ts">
-import { Position } from "@mendel/common";
-import { Component, Prop, Vue } from "vue-property-decorator";
-import { state } from "../state/State";
-
-@Component({})
-export default class RotationTool extends Vue {
-  @Prop() readonly cursor?: Position;
-  @Prop() readonly rotationCenter?: Position;
-
-  get projectedRotationCenter(): Position | null {
-    if (this.rotationCenter) {
-      return state.projection(this.rotationCenter);
-    }
-
-    return null;
-  }
-
-  get projectedCursor(): Position | null {
-    if (this.cursor) {
-      return state.projection(this.cursor);
-    }
-
-    return null;
-  }
-}
-</script>
 <style lang="scss" scoped>
 .rotationLine {
   stroke: black;

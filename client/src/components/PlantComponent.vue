@@ -1,3 +1,34 @@
+<script setup lang="ts">
+import { withDefaults, computed } from "vue";
+import { state } from "../state/State";
+import { Variety } from "@mendel/common";
+
+const props = withDefaults(defineProps<{
+  variety: Variety;
+  drawSpacing: boolean;
+  interactive: boolean;
+}>(), {
+  drawSpacing: true,
+  interactive: true
+});
+
+const family = computed(() => {
+  if (props.variety.family) {
+    return props.variety.family;
+  }
+
+  throw new Error("Variety has no family");
+});
+
+const iconSize = computed((): number => {
+  return Math.min(40 / state.scale, (family.value.spacing * 2) / 3);
+});
+
+const title = computed((): string => {
+  return `${props.variety.name} ${family.value.name}`;
+});
+
+</script>
 <template>
   <g
     :class="interactive ? 'interactive' : 'non-interactive'"
@@ -30,38 +61,6 @@
     <title>{{ title }}</title>
   </g>
 </template>
-
-<script lang="ts">
-import { Component, Prop, Vue } from "vue-property-decorator";
-import { state } from "../state/State";
-import { Family, Variety } from "@mendel/common";
-
-@Component({})
-export defineComponent({
-  name: "PlantComponent",
-  @Prop() readonly variety!: Variety;
-  @Prop({ default: true }) readonly drawSpacing!: boolean;
-  @Prop({ default: true }) readonly interactive!: boolean;
-
-  get family(): Family {
-    if (this.variety.family) {
-      return this.variety.family;
-    }
-
-    throw new Error("Variety has no family");
-  }
-
- iconSize(): number {
-    return Math.min(40 / state.scale, (this.family.spacing * 2) / 3);
-  }
-
-  get title(): string {
-    return `${this.variety.name} ${this.family.name}`;
-  }
-
-  state = state;
-}
-</script>
 
 <style scoped lang="scss">
 .interactive {

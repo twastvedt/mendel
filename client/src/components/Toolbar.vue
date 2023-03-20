@@ -1,3 +1,71 @@
+<script setup lang="ts">
+import { computed, ref, watch } from "vue";
+import { state } from "../state/State";
+import { DrawPlantTool } from "../tools/DrawPlantTool";
+import { DeletePlantTool } from "../tools/DeletePlantTool";
+import { DrawRowTool } from "../tools/DrawRowTool";
+import { DeletePlantingTool } from "../tools/DeletePlantingTool";
+import { Variety } from "@mendel/common";
+import { DrawPlantingTool } from "../tools/DrawPlantingTool";
+import SelectVariety from "./fields/SelectVariety.vue";
+
+const varietySelectDisabled = computed(() => {
+  return (
+    state.toolName === "deletePlant" || state.toolName === "deletePlanting"
+  );
+});
+
+const variety = ref<Variety | undefined>(undefined);
+
+function newTool(newTool: string): void {
+  if (state.db) {
+    switch (newTool) {
+      case "drawPlant":
+        if (!variety.value) {
+          variety.value = state.db.varieties[0];
+        }
+
+        state.setTool(new DrawPlantTool(variety.value));
+
+        break;
+      case "drawRow":
+        if (variety.value) {
+          state.setTool(new DrawRowTool(variety.value));
+        }
+        break;
+      case "drawPlanting":
+        if (!variety.value) {
+          variety.value = state.db.varieties[0];
+        }
+
+        if (state.db.grid) {
+          state.setTool(new DrawPlantingTool(variety.value, state.db.grid));
+        }
+        break;
+      case "deletePlant":
+        state.setTool(new DeletePlantTool());
+        break;
+      case "deletePlanting":
+        state.setTool(new DeletePlantingTool());
+        break;
+    }
+  }
+}
+
+watch(variety, newVariety);
+
+function newVariety(newVariety?: Variety): void {
+  if (
+    newVariety &&
+    (state.toolName === "drawPlant" ||
+      state.toolName === "drawPlanting" ||
+      state.toolName === "drawRow")
+  ) {
+    newTool(state.toolName);
+  }
+}
+</script>
+
 <template>
   <v-toolbar dense floating>
     <v-btn-toggle v-model="state.toolName" borderless @change="newTool">
@@ -23,78 +91,6 @@
     <SelectVariety v-model="variety" :disabled="varietySelectDisabled" />
   </v-toolbar>
 </template>
-
-<script lang="ts">
-import { defineComponent } from "vue";
-import { state } from "../state/State";
-import { DrawPlantTool } from "../tools/DrawPlantTool";
-import { DeletePlantTool } from "../tools/DeletePlantTool";
-import { DrawRowTool } from "../tools/DrawRowTool";
-import { DeletePlantingTool } from "../tools/DeletePlantingTool";
-import { Variety } from "@mendel/common";
-import { DrawPlantingTool } from "../tools/DrawPlantingTool";
-import SelectVariety from "./fields/SelectVariety.vue";
-
-export defineComponent({
-  name: "Toolbar",
-  state = state;
-
-  get varietySelectDisabled() {
-    return (
-      state.toolName === "deletePlant" || state.toolName === "deletePlanting"
-    );
-  }
-
-  variety: Variety | null = null;
-
-  newTool(newTool: string): void {
-    if (state.db) {
-      switch (newTool) {
-        case "drawPlant":
-          if (!this.variety) {
-            this.variety = state.db.varieties[0];
-          }
-
-          state.setTool(new DrawPlantTool(this.variety));
-
-          break;
-        case "drawRow":
-          if (this.variety) {
-            state.setTool(new DrawRowTool(this.variety));
-          }
-          break;
-        case "drawPlanting":
-          if (!this.variety) {
-            this.variety = state.db.varieties[0];
-          }
-
-          if (state.db.grid) {
-            state.setTool(new DrawPlantingTool(this.variety, state.db.grid));
-          }
-          break;
-        case "deletePlant":
-          state.setTool(new DeletePlantTool());
-          break;
-        case "deletePlanting":
-          state.setTool(new DeletePlantingTool());
-          break;
-      }
-    }
-  }
-
-  @Watch("variety")
-  newVariety(newVariety?: Variety): void {
-    if (
-      newVariety &&
-      (state.toolName === "drawPlant" ||
-        state.toolName === "drawPlanting" ||
-        state.toolName === "drawRow")
-    ) {
-      this.newTool(state.toolName);
-    }
-  }
-});
-</script>
 
 <style scoped lang="scss">
 .icon {

@@ -1,3 +1,5 @@
+<script setup lang="ts">
+</script>
 <template>
   <v-list dense nav>
     <v-list-item link to="/">
@@ -31,11 +33,3 @@
     </v-list-group>
   </v-list>
 </template>
-
-<script lang="ts">
-import { Component, Vue } from "vue-property-decorator";
-
-@Component({})
-export defineComponent({
-  name: "MainMenu",}
-</script>

@@ -1,3 +1,118 @@
+<script setup lang="ts">
+import { state } from "../state/State";
+import * as d3 from "d3";
+import { zoom, D3ZoomEvent } from "d3-zoom";
+
+import PlantingComponent from "./PlantingComponent.vue";
+import Toolbar from "./Toolbar.vue";
+import DetailsPane from "./DetailsPane.vue";
+import { UiElementType } from "../types/entityTypes";
+import { nextTick, onMounted, ref } from "vue";
+
+const map = ref<SVGSVGElement>();
+const content = ref<SVGGElement>();
+
+let zoomBehavior!: d3.ZoomBehavior<SVGSVGElement, unknown>;
+let svg: d3.Selection<SVGSVGElement, unknown, null, undefined>;
+
+function zoomed(e: D3ZoomEvent<SVGSVGElement, unknown>): void {
+  if (content.value) {
+    content.value.setAttribute(
+      "transform",
+      e.transform as unknown as string
+    );
+  
+    state.scale = e.transform.k;
+  }
+}
+
+onMounted(async (): Promise<void> => {
+  console.debug("Map mounted");
+
+  await state.ready;
+
+  if (!state.db || !map.value) {
+    return;
+  }
+
+  svg = d3.select(map.value);
+
+  const width = map.value.clientWidth,
+    height = map.value.clientHeight;
+
+  d3.select(map.value).attr("viewBox", [
+    0,
+    0,
+    width,
+    height,
+  ] as unknown as string);
+
+  zoomBehavior = zoom<SVGSVGElement, unknown>().on(
+    "zoom",
+    zoomed.bind(this)
+  );
+
+  svg.call(zoomBehavior);
+
+  nextTick(() => zoomFit(false));
+});
+
+function zoomFit(animate: boolean): void {
+  const bounds = content.value?.getBBox();
+
+  if (bounds && map.value) {
+    const width = map.value.clientWidth,
+      height = map.value.clientHeight,
+      midX = bounds.x + bounds.width / 2,
+      midY = bounds.y + bounds.height / 2;
+
+    const scale =
+        0.9 / Math.max(bounds.width / width, bounds.height / height),
+      translate = [width / 2 - scale * midX, height / 2 - scale * midY];
+
+    let zoomable;
+
+    if (animate) {
+      zoomable = svg.transition().duration(750);
+    } else {
+      zoomable = svg;
+    }
+
+    zoomable.call(
+      zoomBehavior.transform,
+      d3.zoomIdentity.translate(translate[0], translate[1]).scale(scale)
+    );
+  }
+}
+
+function onHover(event: MouseEvent, element?: unknown, index?: number): void {
+  state.tool?.onHover?.(state.cursorPosition, index, element);
+}
+
+function onMouseMove(event: MouseEvent): void {
+  const point = d3.pointer(event, content.value);
+  point[1] = -point[1];
+
+  [...state.cursorPosition] = point;
+
+  if (state.tool) {
+    state.updateTool(point);
+  }
+}
+
+function isInteractive(elementType: UiElementType): boolean {
+  return (
+    (!state.tool || state.tool?.interactiveElements?.has(elementType)) ??
+    false
+  );
+}
+
+function elementStyle(elementType: UiElementType): Record<string, string> {
+  return {
+    "pointer-events": isInteractive(elementType) ? "auto" : "none",
+  };
+}
+</script>
 <template>
   <v-layout class="mapContainer">
     <Toolbar class="ma-3 toolbar" />
@@ -88,136 +203,6 @@
     </v-footer>
   </v-layout>
 </template>
-
-<script lang="ts">
-import { Component, Vue } from "vue-property-decorator";
-import { state } from "../state/State";
-import * as d3 from "d3";
-import { zoom, D3ZoomEvent } from "d3-zoom";
-
-import PlantingComponent from "./PlantingComponent.vue";
-import Toolbar from "./Toolbar.vue";
-import DetailsPane from "./DetailsPane.vue";
-import { UiElementType } from "../types/entityTypes";
-
-@Component({
-  components: {
-    Toolbar,
-    PlantingComponent,
-    DetailsPane,
-  },
-})
-export defineComponent({
-  name: "GardenMap",
-  $refs!: {
-    map: SVGSVGElement;
-    content: SVGGElement;
-  };
-
-  state = state;
-
-  zoom!: d3.ZoomBehavior<SVGSVGElement, unknown>;
-
-  zoomed(e: D3ZoomEvent<SVGSVGElement, unknown>): void {
-    this.$refs.content.setAttribute(
-      "transform",
-      e.transform as unknown as string
-    );
-
-    state.scale = e.transform.k;
-  }
-
-  svg!: d3.Selection<SVGSVGElement, unknown, null, undefined>;
-
-  async mounted(): Promise<void> {
-    console.debug("Map mounted");
-
-    await state.ready;
-
-    if (!state.db) {
-      return;
-    }
-
-    this.svg = d3.select(this.$refs.map);
-
-    const width = this.$refs.map.clientWidth,
-      height = this.$refs.map.clientHeight;
-
-    d3.select(this.$refs.map).attr("viewBox", [
-      0,
-      0,
-      width,
-      height,
-    ] as unknown as string);
-
-    this.zoom = zoom<SVGSVGElement, unknown>().on(
-      "zoom",
-      this.zoomed.bind(this)
-    );
-
-    this.svg.call(this.zoom);
-
-    Vue.nextTick(() => this.zoomFit(false));
-  }
-
-  zoomFit(animate: boolean): void {
-    const bounds = this.$refs.content.getBBox();
-
-    if (bounds) {
-      const width = this.$refs.map.clientWidth,
-        height = this.$refs.map.clientHeight,
-        midX = bounds.x + bounds.width / 2,
-        midY = bounds.y + bounds.height / 2;
-
-      const scale =
-          0.9 / Math.max(bounds.width / width, bounds.height / height),
-        translate = [width / 2 - scale * midX, height / 2 - scale * midY];
-
-      let zoomable;
-
-      if (animate) {
-        zoomable = this.svg.transition().duration(750);
-      } else {
-        zoomable = this.svg;
-      }
-
-      zoomable.call(
-        this.zoom.transform,
-        d3.zoomIdentity.translate(translate[0], translate[1]).scale(scale)
-      );
-    }
-  }
-
-  onHover(event: MouseEvent, element?: unknown, index?: number): void {
-    state.tool?.onHover?.(state.cursorPosition, index, element);
-  }
-
-  onMouseMove(event: MouseEvent): void {
-    const point = d3.pointer(event, this.$refs.content);
-    point[1] = -point[1];
-
-    [...state.cursorPosition] = point;
-
-    if (state.tool) {
-      state.updateTool(point);
-    }
-  }
-
-  isInteractive(elementType: UiElementType): boolean {
-    return (
-      (!state.tool || state.tool?.interactiveElements?.has(elementType)) ??
-      false
-    );
-  }
-
-  elementStyle(elementType: UiElementType): Record<string, string> {
-    return {
-      "pointer-events": this.isInteractive(elementType) ? "auto" : "none",
-    };
-  }
-}
-</script>
-
 <style scoped lang="scss">
 .mapContainer {
   width: 100%;

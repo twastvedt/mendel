@@ -1,3 +1,49 @@
+<script setup lang="ts">
+import { state } from "../state/State";
+import type { DataTableHeader } from "vuetify";
+import EditFamily from "./EditFamily.vue";
+import EditDataTable from "./EditDataTable.vue";
+import { Family } from "@mendel/common";
+
+const headers: DataTableHeader[] = [
+  {
+    text: "Name",
+    value: "name",
+  },
+  {
+    text: "Color",
+    value: "color",
+  },
+  {
+    text: "Spacing",
+    value: "spacing",
+  },
+  {
+    text: "Nitrogen",
+    value: "nitrogen",
+  },
+  {
+    text: "Plants",
+    value: "plants",
+  },
+];
+
+function plantCount(family: Family): number | undefined {
+  return state.db?.plantCount({ familyId: family.id });
+}
+
+async function deleteFamily(family: Family): Promise<void> {
+  const varieties =
+    family.varieties?.length ??
+    state.db?.varieties.filter((v) => v.familyId === family.id).length;
+
+  if (varieties) {
+    alert(`Can't delete family which still has ${varieties} varietie(s).`);
+  } else {
+    state.db?.deleteFamily(family);
+  }
+}
+</script>
 <template>
   <v-container v-if="state.db">
     <EditDataTable
@@ -26,62 +72,3 @@
     </EditDataTable>
   </v-container>
 </template>
-
-<script lang="ts">
-import { Component, Vue } from "vue-property-decorator";
-import { state } from "../state/State";
-import type { DataTableHeader } from "vuetify";
-import EditFamily from "./EditFamily.vue";
-import EditDataTable from "./EditDataTable.vue";
-import { Family } from "@mendel/common";
-
-@Component({
-  components: {
-    EditFamily,
-    EditDataTable,
-  },
-})
-export defineComponent({
-  name: "FamilySettings",
-  state = state;
-
-  headers: DataTableHeader[] = [
-    {
-      text: "Name",
-      value: "name",
-    },
-    {
-      text: "Color",
-      value: "color",
-    },
-    {
-      text: "Spacing",
-      value: "spacing",
-    },
-    {
-      text: "Nitrogen",
-      value: "nitrogen",
-    },
-    {
-      text: "Plants",
-      value: "plants",
-    },
-  ];
-
-  plantCount(family: Family): number | undefined {
-    return state.db?.plantCount({ familyId: family.id });
-  }
-
-  async deleteFamily(family: Family): Promise<void> {
-    const varieties =
-      family.varieties?.length ??
-      state.db?.varieties.filter((v) => v.familyId === family.id).length;
-
-    if (varieties) {
-      alert(`Can't delete family which still has ${varieties} varietie(s).`);
-    } else {
-      state.db?.deleteFamily(family);
-    }
-  }
-}
-</script>
