@@ -11,7 +11,7 @@ addWrappedHandler(
   Family,
   async (request, repository) =>
     repository.find({
-      relations: [nameof(Family.prototype.varieties)],
+      relations: ["varieties"],
     })
 );
 

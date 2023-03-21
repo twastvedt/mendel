@@ -6,23 +6,24 @@
   "private": true,
   "dependencies": {
     "@mendel/common": "^1.0.0",
-    "@svgdotjs/svg.js": "^3.1.2",
-    "@types/express": "^4.17.13",
-    "@types/node": "^16",
-    "@types/ts-nameof": "^4.2.1",
-    "express": "^4.17.3",
-    "pg": "^8.7.3",
+    "cors": "^2.8.5",
+    "express": "^4.18.2",
+    "pg": "^8.10.0",
     "reflect-metadata": "^0.1.13",
-    "svgdom": "^0.1.10",
-    "ts-nameof": "^5.0.0",
-    "ts-node": "10.7.0",
-    "ts-node-dev": "^1.1.8",
-    "ttypescript": "^1.5.13",
-    "typeorm": "0.2.45"
+    "svgdom": "^0.1.13",
+    "ts-node": "10.9.1",
+    "typeorm": "0.3.12"
   },
   "scripts": {
     "clean": "rimraf dist/**/*",
-    "serve": "ts-node-dev --compiler ttypescript src/index.ts",
-    "start": "ts-node --transpile-only --compiler ttypescript src/index.ts"
+    "serve": "ts-node-dev src/index.ts",
+    "start": "ts-node --transpile-only src/index.ts"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.13",
+    "@svgdotjs/svg.js": "^3.1.2",
+    "@types/express": "^4.17.17",
+    "@types/node": "^16",
+    "ts-node-dev": "^2.0.0"
   }
 }

@@ -3,6 +3,7 @@ import express from "express";
 
 import { all, create, one } from "./handlers";
 import { addWrappedHandler } from "./addRoutes";
+import { FindManyOptions } from "typeorm";
 
 const router = express.Router();
 
@@ -12,8 +13,12 @@ addWrappedHandler(bedApi.create, router, create(Bed));
 
 addWrappedHandler(bedApi.one, router, one(Bed));
 
-addWrappedHandler(bedApi.garden, router, Bed, (request, repository) =>
-  repository.find({ where: { garden: request.params.garden } })
-);
+addWrappedHandler(bedApi.garden, router, Bed, (request, repository) => {
+  // TODO: awaiting fix in https://github.com/typeorm/typeorm/pull/9709.
+  const query = {
+    where: { garden: request.params.garden },
+  } as FindManyOptions<Bed>;
+  return repository.find(query);
+});
 
 export default router;

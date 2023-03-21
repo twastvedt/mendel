@@ -16,3 +16,5 @@ export * from "./entity/Planting";
 export * from "./entity/Plant";
 export * from "./entity/Variety";
 export * from "./entity/geoJson";
+
+export * from "./dataSource";

@@ -6,6 +6,6 @@
     "tsBuildInfoFile": "dist/.tsbuildinfo",
     "lib": ["esnext", "esnext.asynciterable", "scripthost"]
   },
-  "include": ["src/**/*.ts", "src/**/*.json"],
+  "include": ["src/**/*.ts"],
   "references": [{ "path": "../common" }]
 }

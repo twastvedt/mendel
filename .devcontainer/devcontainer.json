@@ -5,7 +5,7 @@
 {
   "name": "garden-data",
   "dockerComposeFile": ["../dev/docker-compose.yml"],
-  "forwardPorts": [3000, 3001],
+  "forwardPorts": [8000, 3000, 3001],
   "service": "app",
   "workspaceFolder": "/mendel",
   "customizations": {
@@ -16,7 +16,8 @@
       "extensions": [
         "EditorConfig.editorconfig",
         "dbaeumer.vscode-eslint",
-        "johnsoncodehk.volar",
+        "vue.volar",
+        "vue.vscode-typescript-vue-plugin",
         "visualstudioexptteam.vscodeintellicode",
         "esbenp.prettier-vscode",
         "ms-azuretools.vscode-docker"

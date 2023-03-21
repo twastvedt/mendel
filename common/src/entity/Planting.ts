@@ -7,7 +7,10 @@ import { Variety } from "./Variety";
 
 @Entity()
 export class Planting extends EntityBase {
-  @Column("geometry", { nullable: true, spatialFeatureType: "Geometry" })
+  @Column("geometry", {
+    nullable: true,
+    spatialFeatureType: "GeometryCollection",
+  })
   shape?: Polygon | LineString;
 
   @Column({ nullable: true })

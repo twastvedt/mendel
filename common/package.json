@@ -5,10 +5,10 @@
   "main": "dist/index.js",
   "private": true,
   "scripts": {
-    "clean": "rimraf dist/**/*"
+    "clean": "rimraf dist"
   },
   "dependencies": {
     "axios": "^0.26.1",
-    "typeorm": "0.2.45"
+    "typeorm": "0.3.12"
   }
 }

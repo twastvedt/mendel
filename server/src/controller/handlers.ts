@@ -1,7 +1,12 @@
 import type { Request } from "express";
-import { DeepPartial, EntityTarget, getManager, ObjectLiteral } from "typeorm";
+import {
+  DeepPartial,
+  EntityTarget,
+  FindOptionsWhere,
+  ObjectLiteral,
+} from "typeorm";
 import type { ParsedQs } from "qs";
-import { EntityBase } from "@mendel/common";
+import { dataSource, EntityBase } from "@mendel/common";
 import { QueryDeepPartialEntity } from "typeorm/query-builder/QueryPartialEntity";
 
 type SimpleHandler<TParams, TData, TResponse> = (
@@ -26,13 +31,16 @@ type SimpleHandler<TParams, TData, TResponse> = (
 //   }
 // }
 
-export function one<T extends ObjectLiteral>(
+export function one<T extends ObjectLiteral & EntityBase>(
   entity: EntityTarget<T>
 ): SimpleHandler<{ id: number }, undefined, T> {
   return async (request) => {
-    const repository = getManager().getRepository(entity);
+    const repository = dataSource.manager.getRepository(entity);
 
-    const result = await repository.findOne(request.params.id);
+    // TODO: awaiting fix in https://github.com/typeorm/typeorm/pull/9709.
+    const query = { id: request.params.id } as FindOptionsWhere<T>;
+
+    const result = await repository.findOneBy(query);
 
     if (!result) {
       throw new Error(`Could not find element for id ${request.params.id}.`);
@@ -46,7 +54,7 @@ export function remove<T extends ObjectLiteral>(
   entity: EntityTarget<T>
 ): SimpleHandler<{ id: number }, undefined, void> {
   return async (request) => {
-    const repository = getManager().getRepository(entity);
+    const repository = dataSource.manager.getRepository(entity);
 
     const result = await repository.delete(request.params.id);
 
@@ -60,7 +68,7 @@ export function all<T extends ObjectLiteral>(
   entity: EntityTarget<T>
 ): SimpleHandler<undefined, undefined, T[]> {
   return async () => {
-    const repository = getManager().getRepository(entity);
+    const repository = dataSource.manager.getRepository(entity);
 
     const entities = await repository.find();
 
@@ -72,7 +80,7 @@ export function create<T extends ObjectLiteral>(
   entity: EntityTarget<T>
 ): SimpleHandler<undefined, T | T[], T | T[]> {
   return async (request) => {
-    const repository = getManager().getRepository(entity);
+    const repository = dataSource.manager.getRepository(entity);
 
     if (Array.isArray(request.body)) {
       return repository.save(request.body as DeepPartial<T>[]);
@@ -86,7 +94,7 @@ export function update<T extends EntityBase>(
   entity: EntityTarget<T>
 ): SimpleHandler<undefined, Partial<T> & { id: number }, void> {
   return async (request) => {
-    const repository = getManager().getRepository(entity);
+    const repository = dataSource.manager.getRepository(entity);
 
     await repository.update(
       request.body.id,

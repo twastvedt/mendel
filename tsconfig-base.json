@@ -15,7 +15,6 @@
     "resolveJsonModule": true,
     "sourceMap": true,
     "declaration": true,
-    "declarationMap": true,
-    "plugins": [{ "transform": "ts-nameof", "type": "raw" }]
+    "declarationMap": true
   }
 }

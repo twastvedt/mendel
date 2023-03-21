@@ -1,4 +1,4 @@
-import { Endpoint } from "@mendel/common";
+import { dataSource, Endpoint } from "@mendel/common";
 import {
   RequestHandler,
   Router,
@@ -8,7 +8,7 @@ import {
 } from "express";
 import { ParamsDictionary } from "express-serve-static-core";
 import type { ParsedQs } from "qs";
-import { EntityTarget, getManager, ObjectLiteral, Repository } from "typeorm";
+import { EntityTarget, ObjectLiteral, Repository } from "typeorm";
 
 type ExpressMethod =
   | "all"
@@ -209,7 +209,7 @@ export function addWrappedHandler<
           Record<string, unknown>
         >
       ) => {
-        const repository = getManager().getRepository(rest[0]);
+        const repository = dataSource.manager.getRepository(rest[0]);
 
         return (
           rest[1] as (

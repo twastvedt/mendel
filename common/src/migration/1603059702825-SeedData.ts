@@ -1,15 +1,19 @@
-import { getRepository, MigrationInterface } from "typeorm";
+import { MigrationInterface, Polygon } from "typeorm";
 import { features } from "./SeedBeds.json";
-import { Bed, Variety, Family, Garden, Polygon } from "@mendel/common";
 import fs from "fs";
 import path from "path";
 import { SVG, Container, registerWindow } from "@svgdotjs/svg.js";
 //@ts-ignore
 import { createSVGWindow } from "svgdom";
+import { Garden } from "../entity/Garden";
+import { Bed } from "../entity/Bed";
+import { Family } from "../entity/Family";
+import { Variety } from "../entity/Variety";
+import { dataSource } from "../dataSource";
 
 export class SeedData1603059702825 implements MigrationInterface {
   public async up(): Promise<void> {
-    const garden = await getRepository(Garden).save({
+    const garden = await dataSource.getRepository(Garden).save({
       name: "2307 Stillwater",
       location: {
         type: "Point",
@@ -17,7 +21,7 @@ export class SeedData1603059702825 implements MigrationInterface {
       },
     });
 
-    await getRepository(Bed).save(
+    await dataSource.getRepository(Bed).save(
       features
         .filter((f) => f.geometry.type === "Polygon")
         .map((f) => ({
@@ -45,13 +49,15 @@ export class SeedData1603059702825 implements MigrationInterface {
 
     const potato = new Family("Potato", "#d9cbaf", svgs[2], 4);
 
-    await getRepository(Family).save([tomato, cherry, potato]);
+    await dataSource.getRepository(Family).save([tomato, cherry, potato]);
 
-    await getRepository(Variety).save([
-      new Variety("Cherokee Purple", "#98082f", tomato),
-      new Variety("Yellow Pear", "#fadc17", cherry),
-      new Variety("Black Krum", "#6c0521", cherry),
-    ]);
+    await dataSource
+      .getRepository(Variety)
+      .save([
+        new Variety("Cherokee Purple", "#98082f", tomato),
+        new Variety("Yellow Pear", "#fadc17", cherry),
+        new Variety("Black Krum", "#6c0521", cherry),
+      ]);
   }
 
   private async loadSvg(draw: Container, name: string): Promise<string> {

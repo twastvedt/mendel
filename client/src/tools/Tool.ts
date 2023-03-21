@@ -1,5 +1,5 @@
 import type { Position } from "@mendel/common";
-import type { VueConstructor } from "vue";
+import type { Component } from "vue";
 import type { Action } from "../actions/Action";
 import type { UiElement, UiElementType } from "../types/entityTypes";
 
@@ -8,7 +8,7 @@ export interface Tool {
 
   interactiveElements?: Set<UiElementType>;
 
-  cursorComponent?: VueConstructor;
+  cursorComponent?: Component;
   cursorProps?: Record<string, unknown>;
 
   start?(): void;

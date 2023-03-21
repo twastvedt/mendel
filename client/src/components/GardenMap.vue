@@ -18,11 +18,8 @@ let svg: d3.Selection<SVGSVGElement, unknown, null, undefined>;
 
 function zoomed(e: D3ZoomEvent<SVGSVGElement, unknown>): void {
   if (content.value) {
-    content.value.setAttribute(
-      "transform",
-      e.transform as unknown as string
-    );
-  
+    content.value.setAttribute("transform", e.transform as unknown as string);
+
     state.scale = e.transform.k;
   }
 }
@@ -48,10 +45,7 @@ onMounted(async (): Promise<void> => {
     height,
   ] as unknown as string);
 
-  zoomBehavior = zoom<SVGSVGElement, unknown>().on(
-    "zoom",
-    zoomed.bind(this)
-  );
+  zoomBehavior = zoom<SVGSVGElement, unknown>().on("zoom", zoomed.bind(this));
 
   svg.call(zoomBehavior);
 
@@ -67,8 +61,7 @@ function zoomFit(animate: boolean): void {
       midX = bounds.x + bounds.width / 2,
       midY = bounds.y + bounds.height / 2;
 
-    const scale =
-        0.9 / Math.max(bounds.width / width, bounds.height / height),
+    const scale = 0.9 / Math.max(bounds.width / width, bounds.height / height),
       translate = [width / 2 - scale * midX, height / 2 - scale * midY];
 
     let zoomable;
@@ -103,8 +96,7 @@ function onMouseMove(event: MouseEvent): void {
 
 function isInteractive(elementType: UiElementType): boolean {
   return (
-    (!state.tool || state.tool?.interactiveElements?.has(elementType)) ??
-    false
+    (!state.tool || state.tool?.interactiveElements?.has(elementType)) ?? false
   );
 }
 
@@ -174,9 +166,9 @@ function elementStyle(elementType: UiElementType): Record<string, string> {
             @mouseleave="onHover($event)"
           />
 
-          <dynamic
+          <component
             :is="state.tool.cursorComponent"
-            v-if="state.tool && state.tool.cursorComponent"
+            v-if="state.tool?.cursorComponent"
             v-bind="state.tool.cursorProps"
           />
         </g>
