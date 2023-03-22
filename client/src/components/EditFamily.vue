@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { ref, watch, computed } from "vue";
 import { Family } from "@mendel/common/src";
-import { VForm } from "vuetify/lib/components/index";
+import { VForm } from "vuetify/components";
 
 const emit = defineEmits<{
   (e: "close"): void;
@@ -36,8 +36,9 @@ function resetForm(): void {
   form.value?.resetValidation();
 }
 
-function save(): void {
-  if (form.value?.validate()) {
+async function save(): Promise<void> {
+  const result = await form.value?.validate();
+  if (result?.valid) {
     emit("input", formValue);
     emit("close");
 
@@ -78,7 +79,7 @@ resetForm();
         <v-text-field v-model="formValue.nitrogen" label="Nitrogen" />
 
         <div class="text-caption">Color</div>
-        <v-menu :close-on-content-click="false" :offset-y="true">
+        <v-menu :close-on-content-click="false" location="bottom">
           <template #activator="{ props }">
             <v-btn x-large v-bind="props" class="bigSquareButton">
               <svg class="svgicon">
@@ -100,7 +101,9 @@ resetForm();
         </v-menu>
       </v-card-text>
       <v-card-actions>
-        <v-btn color="primary" :disabled="!valid" @click="save"> Save </v-btn>
+        <v-btn color="text-primary" :disabled="!valid" @click="save">
+          Save
+        </v-btn>
       </v-card-actions>
     </v-form>
   </v-card>

@@ -1,10 +1,12 @@
 <script setup lang="ts">
-import { state } from "../state/State";
+import { useGardenStore } from "../state/gardenStore";
 // import type { DataTableHeader } from 'vuetify/labs/VDataTable';
-import type { DataTableHeader } from '@/types/vuetifyTypes';
+import type { DataTableHeader } from "@/types/vuetifyTypes";
 import EditFamily from "./EditFamily.vue";
 import EditDataTable from "./EditDataTable.vue";
 import type { Family } from "@mendel/common";
+
+const garden = useGardenStore();
 
 const headers: DataTableHeader[] = [
   {
@@ -30,25 +32,25 @@ const headers: DataTableHeader[] = [
 ];
 
 function plantCount(family: Family): number | undefined {
-  return state.db?.plantCount({ familyId: family.id });
+  return garden.plantCount({ familyId: family.id });
 }
 
 async function deleteFamily(family: Family): Promise<void> {
   const varieties =
     family.varieties?.length ??
-    state.db?.varieties.filter((v) => v.familyId === family.id).length;
+    garden.varieties.filter((v) => v.familyId === family.id).length;
 
   if (varieties) {
     alert(`Can't delete family which still has ${varieties} varietie(s).`);
   } else {
-    state.db?.deleteFamily(family);
+    garden.deleteFamily(family);
   }
 }
 </script>
 <template>
-  <v-container v-if="state.db">
+  <v-container v-if="garden.families">
     <EditDataTable
-      v-model="state.db.families"
+      v-model="garden.families"
       name="Families"
       :headers="headers"
       @delete="deleteFamily"
@@ -57,17 +59,17 @@ async function deleteFamily(family: Family): Promise<void> {
         <EditFamily
           :value="props.value"
           @close="props.close"
-          @input="(item) => state.db?.editFamily(item)"
+          @input="(item) => garden.editFamily(item)"
         />
       </template>
 
       <template #[`item.plants`]="{ item }">
-        {{ plantCount(item) }}
+        {{ plantCount(item.raw) }}
       </template>
 
       <template #[`item.color`]="{ item }">
         <svg class="svgicon" style="height: 32px; width: 32px">
-          <use :href="`#family-${item.id}`" :fill="item.color" />
+          <use :href="`#family-${item.raw.id}`" :fill="item.raw.color" />
         </svg>
       </template>
     </EditDataTable>

@@ -11,13 +11,8 @@ const drawer = ref(false);
       <v-app-bar-title> Mendel </v-app-bar-title>
     </v-app-bar>
 
-    <v-navigation-drawer v-model="drawer" app>
-      <v-list-item>
-        <v-list-item-content>
-          <v-list-item-title class="text-h6"> Mendel </v-list-item-title>
-          <v-list-item-subtitle> Garden planner </v-list-item-subtitle>
-        </v-list-item-content>
-      </v-list-item>
+    <v-navigation-drawer v-model="drawer">
+      <v-list-item title="Mendel" subtitle="Garden planner" />
 
       <v-divider></v-divider>
 

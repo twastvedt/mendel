@@ -1,16 +1,21 @@
 <script setup lang="ts">
 import { withDefaults, computed } from "vue";
-import { state } from "../state/State";
+import { useRootStore } from "../state/rootStore";
 import type { Variety } from "@mendel/common";
 
-const props = withDefaults(defineProps<{
-  variety: Variety;
-  drawSpacing: boolean;
-  interactive: boolean;
-}>(), {
-  drawSpacing: true,
-  interactive: true
-});
+const store = useRootStore();
+
+const props = withDefaults(
+  defineProps<{
+    variety: Variety;
+    drawSpacing?: boolean;
+    interactive?: boolean;
+  }>(),
+  {
+    drawSpacing: true,
+    interactive: true,
+  }
+);
 
 const family = computed(() => {
   if (props.variety.family) {
@@ -21,20 +26,19 @@ const family = computed(() => {
 });
 
 const iconSize = computed((): number => {
-  return Math.min(40 / state.scale, (family.value.spacing * 2) / 3);
+  return Math.min(40 / store.scale, (family.value.spacing * 2) / 3);
 });
 
 const title = computed((): string => {
   return `${props.variety.name} ${family.value.name}`;
 });
-
 </script>
 <template>
   <g
     :class="interactive ? 'interactive' : 'non-interactive'"
     @click="$emit('click', $event)"
   >
-    <template v-if="state.scaleRange > 1">
+    <template v-if="store.scaleRange > 1">
       <circle
         v-if="drawSpacing"
         :r="family.spacing / 2"

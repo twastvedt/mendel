@@ -2,10 +2,12 @@ import type { Variety, Position } from "@mendel/common";
 import type { Tool } from "./Tool";
 import { AddPlantAction } from "../actions/AddPlantAction";
 import type { Action } from "../actions/Action";
-import { state } from "../state/State";
+import { useRootStore } from "../state/rootStore";
 import { Vector } from "../Vector";
 import plantComponent from "../components/PlantComponent.vue";
 import type { UiElementType } from "../types/entityTypes";
+import { useGardenStore } from "@/state/gardenStore";
+import { markRaw } from "vue";
 
 export class DrawPlantTool implements Tool {
   private location?: Position;
@@ -13,9 +15,11 @@ export class DrawPlantTool implements Tool {
   private cursor = new Vector(0, 0);
   private tempVec = new Vector(0, 0);
   private lastClosestIndex?: number;
+  private rootStore = useRootStore();
+  private gardenStore = useGardenStore();
 
   public helpText = "Click to draw a plant.";
-  public cursorComponent = plantComponent;
+  public cursorComponent = markRaw(plantComponent);
   public cursorProps: Record<string, unknown> = {
     transform: "",
     interactive: false,
@@ -38,7 +42,7 @@ export class DrawPlantTool implements Tool {
 
   public setTransform(): void {
     if (this.location) {
-      this.cursorProps.transform = state.makeTransform(this.location);
+      this.cursorProps.transform = this.rootStore.makeTransform(this.location);
     }
   }
 
@@ -50,15 +54,17 @@ export class DrawPlantTool implements Tool {
     if (this.location && this.variety.family && this.active) {
       this.cursor.set(...point);
 
-      if (state.db?.delaunay) {
+      if (this.gardenStore.delaunay) {
         const thisRadius = this.variety.family.spacing / 2;
 
-        this.lastClosestIndex = state.db.delaunay.find(
+        this.lastClosestIndex = this.gardenStore.delaunay.find(
           ...point,
           this.lastClosestIndex
         );
 
-        const neighbors = state.db.delaunay.neighbors(this.lastClosestIndex);
+        const neighbors = this.gardenStore.delaunay.neighbors(
+          this.lastClosestIndex
+        );
 
         const closestPlants: {
           location: Vector;
@@ -71,7 +77,7 @@ export class DrawPlantTool implements Tool {
             continue;
           }
 
-          const delaunayPoint = state.db.delaunayPoints[i];
+          const delaunayPoint = this.gardenStore.delaunayPoints[i];
 
           if (delaunayPoint.planting?.variety?.family) {
             const plantVector = Vector.fromArray(

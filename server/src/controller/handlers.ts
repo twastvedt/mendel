@@ -6,8 +6,9 @@ import {
   ObjectLiteral,
 } from "typeorm";
 import type { ParsedQs } from "qs";
-import { dataSource, EntityBase } from "@mendel/common";
+import { EntityBase } from "@mendel/common";
 import { QueryDeepPartialEntity } from "typeorm/query-builder/QueryPartialEntity";
+import { dataSource } from "../dataSource";
 
 type SimpleHandler<TParams, TData, TResponse> = (
   request: Request<TParams, TResponse, TData, ParsedQs, Record<string, unknown>>

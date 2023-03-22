@@ -8,7 +8,7 @@ export class Plant extends EntityBase {
   @Column("geometry", { nullable: true, spatialFeatureType: "Point" })
   location!: Point;
 
-  @Column()
+  @Column("integer")
   plantingId!: number;
 
   @ManyToOne(() => Planting, (planting) => planting.plants, {

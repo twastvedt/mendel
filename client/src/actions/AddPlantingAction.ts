@@ -1,21 +1,23 @@
 import type { Planting } from "@mendel/common";
-import type { State } from "../state/State";
 import { Action } from "./Action";
+import { useGardenStore } from "@/state/gardenStore";
 
 export class AddPlantingAction extends Action {
+  private gardenStore = useGardenStore();
+
   public constructor(private planting: Planting) {
     super();
   }
 
-  public async Do(state: State): Promise<void> {
-    await super.Do(state);
+  public async Do(): Promise<void> {
+    await super.Do();
 
-    await state.db?.addPlanting(this.planting);
+    await this.gardenStore.addPlanting(this.planting);
   }
 
-  public async Undo(state: State): Promise<void> {
-    await super.Undo(state);
+  public async Undo(): Promise<void> {
+    await super.Undo();
 
-    await state.db?.removePlanting(this.planting);
+    await this.gardenStore.removePlanting(this.planting);
   }
 }

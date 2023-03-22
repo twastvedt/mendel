@@ -1,11 +1,13 @@
 <script setup lang="ts">
-import { state } from "../state/State";
+import { useGardenStore } from "../state/gardenStore";
 // import type { DataTableHeader } from 'vuetify/labs/VDataTable';
-import type { DataTableHeader } from '@/types/vuetifyTypes';
+import type { DataTableHeader } from "@/types/vuetifyTypes";
 import { polygonArea } from "d3-polygon";
 import { bboxArea, polygonBounds } from "../geometry/polygonTools";
 import type { Variety } from "@mendel/common";
 import { computed } from "vue";
+
+const gardenStore = useGardenStore();
 
 const headers: DataTableHeader[] = [
   {
@@ -27,7 +29,7 @@ const headers: DataTableHeader[] = [
 ];
 
 const totalArea = computed((): number | undefined => {
-  const beds = state.db?.garden.beds;
+  const beds = gardenStore.garden?.beds;
 
   if (beds) {
     return (
@@ -48,7 +50,7 @@ const totalArea = computed((): number | undefined => {
 
 const areas = {
   Beds:
-    (state.db?.garden.beds.reduce(
+    (gardenStore.garden?.beds.reduce(
       (total, bed) => total + polygonArea(bed.shape.coordinates[0]),
       0
     ) ?? 0) / 144,
@@ -56,7 +58,7 @@ const areas = {
 };
 
 function plantCount(variety: Variety): number | undefined {
-  return state.db?.plantCount({ varietyId: variety.id });
+  return gardenStore.plantCount({ varietyId: variety.id });
 }
 </script>
 <template>
@@ -66,20 +68,19 @@ function plantCount(variety: Variety): number | undefined {
         <v-card>
           <v-card-title>Varieties</v-card-title>
           <v-data-table
-            v-if="state.db"
-            :items="state.db.varieties"
+            :items="gardenStore.varieties"
             name="Varieties"
             :headers="headers"
           >
             <template #[`item.plants`]="{ item }">
-              {{ plantCount(item) }}
+              {{ plantCount(item.raw) }}
             </template>
 
             <template #[`item.name`]="{ item }">
-              <svg class="icon avatar" :style="`fill: ${item.color}`">
-                <use :href="`#family-${item.familyId}`" />
+              <svg class="icon avatar" :style="`fill: ${item.raw.color}`">
+                <use :href="`#family-${item.raw.familyId}`" />
               </svg>
-              {{ item.name }}
+              {{ item.raw.name }}
               <!-- <v-list-item-avatar class="icon" :style="`fill: ${item.color}`">
           <svg><use :href="`#family-${item.familyId}`" /></svg>
         </v-list-item-avatar>
@@ -93,7 +94,7 @@ function plantCount(variety: Variety): number | undefined {
       <v-col>
         <v-card>
           <v-card-title>Areas</v-card-title>
-          <v-simple-table>
+          <v-table>
             <template #default>
               <tbody>
                 <tr v-for="(value, key) in areas" :key="key">
@@ -105,7 +106,7 @@ function plantCount(variety: Variety): number | undefined {
                 </tr>
               </tbody>
             </template>
-          </v-simple-table>
+          </v-table>
         </v-card>
       </v-col>
     </v-row>

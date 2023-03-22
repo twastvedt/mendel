@@ -1,10 +1,12 @@
 <script setup lang="ts">
-import { state } from "../state/State";
+import { useGardenStore } from "../state/gardenStore";
 // import type { DataTableHeader } from 'vuetify/labs/VDataTable';
 import type { DataTableHeader } from "@/types/vuetifyTypes";
 import EditVariety from "./EditVariety.vue";
 import EditDataTable from "./EditDataTable.vue";
 import type { Variety } from "@mendel/common";
+
+const gardenStore = useGardenStore();
 
 const varietyHeaders: DataTableHeader[] = [
   {
@@ -26,32 +28,32 @@ const varietyHeaders: DataTableHeader[] = [
 ];
 
 function plantCount(variety: Variety): number | undefined {
-  return state.db?.plantCount({ varietyId: variety.id });
+  return gardenStore.plantCount({ varietyId: variety.id });
 }
 </script>
 <template>
-  <v-container v-if="state.db">
+  <v-container>
     <EditDataTable
-      v-model="state.db.varieties"
+      v-model="gardenStore.varieties"
       name="Varieties"
       :headers="varietyHeaders"
-      @delete="(item) => state.db?.deleteVariety(item)"
+      @delete="(item) => gardenStore.deleteVariety(item)"
     >
       <template #default="props">
         <EditVariety
           :value="props.value"
           @close="props.close"
-          @input="(item) => state.db?.editVariety(item)"
+          @input="(item) => gardenStore.editVariety(item)"
         />
       </template>
 
       <template #[`item.plants`]="{ item }">
-        {{ plantCount(item) }}
+        {{ plantCount(item.raw) }}
       </template>
 
       <template #[`item.color`]="{ item }">
         <svg class="svgicon" style="height: 32px; width: 32px">
-          <use :href="`#family-${item.family.id}`" :fill="item.color" />
+          <use :href="`#family-${item.raw.family.id}`" :fill="item.raw.color" />
         </svg>
       </template>
     </EditDataTable>

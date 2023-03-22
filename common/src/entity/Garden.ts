@@ -6,7 +6,7 @@ import { Planting } from "./Planting";
 
 @Entity()
 export class Garden extends EntityBase {
-  @Column()
+  @Column("varchar")
   name!: string;
 
   @Column("geometry", { spatialFeatureType: "Point", srid: 4326 })

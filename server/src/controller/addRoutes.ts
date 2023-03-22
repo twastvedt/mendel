@@ -1,4 +1,4 @@
-import { dataSource, Endpoint } from "@mendel/common";
+import { Endpoint } from "@mendel/common";
 import {
   RequestHandler,
   Router,
@@ -9,6 +9,7 @@ import {
 import { ParamsDictionary } from "express-serve-static-core";
 import type { ParsedQs } from "qs";
 import { EntityTarget, ObjectLiteral, Repository } from "typeorm";
+import { dataSource } from "../dataSource";
 
 type ExpressMethod =
   | "all"

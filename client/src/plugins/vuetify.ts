@@ -12,19 +12,19 @@ export default createVuetify({
       light: {
         dark: false,
         colors: {
-          primary: colors.green,
-          secondary: colors.brown,
-          accent: colors.orange,
-          error: colors.red,
+          primary: colors.green.base,
+          secondary: colors.brown.base,
+          accent: colors.orange.base,
+          error: colors.red.base,
         },
       },
       dark: {
         dark: true,
         colors: {
-          primary: colors.green,
-          secondary: colors.brown,
-          accent: colors.orange,
-          error: colors.red,
+          primary: colors.green.base,
+          secondary: colors.brown.base,
+          accent: colors.orange.base,
+          error: colors.red.base,
         },
       },
     },

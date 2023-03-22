@@ -3,11 +3,12 @@ import type { Position } from "@mendel/common";
 import type { Tool } from "./Tool";
 import { AddPlantingAction } from "../actions/AddPlantingAction";
 import type { Action } from "../actions/Action";
-import { state } from "../state/State";
+import { useRootStore } from "../state/rootStore";
 import drawPlanting from "../components/DrawPlanting.vue";
 import type { GridPoints, PolygonGrid } from "../services/polygonGrid";
 import type { UiElementType } from "../types/entityTypes";
 import { Plant } from "@mendel/common/src/entity/Plant";
+import { markRaw } from "vue";
 
 export enum Stage {
   selecting,
@@ -18,12 +19,13 @@ export enum Stage {
 export class DrawPlantingTool implements Tool {
   private planting?: Planting;
   private index?: number;
+  private store = useRootStore();
 
   public constructor(private variety: Variety, private grid: PolygonGrid) {}
 
   public interactiveElements = new Set<UiElementType>(["area"]);
 
-  public cursorComponent = drawPlanting;
+  public cursorComponent = markRaw(drawPlanting);
   public cursorProps = {
     cursor: null as Position | null,
     plants: null as GridPoints | null,
@@ -208,7 +210,7 @@ export class DrawPlantingTool implements Tool {
   }
 
   private snapToBeds(point: Position): boolean {
-    const closest = this.grid.closestPolygon(point, 4 / state.scale);
+    const closest = this.grid.closestPolygon(point, 4 / this.store.scale);
 
     if (closest.distance !== undefined) {
       this.cursorProps.dividingLine.splice(0, 1, closest.point.asArray);
@@ -240,7 +242,7 @@ export class DrawPlantingTool implements Tool {
       this.index !== undefined &&
       props.cursor
     ) {
-      const r = 50 / state.scale;
+      const r = 50 / this.store.scale;
 
       props.rotationCenter = [
         props.cursor[0] - r * Math.cos(this.grid.rotation),

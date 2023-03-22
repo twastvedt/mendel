@@ -13,31 +13,31 @@ export class Planting extends EntityBase {
   })
   shape?: Polygon | LineString;
 
-  @Column({ nullable: true })
+  @Column("date", { nullable: true })
   plantDate?: Date;
 
-  @Column()
+  @Column("boolean")
   areSeedlings: boolean;
 
-  @Column({ nullable: true })
+  @Column("integer", { nullable: true })
   germinationRank?: number;
 
-  @Column({ nullable: true })
+  @Column("integer", { nullable: true })
   growthRank?: number;
 
-  @Column({ nullable: true })
+  @Column("integer", { nullable: true })
   healthRank?: number;
 
-  @Column({ nullable: true })
+  @Column("integer", { nullable: true })
   yeildRank?: number;
 
-  @Column({ nullable: true })
+  @Column("integer", { nullable: true })
   varietyId?: number;
 
   @ManyToOne(() => Variety, (variety) => variety.plantings)
   variety?: Variety;
 
-  @Column({ nullable: true })
+  @Column("integer", { nullable: true })
   gardenId?: number;
 
   @ManyToOne(() => Garden, (garden) => garden.plantings, {

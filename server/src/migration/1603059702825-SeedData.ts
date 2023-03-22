@@ -5,10 +5,7 @@ import path from "path";
 import { SVG, Container, registerWindow } from "@svgdotjs/svg.js";
 //@ts-ignore
 import { createSVGWindow } from "svgdom";
-import { Garden } from "../entity/Garden";
-import { Bed } from "../entity/Bed";
-import { Family } from "../entity/Family";
-import { Variety } from "../entity/Variety";
+import { Garden, Bed, Variety, Family } from "@mendel/common";
 import { dataSource } from "../dataSource";
 
 export class SeedData1603059702825 implements MigrationInterface {

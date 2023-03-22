@@ -8,10 +8,10 @@ export class Bed extends EntityBase {
   @Column("geometry", { spatialFeatureType: "Polygon" })
   shape!: Polygon;
 
-  @Column()
+  @Column("date")
   startDate!: Date;
 
-  @Column({ nullable: true })
+  @Column("date", { nullable: true })
   endDate?: Date;
 
   @ManyToOne(() => Garden, (garden) => garden.beds, {

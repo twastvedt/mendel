@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import { watch, ref, computed } from "vue";
 import { Variety } from "@mendel/common/src";
-import { state } from "../state/State";
-import { VForm } from "vuetify/lib/components/index";
+import { useGardenStore } from "../state/gardenStore";
+import { VForm } from "vuetify/components";
+
+const garden = useGardenStore();
 
 const emit = defineEmits<{
   (e: "close"): void;
@@ -16,7 +18,7 @@ const props = defineProps<{
 }>();
 
 let formValue = getDefault();
-const families = state.db?.families ?? [];
+const families = garden.families ?? [];
 let valid = true;
 const requiredRule = (v: unknown) => !!v || "Value required";
 
@@ -40,8 +42,9 @@ function resetForm(): void {
   form.value?.resetValidation();
 }
 
-function save(): void {
-  if (form.value?.validate()) {
+async function save(): Promise<void> {
+  const result = await form.value?.validate();
+  if (result?.valid) {
     formValue.familyId = formValue.family?.id;
 
     emit("input", formValue);
@@ -71,17 +74,17 @@ resetForm();
         <v-select
           v-model="formValue.family"
           :items="families"
-          item-text="name"
+          item-title="name"
           return-object
           label="Family"
           persistent-hint
           :rules="[requiredRule]"
-          @input="updateColor"
+          @update:model-value="updateColor"
         ></v-select>
         <v-row>
           <v-col>
             <div class="text-caption">Color</div>
-            <v-menu :close-on-content-click="false" :offset-y="true">
+            <v-menu :close-on-content-click="false" location="bottom">
               <template #activator="{ props }">
                 <v-btn x-large v-bind="props" class="bigSquareButton">
                   <svg v-if="formValue.family" class="svgicon">
@@ -109,7 +112,9 @@ resetForm();
         </v-row>
       </v-card-text>
       <v-card-actions>
-        <v-btn color="primary" :disabled="!valid" @click="save"> Save </v-btn>
+        <v-btn color="text-primary" :disabled="!valid" @click="save">
+          Save
+        </v-btn>
       </v-card-actions>
     </v-form>
   </v-card>

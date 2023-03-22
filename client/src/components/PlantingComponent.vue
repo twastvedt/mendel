@@ -1,11 +1,13 @@
 <script setup lang="ts">
 import type { Planting, Position, Variety } from "@mendel/common";
-import { state } from "../state/State";
+import { useRootStore } from "../state/rootStore";
 import type { PlantElement } from "../types/entityTypes";
 import PlantComponent from "./PlantComponent.vue";
 import polylabel from "polylabel";
 import type { Plant } from "@mendel/common/dist/entity/Plant";
 import { computed } from "vue";
+
+const store = useRootStore();
 
 const props = defineProps<{
   planting: Planting;
@@ -22,21 +24,23 @@ const variety = computed((): Variety => {
   throw new Error("Planting has no variety");
 });
 
-const classList = computed((): (Record<string, unknown> | string | undefined)[] => {
-  return [props.planting.shape?.type, { cursor: props.isCursor }];
-});
+const classList = computed(
+  (): (Record<string, unknown> | string | undefined)[] => {
+    return [props.planting.shape?.type, { cursor: props.isCursor }];
+  }
+);
 
 const labelTransform = computed((): string | undefined => {
   if (props.planting.shape) {
     if (props.planting.shape.type === "LineString") {
       const coordinates = props.planting.shape.coordinates;
 
-      return state.makeTransform([
+      return store.makeTransform([
         (coordinates[1][0] + coordinates[0][0]) / 2,
         (coordinates[1][1] + coordinates[0][1]) / 2,
       ]);
     } else {
-      return state.makeTransform(
+      return store.makeTransform(
         polylabel(props.planting.shape.coordinates) as [number, number]
       );
     }
@@ -54,7 +58,7 @@ const plantLocations = computed((): Position[] => {
 });
 
 function plantClick(event: PointerEvent, plant: Plant): void {
-  state.onClick(event, {
+  store.onClick(event, {
     type: "plant",
     item: plant,
   } as PlantElement);
@@ -66,7 +70,7 @@ function plantClick(event: PointerEvent, plant: Plant): void {
     <path
       v-if="planting.shape"
       ref="shape"
-      :d="state.pathGenerator(planting.shape)"
+      :d="store.pathGenerator(planting.shape)"
       :fill="variety.color"
       :stroke="variety.color"
       class="shape"
@@ -74,7 +78,7 @@ function plantClick(event: PointerEvent, plant: Plant): void {
     />
 
     <PlantComponent
-      v-if="!isCursor && state.scaleRange > 1 && !plantLocations.length"
+      v-if="!isCursor && store.scaleRange > 1 && !plantLocations.length"
       :transform="labelTransform"
       :draw-spacing="false"
       :variety="variety"
@@ -85,7 +89,7 @@ function plantClick(event: PointerEvent, plant: Plant): void {
         v-for="(position, i) in locations"
         :key="i"
         :variety="variety"
-        :transform="state.makeTransform(position)"
+        :transform="store.makeTransform(position)"
         :interactive="false"
       />
     </template>
@@ -94,7 +98,7 @@ function plantClick(event: PointerEvent, plant: Plant): void {
         v-for="(plant, i) in planting.plants"
         :key="`plant-${i}`"
         :variety="variety"
-        :transform="state.makeTransform(plant.location.coordinates)"
+        :transform="store.makeTransform(plant.location.coordinates)"
         :interactive="plantsInteractive"
         @click.stop="plantClick($event, plant)"
       />

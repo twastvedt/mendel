@@ -1,14 +1,18 @@
 <script setup lang="ts">
-import { state } from "../state/State";
+import { useRootStore } from "../state/rootStore";
+import { useGardenStore } from "../state/gardenStore";
 import * as d3 from "d3";
 import { zoom } from "d3-zoom";
 import type { D3ZoomEvent } from "d3-zoom";
 
 import PlantingComponent from "./PlantingComponent.vue";
-import Toolbar from "./Toolbar.vue";
+import MapToolbar from "./MapToolbar.vue";
 import DetailsPane from "./DetailsPane.vue";
 import type { UiElementType } from "../types/entityTypes";
 import { nextTick, onMounted, ref } from "vue";
+
+const store = useRootStore();
+const gardenStore = useGardenStore();
 
 const map = ref<SVGSVGElement>();
 const content = ref<SVGGElement>();
@@ -17,19 +21,24 @@ let zoomBehavior!: d3.ZoomBehavior<SVGSVGElement, unknown>;
 let svg: d3.Selection<SVGSVGElement, unknown, null, undefined>;
 
 function zoomed(e: D3ZoomEvent<SVGSVGElement, unknown>): void {
-  if (content.value) {
+  if (
+    content.value &&
+    !isNaN(e.transform.x) &&
+    !isNaN(e.transform.y) &&
+    isFinite(e.transform.k)
+  ) {
     content.value.setAttribute("transform", e.transform as unknown as string);
 
-    state.scale = e.transform.k;
+    store.scale = e.transform.k;
   }
 }
 
 onMounted(async (): Promise<void> => {
   console.debug("Map mounted");
 
-  await state.ready;
+  await gardenStore.ready;
 
-  if (!state.db || !map.value) {
+  if (!map.value) {
     return;
   }
 
@@ -80,23 +89,23 @@ function zoomFit(animate: boolean): void {
 }
 
 function onHover(event: MouseEvent, element?: unknown, index?: number): void {
-  state.tool?.onHover?.(state.cursorPosition, index, element);
+  store.tool?.onHover?.(store.cursorPosition, index, element);
 }
 
 function onMouseMove(event: MouseEvent): void {
   const point = d3.pointer(event, content.value);
   point[1] = -point[1];
 
-  [...state.cursorPosition] = point;
+  [...store.cursorPosition] = point;
 
-  if (state.tool) {
-    state.updateTool(point);
+  if (store.tool) {
+    store.updateTool(point);
   }
 }
 
 function isInteractive(elementType: UiElementType): boolean {
   return (
-    (!state.tool || state.tool?.interactiveElements?.has(elementType)) ?? false
+    (!store.tool || store.tool?.interactiveElements?.has(elementType)) ?? false
   );
 }
 
@@ -108,7 +117,7 @@ function elementStyle(elementType: UiElementType): Record<string, string> {
 </script>
 <template>
   <v-layout class="mapContainer">
-    <Toolbar class="ma-3 toolbar" />
+    <MapToolbar class="ma-3 toolbar" />
 
     <svg
       id="map"
@@ -116,17 +125,17 @@ function elementStyle(elementType: UiElementType): Record<string, string> {
       xmlns="http://www.w3.org/2000/svg"
       xmlns:xlink="http://www.w3.org/1999/xlink"
       @mousemove="onMouseMove"
-      @click="state.onClick($event)"
+      @click="store.onClick($event)"
       @mouseleave="onHover"
     >
       <g ref="content" class="content">
-        <g v-if="state.db">
-          <g v-for="(bed, i) in state.db.garden.beds" :key="bed.id">
+        <g v-if="gardenStore.garden">
+          <g v-for="(bed, i) in gardenStore.garden.beds" :key="bed.id">
             <path
               class="bed"
               :style="elementStyle('bed')"
-              :d="state.pathGenerator(bed.shape)"
-              @click.stop="state.onClick($event, { type: 'bed', item: bed })"
+              :d="store.pathGenerator(bed.shape)"
+              @click.stop="store.onClick($event, { type: 'bed', item: bed })"
               @mouseenter="onHover($event, bed, i)"
               @mouseleave="onHover($event)"
             />
@@ -140,45 +149,45 @@ function elementStyle(elementType: UiElementType): Record<string, string> {
           /> -->
           </g>
 
-          <g v-if="state.db.grid">
+          <g v-if="gardenStore.grid">
             <path
-              v-for="(area, i) in state.db.grid.areas"
+              v-for="(area, i) in gardenStore.grid.areas"
               :key="i"
               class="area"
               :style="elementStyle('area')"
-              :d="state.pathFromPoints(area.polygon)"
-              @click.stop="state.onClick($event, { type: 'area', item: area })"
+              :d="store.pathFromPoints(area.polygon)"
+              @click.stop="store.onClick($event, { type: 'area', item: area })"
               @mouseenter="onHover($event, area, i)"
               @mouseleave="onHover($event)"
             />
           </g>
 
           <PlantingComponent
-            v-for="(planting, index) in state.db.garden.plantings"
+            v-for="(planting, index) in gardenStore.garden.plantings"
             :key="`${index}-planting`"
             :planting="planting"
             :plants-interactive="isInteractive('plant')"
             :style="elementStyle('planting')"
             @click.stop="
-              state.onClick($event, { type: 'planting', item: planting })
+              store.onClick($event, { type: 'planting', item: planting })
             "
             @mouseover="onHover($event, planting, index)"
             @mouseleave="onHover($event)"
           />
 
           <component
-            :is="state.tool.cursorComponent"
-            v-if="state.tool?.cursorComponent"
-            v-bind="state.tool.cursorProps"
+            :is="store.tool.cursorComponent"
+            v-if="store.tool?.cursorComponent"
+            v-bind="store.tool.cursorProps"
           />
         </g>
       </g>
     </svg>
 
     <v-navigation-drawer
-      v-if="state.selection.length"
+      v-if="store.selection.length"
       width="300"
-      right
+      location="right"
       absolute
       permanent
     >
@@ -186,12 +195,12 @@ function elementStyle(elementType: UiElementType): Record<string, string> {
     </v-navigation-drawer>
 
     <v-footer app>
-      <template v-if="state.tool">
-        {{ state.tool.helpText }}
+      <template v-if="store.tool">
+        {{ store.tool.helpText }}
       </template>
       <v-spacer />
       {{
-        state.cursorPosition.map((c) => Math.round(c * 100) / 100).join(", ")
+        store.cursorPosition.map((c) => Math.round(c * 100) / 100).join(", ")
       }}
     </v-footer>
   </v-layout>

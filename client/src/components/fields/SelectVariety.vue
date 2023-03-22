@@ -1,23 +1,28 @@
 <script setup lang="ts">
-import { state } from "../../state/State";
+import { useGardenStore } from "../../state/gardenStore";
 import type { Variety } from "@mendel/common";
+import { computed } from "vue";
+
+const gardenStore = useGardenStore();
 
 const props = defineProps<{
   disabled?: boolean;
-  value: Variety | null;
+  value?: Variety;
 }>();
 
-const varietyList: (Variety | { divider: boolean })[] = [];
+const varietyList = computed(() => {
+  const list: (Variety | { divider: boolean })[] = [];
 
-if (state.db) {
-  for (const variety of state.db.varieties) {
-    if (variety !== varietyList[varietyList.length - 1]) {
-      varietyList.push({ divider: true });
+  for (const variety of gardenStore.varieties) {
+    if (variety !== list[list.length - 1]) {
+      list.push({ divider: true });
     }
-  
-    varietyList.push(variety);
+
+    list.push(variety);
   }
-}
+
+  return list;
+});
 
 function varietyFilter(item: Variety, queryText: string): boolean {
   return (
@@ -29,33 +34,38 @@ function varietyFilter(item: Variety, queryText: string): boolean {
 </script>
 <template>
   <v-select
-    :value="props.value"
+    :model-value="props.value"
     class="ml-3"
     :disabled="props.disabled"
     :items="varietyList"
     hide-details
-    item-text="name"
+    item-title="name"
     item-value="id"
     no-data-text="No plant varieties found"
     return-object
     :filter="varietyFilter"
-    @change="$emit('input', $event)"
+    @update:model-value="$emit('input', $event)"
   >
     <template #selection="{ item }">
-      <svg class="icon avatar" :style="`fill: ${item.color}`">
-        <use :href="`#family-${item.familyId}`" />
+      <svg class="icon avatar" :style="`fill: ${item.raw.color}`">
+        <use :href="`#family-${item.raw.familyId}`" />
       </svg>
-      {{ item.name }} - {{ item.family.name }}
+      {{ item.raw.name }} - {{ item.raw.family?.name }}
     </template>
-
-    <template #item="{ item }">
-      <v-list-item-avatar class="icon" :style="`fill: ${item.color}`">
-        <svg><use :href="`#family-${item.familyId}`" /></svg>
-      </v-list-item-avatar>
-      <v-list-item-content>
-        <v-list-item-title v-text="item.name"></v-list-item-title>
-        <v-list-item-subtitle v-text="item.family.name"></v-list-item-subtitle>
-      </v-list-item-content>
+    <template #item="{ item, props }">
+      <v-divider v-if="item.raw.divider" />
+      <v-list-item
+        v-else
+        v-bind="props"
+        :title="item.raw.name"
+        :subtitle="item.raw.family?.name"
+      >
+        <template #prepend>
+          <v-avatar class="icon" :style="`fill: ${item.raw.color}`">
+            <svg><use :href="`#family-${item.raw.familyId}`" /></svg>
+          </v-avatar>
+        </template>
+      </v-list-item>
     </template>
   </v-select>
 </template>

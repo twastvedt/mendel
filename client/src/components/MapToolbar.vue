@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref, watch } from "vue";
-import { state } from "../state/State";
+import { useRootStore } from "../state/rootStore";
 import { DrawPlantTool } from "../tools/DrawPlantTool";
 import { DeletePlantTool } from "../tools/DeletePlantTool";
 import { DrawRowTool } from "../tools/DrawRowTool";
@@ -8,47 +8,52 @@ import { DeletePlantingTool } from "../tools/DeletePlantingTool";
 import type { Variety } from "@mendel/common";
 import { DrawPlantingTool } from "../tools/DrawPlantingTool";
 import SelectVariety from "./fields/SelectVariety.vue";
+import { useGardenStore } from "@/state/gardenStore";
+import type { PolygonGrid } from "@/services/polygonGrid";
+
+const store = useRootStore();
+const gardenStore = useGardenStore();
 
 const varietySelectDisabled = computed(() => {
   return (
-    state.toolName === "deletePlant" || state.toolName === "deletePlanting"
+    store.toolName === "deletePlant" || store.toolName === "deletePlanting"
   );
 });
 
 const variety = ref<Variety | undefined>(undefined);
 
 function newTool(newTool: string): void {
-  if (state.db) {
-    switch (newTool) {
-      case "drawPlant":
-        if (!variety.value) {
-          variety.value = state.db.varieties[0];
-        }
+  switch (newTool) {
+    case "drawPlant":
+      if (!variety.value) {
+        variety.value = gardenStore.varieties[0];
+      }
 
-        state.setTool(new DrawPlantTool(variety.value));
+      store.setTool(new DrawPlantTool(variety.value));
 
-        break;
-      case "drawRow":
-        if (variety.value) {
-          state.setTool(new DrawRowTool(variety.value));
-        }
-        break;
-      case "drawPlanting":
-        if (!variety.value) {
-          variety.value = state.db.varieties[0];
-        }
+      break;
+    case "drawRow":
+      if (variety.value) {
+        store.setTool(new DrawRowTool(variety.value));
+      }
+      break;
+    case "drawPlanting":
+      if (!variety.value) {
+        variety.value = gardenStore.varieties[0];
+      }
 
-        if (state.db.grid) {
-          state.setTool(new DrawPlantingTool(variety.value, state.db.grid));
-        }
-        break;
-      case "deletePlant":
-        state.setTool(new DeletePlantTool());
-        break;
-      case "deletePlanting":
-        state.setTool(new DeletePlantingTool());
-        break;
-    }
+      if (gardenStore.grid) {
+        store.setTool(
+          new DrawPlantingTool(variety.value, gardenStore.grid as PolygonGrid)
+        );
+      }
+      break;
+    case "deletePlant":
+      store.setTool(new DeletePlantTool());
+      break;
+    case "deletePlanting":
+      store.setTool(new DeletePlantingTool());
+      break;
   }
 }
 
@@ -57,18 +62,22 @@ watch(variety, newVariety);
 function newVariety(newVariety?: Variety): void {
   if (
     newVariety &&
-    (state.toolName === "drawPlant" ||
-      state.toolName === "drawPlanting" ||
-      state.toolName === "drawRow")
+    (store.toolName === "drawPlant" ||
+      store.toolName === "drawPlanting" ||
+      store.toolName === "drawRow")
   ) {
-    newTool(state.toolName);
+    newTool(store.toolName);
   }
 }
 </script>
 
 <template>
-  <v-toolbar dense floating>
-    <v-btn-toggle v-model="state.toolName" borderless @change="newTool">
+  <v-toolbar density="compact" floating>
+    <v-btn-toggle
+      v-model="store.toolName"
+      borderless
+      @update:model-value="newTool"
+    >
       <v-btn icon value="drawPlant" title="Add plant">
         <v-icon>mdi-sprout</v-icon>
       </v-btn>
@@ -80,11 +89,11 @@ function newVariety(newVariety?: Variety): void {
       </v-btn>
       <v-btn icon value="deletePlant" title="Delete plant">
         <v-icon>mdi-sprout</v-icon>
-        <v-icon class="badge" color="red darken-4">mdi-close</v-icon>
+        <v-icon class="badge" color="red-darken-4">mdi-close</v-icon>
       </v-btn>
       <v-btn icon value="deletePlanting" title="Delete planting">
         <v-icon>mdi-dots-hexagon</v-icon>
-        <v-icon class="badge" color="red darken-4">mdi-close</v-icon>
+        <v-icon class="badge" color="red-darken-4">mdi-close</v-icon>
       </v-btn>
     </v-btn-toggle>
 

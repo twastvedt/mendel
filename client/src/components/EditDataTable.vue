@@ -1,9 +1,9 @@
 <script setup lang="ts">
 // import type { DataTableHeader } from 'vuetify/labs/VDataTable';
-import type { DataTableHeader } from '@/types/vuetifyTypes';
+import type { DataTableHeader } from "@/types/vuetifyTypes";
 
 const props = defineProps<{
-  value: unknown[];
+  modelValue: unknown[];
   name: string;
   headers: DataTableHeader[];
   showExpand?: boolean;
@@ -38,14 +38,14 @@ function fullHeaders(): DataTableHeader[] {
 }
 
 function editItem(item: unknown): void {
-  currentIndex = props.value.indexOf(item);
+  currentIndex = props.modelValue.indexOf(item);
 
   showDialog = true;
 }
 
 function expandAll(v: Event): void {
   if (v) {
-    expanded = props.value;
+    expanded = props.modelValue;
   } else {
     expanded = [];
   }
@@ -64,23 +64,25 @@ function expandAll(v: Event): void {
         single-line
         hide-details
       >
-        <template #append-outer>
+        <template #append>
           <v-dialog v-model="showDialog">
             <template #activator="{ props }">
               <v-btn
-                fab
+                icon
                 small
                 class="mx-2"
                 v-bind="props"
                 @click="currentIndex = null"
               >
-                <v-icon color="primary">mdi-plus</v-icon>
+                <v-icon color="text-primary">mdi-plus</v-icon>
               </v-btn>
             </template>
 
             <slot
               :close="() => (showDialog = false)"
-              :value="currentIndex !== null ? value[currentIndex] : undefined"
+              :value="
+                currentIndex !== null ? modelValue[currentIndex] : undefined
+              "
             />
           </v-dialog>
         </template>
@@ -89,23 +91,25 @@ function expandAll(v: Event): void {
 
     <v-data-table
       v-bind="$attrs"
-      :items="value"
+      :items="modelValue"
       :search="search"
-      :headers="fullHeaders"
+      :headers="fullHeaders()"
       :show-expand="showExpand"
-      :expanded.sync="expanded"
+      v-model:expanded="expanded"
     >
       <template #[`header.data-table-expand`]="{}">
         <v-checkbox
-          off-icon="mdi-chevron-down"
-          on-icon="mdi-chevron-up"
-          @change="(v: Event) => expandAll(v)"
+          false-icon="mdi-chevron-down"
+          true-icon="mdi-chevron-up"
+          @click:append="(v: Event) => expandAll(v)"
         />
       </template>
 
       <template #[`item.actions`]="{ item }">
-        <v-icon small class="mr-2" @click="editItem(item)"> mdi-pencil </v-icon>
-        <v-icon small class="mr-2" @click="$emit('delete', item)">
+        <v-icon small class="mr-2" @click="editItem(item.raw)">
+          mdi-pencil
+        </v-icon>
+        <v-icon small class="mr-2" @click="$emit('delete', item.raw)">
           mdi-delete
         </v-icon>
       </template>

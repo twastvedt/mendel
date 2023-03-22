@@ -1,35 +1,30 @@
-<script setup lang="ts">
-</script>
+<script setup lang="ts"></script>
 <template>
-  <v-list dense nav>
-    <v-list-item link to="/">
-      <v-list-item-icon>
-        <v-icon>mdi-map</v-icon>
-      </v-list-item-icon>
-      <v-list-item-title>Map</v-list-item-title>
-    </v-list-item>
+  <v-list density="comfortable" nav>
+    <v-list-item link to="/" prepend-icon="mdi-map" title="Map" />
+    <v-list-item
+      link
+      to="/summary"
+      prepend-icon="mdi-view-list"
+      title="Summary"
+    />
 
-    <v-list-item link to="/summary">
-      <v-list-item-icon>
-        <v-icon>mdi-view-list</v-icon>
-      </v-list-item-icon>
-      <v-list-item-title>Summary</v-list-item-title>
-    </v-list-item>
+    <v-divider inset></v-divider>
 
-    <v-list-group prepend-icon="mdi-cog" :value="true">
-      <template #activator>
-        <v-list-item-title>Settings</v-list-item-title>
-      </template>
+    <v-list-subheader inset>Settings</v-list-subheader>
 
-      <v-list-item link to="/settings/families">
-        <v-list-item-icon />
-        <v-list-item-title>Families</v-list-item-title>
-      </v-list-item>
+    <v-list-item
+      link
+      to="/settings/families"
+      prepend-icon="mdi-cog"
+      title="Families"
+    />
 
-      <v-list-item link to="/settings/varieties">
-        <v-list-item-icon />
-        <v-list-item-title>Varieties</v-list-item-title>
-      </v-list-item>
-    </v-list-group>
+    <v-list-item
+      link
+      to="/settings/varieties"
+      prepend-icon="mdi-cog"
+      title="Varieties"
+    />
   </v-list>
 </template>

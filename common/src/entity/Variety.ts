@@ -22,13 +22,13 @@ export class Variety extends EntityBase {
     }
   }
 
-  @Column()
+  @Column("varchar")
   name!: string;
 
-  @Column()
+  @Column("varchar")
   color!: string;
 
-  @Column()
+  @Column("integer")
   familyId?: number;
 
   @ManyToOne(() => Family, (family) => family.varieties, {

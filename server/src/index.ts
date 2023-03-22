@@ -3,14 +3,13 @@ import express, { static as _static, json } from "express";
 import { join } from "path";
 import cors from "cors";
 
-import { dataSource } from "@mendel/common/src";
-
 import BedRoutes from "./controller/Beds";
 import VarietyRoutes from "./controller/Varieties";
 import GardenRoutes from "./controller/Gardens";
 import PlantingRoutes from "./controller/Plantings";
 import PlantRoutes from "./controller/Plants";
 import FamilyRoutes from "./controller/Families";
+import { dataSource } from "./dataSource";
 
 dataSource
   .initialize()

@@ -37,3 +37,19 @@ export type UiElement =
   | PlantElement
   | PlantingElement
   | AreaElement;
+
+export function getEntityIcon(entity: UiElement): string {
+  switch (entity.type) {
+    case "area":
+      return "mdi-triangle-outline";
+
+    case "bed":
+      return "mdi-rectangle-outline";
+
+    case "plant":
+      return "mdi-sprout";
+
+    case "planting":
+      return "mdi-dots-hexagon";
+  }
+}

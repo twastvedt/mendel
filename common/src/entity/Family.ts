@@ -20,22 +20,22 @@ export class Family extends EntityBase {
     this.nitrogen = nitrogen;
   }
 
-  @Column()
+  @Column("varchar")
   name!: string;
 
-  @Column()
+  @Column("varchar")
   icon!: string;
 
-  @Column()
+  @Column("varchar")
   color!: string;
 
-  @Column({ nullable: true })
+  @Column("varchar", { nullable: true })
   nitrogen?: number;
 
   /**
    * Space between plants, in inches.
    */
-  @Column()
+  @Column("float")
   spacing!: number;
 
   @OneToMany(() => Variety, (v) => v.family)

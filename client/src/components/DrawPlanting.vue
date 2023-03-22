@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import type { Planting, Variety, Position } from "@mendel/common";
-import { state } from "../state/State";
+import { useRootStore } from "../state/rootStore";
 import PlantingComponent from "./PlantingComponent.vue";
 import RotationTool from "./RotationTool.vue";
 import type { GridPoints } from "../services/polygonGrid";
 import { Stage } from "../tools/DrawPlantingTool";
+
+const store = useRootStore();
 
 const props = defineProps<{
   planting: Planting;
@@ -43,7 +45,7 @@ function plantsClass(): Record<string, boolean> {
 
 const projectedLineHead =
   props.dividingLine[0] && props.stage !== Stage.selectingAfterLine
-    ? state.projection(props.dividingLine[0])
+    ? store.projection(props.dividingLine[0])
     : null;
 </script>
 <template>
@@ -56,7 +58,7 @@ const projectedLineHead =
 
     <g
       v-if="plants"
-      :transform="state.makeTransform(plants.offset)"
+      :transform="store.makeTransform(plants.offset)"
       :class="plantsClass"
     >
       <circle
@@ -85,7 +87,7 @@ const projectedLineHead =
     <path
       v-if="dividingLine.length > 1"
       class="dividingLine"
-      :d="state.pathFromPoints(dividingLine)"
+      :d="store.pathFromPoints(dividingLine)"
     />
 
     <circle

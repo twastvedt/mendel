@@ -3,23 +3,27 @@ import type { Position } from "@mendel/common";
 import type { Tool } from "./Tool";
 import { AddPlantingAction } from "../actions/AddPlantingAction";
 import type { Action } from "../actions/Action";
-import { state } from "../state/State";
 import drawPlantRow from "../components/DrawPlantRow.vue";
 import { polygonTrimRay } from "../geometry/polygonTools";
 import { Vector } from "../Vector";
 import type { UiElementType } from "../types/entityTypes";
+import { useRootStore } from "@/state/rootStore";
+import { useGardenStore } from "@/state/gardenStore";
+import { markRaw } from "vue";
 
 export class DrawRowTool implements Tool {
   private index?: number;
   private rotation = 0;
   private ray = new Vector(0, 0);
   private segment?: [number, number];
+  private rootStore = useRootStore();
+  private gardenStore = useGardenStore();
 
   public constructor(private variety: Variety) {}
 
   public interactiveElements = new Set<UiElementType>(["area"]);
 
-  public cursorComponent = drawPlantRow;
+  public cursorComponent = markRaw(drawPlantRow);
   public cursorProps = {
     cursor: null as Position | null,
     locations: [] as Position[],
@@ -114,7 +118,7 @@ export class DrawRowTool implements Tool {
 
     const spacing = this.variety.family?.spacing;
 
-    if (!spacing || !props.planting?.shape || !state.db) {
+    if (!spacing || !props.planting?.shape || !this.gardenStore.garden) {
       return;
     }
 
@@ -131,7 +135,7 @@ export class DrawRowTool implements Tool {
       const locations = props.locations;
       locations.length = 0;
 
-      const bed = state.db.garden.beds[this.index];
+      const bed = this.gardenStore.garden.beds[this.index];
 
       Vector.fromPolar(1, this.rotation, this.ray);
 
@@ -171,7 +175,7 @@ export class DrawRowTool implements Tool {
       this.index !== undefined &&
       props.cursor
     ) {
-      const r = 50 / state.scale;
+      const r = 50 / this.rootStore.scale;
 
       props.rotationCenter = [
         props.cursor[0] - r * Math.cos(this.rotation),

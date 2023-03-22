@@ -6,24 +6,38 @@ import {
   Planting,
   plantingApi,
   Variety,
+  gardenApi,
   varietyApi,
 } from "@mendel/common/src";
 import type { EntityId, Position } from "@mendel/common";
 import { Plant } from "@mendel/common/src/entity/Plant";
 import { Delaunay } from "d3-delaunay";
 import { PolygonGrid } from "../services/polygonGrid";
+import { defineStore } from "pinia";
+import { ref, shallowRef, markRaw } from "vue";
+import { useRootStore } from "./rootStore";
 
-export class GardenState {
-  delaunayPoints: Plant[];
+export const useGardenStore = defineStore("garden", () => {
+  const rootStore = useRootStore();
 
-  delaunay?: Delaunay<Plant>;
+  const delaunayPoints = markRaw<Plant[]>([]);
+  const delaunay = shallowRef<Delaunay<Plant> | undefined>(undefined);
+  const grid = shallowRef<PolygonGrid | undefined>(undefined);
 
-  grid: PolygonGrid;
+  const varieties = ref<Variety[]>([]);
+  const garden = ref<Garden>();
+  const families = ref<Family[]>();
 
-  varieties: Variety[] = [];
+  const ready = initialize();
 
-  constructor(public garden: Garden, public families: Family[]) {
-    this.varieties = [];
+  async function initialize() {
+    rootStore.loading = true;
+
+    families.value = await varietyApi.allByFamily.request();
+
+    garden.value = await gardenApi.one.request({ routeParams: { id: 1 } });
+
+    varieties.value = [];
 
     const symbols = document.createElementNS(
       "http://www.w3.org/2000/svg",
@@ -32,7 +46,7 @@ export class GardenState {
 
     let content = "";
 
-    families
+    families.value
       .slice()
       .sort((a, b) => a.name.localeCompare(b.name))
       .forEach((f) => {
@@ -43,7 +57,7 @@ export class GardenState {
           .sort((a, b) => a.name.localeCompare(b.name))
           .forEach((v) => {
             v.family = f;
-            this.varieties.push(v);
+            varieties.value.push(v);
           });
       });
 
@@ -52,38 +66,44 @@ export class GardenState {
 
     document.body.prepend(symbols);
 
-    this.delaunayPoints = [];
+    delaunayPoints.length = 0;
 
-    garden.plantings.forEach((planting) => {
-      this.inflatePlanting(planting);
+    garden.value.plantings.forEach((planting) => {
+      inflatePlanting(planting);
 
-      if (planting.plants) {
-        planting.plants.forEach((p) => {
-          this.delaunayPoints.push(this.inflatePlant(p));
-        });
-      }
+      planting.plants?.forEach((p) => {
+        delaunayPoints.push(inflatePlant(p));
+      });
     });
 
-    this.renewDelaunay();
+    renewDelaunay();
 
-    this.grid = new PolygonGrid(
-      garden.beds.map((b) => b.shape.coordinates[0]),
+    grid.value = new PolygonGrid(
+      garden.value.beds.map((b) => b.shape.coordinates[0]),
       6
     );
+
+    rootStore.loading = false;
   }
 
-  async addPlant(
+  async function addPlant(
     location: Position,
     varietyId: number
   ): Promise<EntityId<Plant>> {
-    let planting = this.garden.plantings.find((p) => p.varietyId === varietyId);
+    if (!garden.value) {
+      throw new Error("No garden!");
+    }
+
+    let planting = garden.value.plantings.find(
+      (p) => p.varietyId === varietyId
+    );
 
     if (!planting) {
       const newPlanting = new Planting();
       newPlanting.varietyId = varietyId;
-      newPlanting.gardenId = this.garden.id;
+      newPlanting.gardenId = garden.value.id;
 
-      planting = await this.addPlanting(newPlanting);
+      planting = await addPlanting(newPlanting);
     }
 
     if (planting.id === undefined) {
@@ -107,20 +127,24 @@ export class GardenState {
 
     Object.assign(plant, newPlant);
 
-    this.delaunayPoints.push(plant);
+    delaunayPoints.push(plant);
 
-    this.renewDelaunay();
+    renewDelaunay();
 
     return plant as EntityId<Plant>;
   }
 
-  async editPlant(id: number, changes: Partial<Plant>): Promise<void> {
+  async function editPlant(id: number, changes: Partial<Plant>): Promise<void> {
     await plantApi.update.request({ data: { ...changes, id } });
   }
 
-  inflatePlant(plant: Plant): Plant {
+  function inflatePlant(plant: Plant): Plant {
+    if (!garden.value) {
+      throw new Error("No garden!");
+    }
+
     if (!plant.planting) {
-      plant.planting = this.garden.plantings.find(
+      plant.planting = garden.value.plantings.find(
         (p) => p.id === plant.plantingId
       );
     }
@@ -128,23 +152,31 @@ export class GardenState {
     return plant;
   }
 
-  inflatePlanting(planting: Planting): Planting {
+  function inflatePlanting(planting: Planting): Planting {
+    if (!garden.value) {
+      throw new Error("No garden!");
+    }
+
     if (planting.varietyId !== undefined) {
-      planting.variety = this.varieties.find(
+      planting.variety = varieties.value.find(
         (v) => v.id === planting.varietyId
       );
     }
 
-    planting.gardenId = this.garden.id;
-    planting.garden = this.garden;
+    planting.gardenId = garden.value.id;
+    planting.garden = garden.value;
 
     return planting;
   }
 
-  async addPlanting(planting: Planting): Promise<EntityId<Planting>> {
-    this.inflatePlanting(planting);
+  async function addPlanting(planting: Planting): Promise<EntityId<Planting>> {
+    if (!garden.value) {
+      throw new Error("No garden!");
+    }
 
-    this.garden?.plantings.push(planting);
+    inflatePlanting(planting);
+
+    garden.value.plantings.push(planting);
 
     const newPlanting = (await plantingApi.create.request({
       data: Planting.cleanCopy(planting),
@@ -155,16 +187,20 @@ export class GardenState {
     if (planting.plants) {
       planting.plants.forEach((p) => {
         p.plantingId = newPlanting.id;
-        this.delaunayPoints.push(p);
+        delaunayPoints.push(p);
       });
 
-      this.renewDelaunay();
+      renewDelaunay();
     }
 
     return planting as EntityId<Planting>;
   }
 
-  async removePlant(plant: EntityId<Plant>): Promise<void> {
+  async function removePlant(plant: EntityId<Plant>): Promise<void> {
+    if (!garden.value) {
+      throw new Error("No garden!");
+    }
+
     await plantApi.delete.request({
       routeParams: {
         id: plant.id,
@@ -174,7 +210,7 @@ export class GardenState {
     let planting = plant.planting;
 
     if (!planting) {
-      planting = this.garden.plantings.find((p) => p.id === plant.id);
+      planting = garden.value.plantings.find((p) => p.id === plant.id);
     }
 
     if (planting?.plants) {
@@ -185,79 +221,96 @@ export class GardenState {
       }
     }
 
-    const index = this.delaunayPoints.findIndex((p) => p.id === plant.id);
+    const index = delaunayPoints.findIndex((p) => p.id === plant.id);
 
     if (index !== -1) {
-      this.delaunayPoints.splice(index, 1);
-      this.renewDelaunay();
+      delaunayPoints.splice(index, 1);
+      renewDelaunay();
     }
   }
 
-  renewDelaunay(): void {
-    if (this.delaunayPoints.length) {
-      this.delaunay = Delaunay.from(
-        this.delaunayPoints,
+  function renewDelaunay(): void {
+    if (delaunayPoints.length) {
+      delaunay.value = Delaunay.from(
+        delaunayPoints,
         (p) => p.location.coordinates[0],
         (p) => p.location.coordinates[1]
       );
     } else {
-      delete this.delaunay;
+      delaunay.value = undefined;
     }
   }
 
-  async removePlanting(id: number): Promise<void>;
-  async removePlanting(planting: Planting): Promise<void>;
-  async removePlanting(idOrPlanting: Planting | number): Promise<void> {
+  async function removePlanting(id: number): Promise<void>;
+  async function removePlanting(planting: Planting): Promise<void>;
+  async function removePlanting(
+    idOrPlanting: Planting | number
+  ): Promise<void> {
+    if (!garden.value) {
+      throw new Error("No garden!");
+    }
+
     let i;
 
     if (typeof idOrPlanting === "number") {
-      i = this.garden.plantings.findIndex((p) => p.id === idOrPlanting);
+      i = garden.value.plantings.findIndex((p) => p.id === idOrPlanting);
     } else {
-      i = this.garden.plantings.findIndex((p) => p.id === idOrPlanting.id);
+      i = garden.value.plantings.findIndex((p) => p.id === idOrPlanting.id);
     }
 
-    if (i !== -1) {
-      const planting = this.garden.plantings[i];
+    if (i !== undefined && i !== -1) {
+      const planting = garden.value.plantings[i];
 
-      if (planting.plants) {
+      if (planting?.plants) {
         planting.plants.forEach((plant) => {
-          const delaunayIndex = this.delaunayPoints.indexOf(plant);
+          const delaunayIndex = delaunayPoints.indexOf(plant);
 
-          this.delaunayPoints.splice(delaunayIndex, 1);
+          delaunayPoints.splice(delaunayIndex, 1);
         });
 
-        this.renewDelaunay();
+        renewDelaunay();
       }
 
-      if (planting.id !== undefined) {
+      if (planting?.id !== undefined) {
         await plantingApi.delete.request({ routeParams: { id: planting.id } });
       }
 
-      this.garden.plantings.splice(i, 1);
+      garden.value.plantings.splice(i, 1);
     }
   }
 
-  plantCount(options?: { varietyId?: number; familyId?: number }): number {
+  function plantCount(options?: {
+    varietyId?: number;
+    familyId?: number;
+  }): number {
+    if (!garden.value) {
+      throw new Error("No garden!");
+    }
+
     let plantings: Planting[];
 
     if (options?.varietyId !== undefined) {
-      plantings = this.garden.plantings.filter(
+      plantings = garden.value.plantings.filter(
         (p) => p.varietyId === options.varietyId
       );
     } else if (options?.familyId !== undefined) {
-      plantings = this.garden.plantings.filter(
+      plantings = garden.value.plantings.filter(
         (p) => p.variety?.familyId === options.familyId
       );
     } else {
-      plantings = this.garden.plantings;
+      plantings = garden.value.plantings;
     }
 
     return plantings.reduce((t, p) => t + (p.plants?.length ?? 0), 0);
   }
 
-  async editVariety(item: Variety): Promise<void> {
+  async function editVariety(item: Variety): Promise<void> {
+    if (!families.value) {
+      throw new Error("No families!");
+    }
+
     if (item.id) {
-      const index = this.varieties.findIndex((v) => v.id === item.id);
+      const index = varieties.value.findIndex((v) => v.id === item.id);
 
       if (index === -1) {
         throw new Error(
@@ -265,7 +318,7 @@ export class GardenState {
         );
       }
 
-      Object.assign(this.varieties[index], item);
+      Object.assign(varieties.value[index], item);
 
       await varietyApi.update.request({
         data: Variety.cleanCopy(item) as EntityId<Variety>,
@@ -275,9 +328,9 @@ export class GardenState {
         data: Variety.cleanCopy(item),
       })) as Variety;
 
-      this.varieties.push(newVariety);
+      varieties.value.push(newVariety);
 
-      const family = this.families.find(
+      const family = families.value.find(
         (f) => f.id === item.familyId ?? item.family?.id
       );
 
@@ -290,12 +343,16 @@ export class GardenState {
     }
   }
 
-  async deleteVariety(item: Variety): Promise<void> {
+  async function deleteVariety(item: Variety): Promise<void> {
+    if (!families.value) {
+      throw new Error("No families!");
+    }
+
     if (item.id == undefined) {
       throw new Error("No id on item to delete");
     }
 
-    let index = this.varieties.findIndex((v) => v.id === item.id);
+    let index = varieties.value.findIndex((v) => v.id === item.id);
 
     if (index === -1) {
       throw new Error(
@@ -303,12 +360,12 @@ export class GardenState {
       );
     }
 
-    this.varieties.splice(index, 1);
+    varieties.value.splice(index, 1);
 
     let family = item.family;
 
     if (!family) {
-      family = this.families.find((f) => f.id === item.familyId);
+      family = families.value.find((f) => f.id === item.familyId);
     }
 
     if (!family) {
@@ -330,9 +387,13 @@ export class GardenState {
     await varietyApi.delete.request({ routeParams: { id: item.id } });
   }
 
-  async editFamily(item: Family): Promise<void> {
+  async function editFamily(item: Family): Promise<void> {
+    if (!families.value) {
+      throw new Error("No families!");
+    }
+
     if (item.id !== undefined) {
-      const index = this.families.findIndex((v) => v.id === item.id);
+      const index = families.value.findIndex((v) => v.id === item.id);
 
       if (index === -1) {
         throw new Error(
@@ -340,7 +401,7 @@ export class GardenState {
         );
       }
 
-      Object.assign(this.families[index], item);
+      Object.assign(families.value[index], item);
 
       const newFamily = Family.cleanCopy(item);
 
@@ -352,23 +413,27 @@ export class GardenState {
         data: Family.cleanCopy(item),
       })) as Family;
 
-      this.families.push(newFamily);
+      families.value.push(newFamily);
     }
   }
 
-  async deleteFamily(item: Family): Promise<void> {
+  async function deleteFamily(item: Family): Promise<void> {
+    if (!families.value) {
+      throw new Error("No families!");
+    }
+
     if (item.id == undefined) {
       throw new Error("No id on item to delete");
     }
 
     if (
       item.varieties?.length ||
-      this.varieties.some((v) => v.familyId === item.id)
+      varieties.value.some((v) => v.familyId === item.id)
     ) {
       throw new Error("Can't delete family with varieties.");
     }
 
-    const index = this.families.findIndex((v) => v.id === item.id);
+    const index = families.value.findIndex((v) => v.id === item.id);
 
     if (index === -1) {
       throw new Error(
@@ -376,8 +441,32 @@ export class GardenState {
       );
     }
 
-    this.families.splice(index, 1);
+    families.value.splice(index, 1);
 
     await familyApi.delete.request({ routeParams: { id: item.id } });
   }
-}
+
+  return {
+    ready,
+    delaunayPoints,
+    delaunay,
+    grid,
+    varieties,
+    garden,
+    families,
+    initialize,
+    addPlant,
+    editPlant,
+    inflatePlant,
+    inflatePlanting,
+    addPlanting,
+    removePlant,
+    renewDelaunay,
+    removePlanting,
+    plantCount,
+    editVariety,
+    deleteVariety,
+    editFamily,
+    deleteFamily,
+  };
+});
