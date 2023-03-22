@@ -1,12 +1,13 @@
 <script setup lang="ts">
-import type { Planting, Variety, Position } from "@mendel/common";
-import { useRootStore } from "../state/rootStore";
+import type { Planting, Position } from "@mendel/common";
 import PlantingComponent from "./PlantingComponent.vue";
 import RotationTool from "./RotationTool.vue";
 import type { GridPoints } from "../services/polygonGrid";
 import { Stage } from "../tools/DrawPlantingTool";
+import { computed } from "vue";
+import * as projection from "@/services/projection";
 
-const store = useRootStore();
+const projectionTools = projection;
 
 const props = defineProps<{
   planting: Planting;
@@ -18,35 +19,34 @@ const props = defineProps<{
   snapped: boolean;
 }>();
 
-function variety(): Variety {
+const variety = computed(() => {
   if (props.planting.variety) {
     return props.planting.variety;
   }
 
   throw new Error("Planting has no variety");
-}
+});
 
-function radius(): number | undefined {
-  const v = variety();
+const radius = computed(() => {
+  const v = variety.value;
   if (v.family) {
     return v.family.spacing / 2;
   }
 
   return undefined;
-}
+});
 
-function plantsClass(): Record<string, boolean> {
-  return {
-    faded:
-      (props.stage === Stage.selecting && !!props.dividingLine[0]) ||
-      props.stage === Stage.drawingLine,
-  };
-}
+const plantsClass = computed(() => ({
+  faded:
+    (props.stage === Stage.selecting && !!props.dividingLine[0]) ||
+    props.stage === Stage.drawingLine,
+}));
 
-const projectedLineHead =
+const projectedLineHead = computed(() =>
   props.dividingLine[0] && props.stage !== Stage.selectingAfterLine
-    ? store.projection(props.dividingLine[0])
-    : null;
+    ? projectionTools.projection(props.dividingLine[0])
+    : null
+);
 </script>
 <template>
   <g>
@@ -58,13 +58,13 @@ const projectedLineHead =
 
     <g
       v-if="plants"
-      :transform="store.makeTransform(plants.offset)"
+      :transform="projectionTools.makeTransform(plants.offset)"
       :class="plantsClass"
     >
       <circle
         v-for="(point, i) in plants.interiorPoints"
         :key="`interior${i}`"
-        :fill="variety().color"
+        :fill="variety.color"
         :cx="point[0]"
         :cy="-point[1]"
         :r="radius"
@@ -74,7 +74,7 @@ const projectedLineHead =
         v-for="(p, i) in plants.edgePoints"
         v-show="p.display"
         :key="`exterior${i}`"
-        :fill="variety().color"
+        :fill="variety.color"
         :cx="p.point[0]"
         :cy="-p.point[1]"
         :r="radius"
@@ -87,7 +87,7 @@ const projectedLineHead =
     <path
       v-if="dividingLine.length > 1"
       class="dividingLine"
-      :d="store.pathFromPoints(dividingLine)"
+      :d="projectionTools.pathFromPoints(dividingLine)"
     />
 
     <circle

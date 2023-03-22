@@ -1,8 +1,6 @@
 import type { Position } from "@mendel/common";
 import type { Tool } from "../tools/Tool";
 import type { Action } from "../actions/Action";
-import { geoIdentity, geoPath } from "d3-geo";
-import type { GeoPermissibleObjects } from "d3-geo";
 import axios from "axios";
 import type { UiElement } from "../types/entityTypes";
 import { defineStore } from "pinia";
@@ -11,15 +9,6 @@ import { ref, computed } from "vue";
 axios.defaults.baseURL = "http://localhost:3000";
 
 export const useRootStore = defineStore("root", () => {
-  // TODO: We assume data is stored in inches relative to garden origin.
-  const projection = geoIdentity().reflectY(true);
-
-  const projectionGenerator = geoPath(projection);
-
-  function pathGenerator(o: GeoPermissibleObjects) {
-    return projectionGenerator(o) ?? undefined;
-  }
-
   const loading = ref(false);
   const scale = ref(1);
   const selection = ref<UiElement[]>([]);
@@ -96,17 +85,7 @@ export const useRootStore = defineStore("root", () => {
     }
   }
 
-  function makeTransform(coordinate: Position): string {
-    return `translate(${projection(coordinate)?.join(" ")})`;
-  }
-
-  function pathFromPoints(coordinates: Position[]): string | undefined {
-    return pathGenerator({ type: "LineString", coordinates });
-  }
-
   return {
-    projection,
-    pathGenerator,
     loading,
     scale,
     selection,
@@ -119,7 +98,5 @@ export const useRootStore = defineStore("root", () => {
     setTool,
     updateTool,
     clearTool,
-    makeTransform,
-    pathFromPoints,
   };
 });

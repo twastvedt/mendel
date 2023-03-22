@@ -10,6 +10,10 @@ import MapToolbar from "./MapToolbar.vue";
 import DetailsPane from "./DetailsPane.vue";
 import type { UiElementType } from "../types/entityTypes";
 import { nextTick, onMounted, ref } from "vue";
+import { pathGenerator, pathFromPoints } from "@/services/projection";
+
+const pathGeneratorLocal = pathGenerator;
+const pathFromPointsLocal = pathFromPoints;
 
 const store = useRootStore();
 const gardenStore = useGardenStore();
@@ -134,7 +138,7 @@ function elementStyle(elementType: UiElementType): Record<string, string> {
             <path
               class="bed"
               :style="elementStyle('bed')"
-              :d="store.pathGenerator(bed.shape)"
+              :d="pathGeneratorLocal(bed.shape)"
               @click.stop="store.onClick($event, { type: 'bed', item: bed })"
               @mouseenter="onHover($event, bed, i)"
               @mouseleave="onHover($event)"
@@ -155,7 +159,7 @@ function elementStyle(elementType: UiElementType): Record<string, string> {
               :key="i"
               class="area"
               :style="elementStyle('area')"
-              :d="store.pathFromPoints(area.polygon)"
+              :d="pathFromPointsLocal(area.polygon)"
               @click.stop="store.onClick($event, { type: 'area', item: area })"
               @mouseenter="onHover($event, area, i)"
               @mouseleave="onHover($event)"

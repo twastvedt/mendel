@@ -1,9 +1,7 @@
 <script setup lang="ts">
 import type { Position } from "@mendel/common";
 import { computed } from "vue";
-import { useRootStore } from "../state/rootStore";
-
-const store = useRootStore();
+import { projection } from "@/services/projection";
 
 const props = defineProps<{
   cursor?: Position;
@@ -12,7 +10,7 @@ const props = defineProps<{
 
 const projectedRotationCenter = computed((): Position | null => {
   if (props.rotationCenter) {
-    return store.projection(props.rotationCenter);
+    return projection(props.rotationCenter);
   }
 
   return null;
@@ -20,7 +18,7 @@ const projectedRotationCenter = computed((): Position | null => {
 
 const projectedCursor = computed((): Position | null => {
   if (props.cursor) {
-    return store.projection(props.cursor);
+    return projection(props.cursor);
   }
 
   return null;

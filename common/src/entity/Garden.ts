@@ -14,11 +14,13 @@ export class Garden extends EntityBase {
 
   @OneToMany(() => Bed, (bed) => bed.garden, {
     eager: true,
+    cascade: true,
   })
   beds!: Bed[];
 
   @OneToMany(() => Planting, (planting) => planting.garden, {
     eager: true,
+    cascade: true,
   })
   plantings!: Planting[];
 }

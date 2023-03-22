@@ -1,6 +1,7 @@
 <script setup lang="ts">
 // import type { DataTableHeader } from 'vuetify/labs/VDataTable';
 import type { DataTableHeader } from "@/types/vuetifyTypes";
+import { computed } from "vue";
 
 const props = defineProps<{
   modelValue: unknown[];
@@ -14,7 +15,7 @@ let search = "";
 let showDialog = false;
 let currentIndex = null as number | null;
 
-function fullHeaders(): DataTableHeader[] {
+const fullHeaders = computed(() => {
   const headers: DataTableHeader[] = [
     ...props.headers,
     {
@@ -35,7 +36,7 @@ function fullHeaders(): DataTableHeader[] {
   }
 
   return headers;
-}
+});
 
 function editItem(item: unknown): void {
   currentIndex = props.modelValue.indexOf(item);
@@ -93,7 +94,7 @@ function expandAll(v: Event): void {
       v-bind="$attrs"
       :items="modelValue"
       :search="search"
-      :headers="fullHeaders()"
+      :headers="fullHeaders"
       :show-expand="showExpand"
       v-model:expanded="expanded"
     >

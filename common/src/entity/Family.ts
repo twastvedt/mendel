@@ -38,7 +38,7 @@ export class Family extends EntityBase {
   @Column("float")
   spacing!: number;
 
-  @OneToMany(() => Variety, (v) => v.family)
+  @OneToMany(() => Variety, (v) => v.family, { cascade: true })
   varieties?: Variety[];
 
   static cleanCopy<T extends Family>(family: T): Omit<T, "varieties"> {

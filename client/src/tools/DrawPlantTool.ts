@@ -2,12 +2,12 @@ import type { Variety, Position } from "@mendel/common";
 import type { Tool } from "./Tool";
 import { AddPlantAction } from "../actions/AddPlantAction";
 import type { Action } from "../actions/Action";
-import { useRootStore } from "../state/rootStore";
 import { Vector } from "../Vector";
 import plantComponent from "../components/PlantComponent.vue";
 import type { UiElementType } from "../types/entityTypes";
 import { useGardenStore } from "@/state/gardenStore";
 import { markRaw } from "vue";
+import { makeTransform } from "@/services/projection";
 
 export class DrawPlantTool implements Tool {
   private location?: Position;
@@ -15,7 +15,6 @@ export class DrawPlantTool implements Tool {
   private cursor = new Vector(0, 0);
   private tempVec = new Vector(0, 0);
   private lastClosestIndex?: number;
-  private rootStore = useRootStore();
   private gardenStore = useGardenStore();
 
   public helpText = "Click to draw a plant.";
@@ -42,7 +41,7 @@ export class DrawPlantTool implements Tool {
 
   public setTransform(): void {
     if (this.location) {
-      this.cursorProps.transform = this.rootStore.makeTransform(this.location);
+      this.cursorProps.transform = makeTransform(this.location);
     }
   }
 

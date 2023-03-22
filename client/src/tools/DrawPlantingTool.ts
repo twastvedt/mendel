@@ -54,8 +54,8 @@ export class DrawPlantingTool implements Tool {
     this.planting.variety = this.variety;
     this.planting.varietyId = this.variety.id;
     this.planting.shape = {
-      type: "Polygon",
-      coordinates: [[[0, 0]]],
+      type: "LineString",
+      coordinates: [[0, 0]],
     };
 
     if (!this.variety.family) {
@@ -123,8 +123,8 @@ export class DrawPlantingTool implements Tool {
       this.index = index;
     } else if (index != undefined) {
       this.planting.shape = {
-        type: "Polygon",
-        coordinates: [this.grid.areas[index].polygon],
+        type: "LineString",
+        coordinates: this.grid.areas[index].polygon,
       };
 
       this.grid.activeGrid = index;
@@ -225,7 +225,7 @@ export class DrawPlantingTool implements Tool {
 
   private clearDisplay(): void {
     if (this.planting?.shape) {
-      this.planting.shape.coordinates = [[[0, 0]]];
+      this.planting.shape.coordinates = [[0, 0]];
     }
 
     this.cursorProps.plants = null;
@@ -268,8 +268,8 @@ export class DrawPlantingTool implements Tool {
   private finish(): AddPlantingAction | undefined {
     if (this.planting && this.index !== undefined) {
       this.planting.shape = {
-        type: "Polygon",
-        coordinates: [this.grid.areas[this.index].polygon],
+        type: "LineString",
+        coordinates: this.grid.areas[this.index].polygon,
       };
 
       const plants = this.cursorProps.plants;

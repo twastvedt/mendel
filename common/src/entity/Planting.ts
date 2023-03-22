@@ -1,7 +1,7 @@
 import { Entity, Column, ManyToOne, OneToMany } from "typeorm";
 import { EntityBase } from "./EntityBase";
 import { Garden } from "./Garden";
-import { Polygon, LineString } from "./geoJson";
+import { LineString } from "./geoJson";
 import { Plant } from "./Plant";
 import { Variety } from "./Variety";
 
@@ -9,9 +9,9 @@ import { Variety } from "./Variety";
 export class Planting extends EntityBase {
   @Column("geometry", {
     nullable: true,
-    spatialFeatureType: "GeometryCollection",
+    spatialFeatureType: "LineString",
   })
-  shape?: Polygon | LineString;
+  shape?: LineString;
 
   @Column("date", { nullable: true })
   plantDate?: Date;
@@ -47,6 +47,7 @@ export class Planting extends EntityBase {
 
   @OneToMany(() => Plant, (plant) => plant.planting, {
     eager: true,
+    cascade: true,
   })
   plants?: Plant[];
 

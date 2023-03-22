@@ -140,7 +140,7 @@ export function pointInBounds(
     bounds[0] - padding <= point[0] &&
     bounds[1] - padding <= point[1] &&
     bounds[2] + padding >= point[0] &&
-    bounds[3] - padding >= point[1]
+    bounds[3] + padding >= point[1]
   );
 }
 

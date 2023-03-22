@@ -38,6 +38,7 @@ export class Variety extends EntityBase {
 
   @OneToMany(() => Planting, (planting) => planting.variety, {
     onDelete: "CASCADE",
+    cascade: true,
   })
   plantings?: Planting[];
 

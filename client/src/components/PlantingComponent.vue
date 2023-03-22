@@ -6,6 +6,10 @@ import PlantComponent from "./PlantComponent.vue";
 import polylabel from "polylabel";
 import type { Plant } from "@mendel/common/dist/entity/Plant";
 import { computed } from "vue";
+import { pathGenerator, makeTransform } from "@/services/projection";
+
+const pathGeneratorLocal = pathGenerator;
+const makeTransformLocal = makeTransform;
 
 const store = useRootStore();
 
@@ -26,24 +30,15 @@ const variety = computed((): Variety => {
 
 const classList = computed(
   (): (Record<string, unknown> | string | undefined)[] => {
-    return [props.planting.shape?.type, { cursor: props.isCursor }];
+    return [{ cursor: props.isCursor }];
   }
 );
 
 const labelTransform = computed((): string | undefined => {
   if (props.planting.shape) {
-    if (props.planting.shape.type === "LineString") {
-      const coordinates = props.planting.shape.coordinates;
-
-      return store.makeTransform([
-        (coordinates[1][0] + coordinates[0][0]) / 2,
-        (coordinates[1][1] + coordinates[0][1]) / 2,
-      ]);
-    } else {
-      return store.makeTransform(
-        polylabel(props.planting.shape.coordinates) as [number, number]
-      );
-    }
+    return makeTransform(
+      polylabel([props.planting.shape.coordinates]) as [number, number]
+    );
   }
 
   return undefined;
@@ -70,7 +65,7 @@ function plantClick(event: PointerEvent, plant: Plant): void {
     <path
       v-if="planting.shape"
       ref="shape"
-      :d="store.pathGenerator(planting.shape)"
+      :d="pathGeneratorLocal(planting.shape)"
       :fill="variety.color"
       :stroke="variety.color"
       class="shape"
@@ -89,7 +84,7 @@ function plantClick(event: PointerEvent, plant: Plant): void {
         v-for="(position, i) in locations"
         :key="i"
         :variety="variety"
-        :transform="store.makeTransform(position)"
+        :transform="makeTransformLocal(position)"
         :interactive="false"
       />
     </template>
@@ -98,7 +93,7 @@ function plantClick(event: PointerEvent, plant: Plant): void {
         v-for="(plant, i) in planting.plants"
         :key="`plant-${i}`"
         :variety="variety"
-        :transform="store.makeTransform(plant.location.coordinates)"
+        :transform="makeTransformLocal(plant.location.coordinates)"
         :interactive="plantsInteractive"
         @click.stop="plantClick($event, plant)"
       />
@@ -116,27 +111,18 @@ function plantClick(event: PointerEvent, plant: Plant): void {
 <style scoped lang="scss">
 .shape {
   opacity: 0.5;
-  stroke-width: 10px;
-  stroke-linecap: round;
+  stroke: none;
 
   &:hover {
     opacity: 0.3;
   }
 }
 
-.Polygon .shape {
-  stroke: none;
-}
-
-.LineString .shape {
-  fill: none;
-}
-
-.cursor .shape {
-  fill-opacity: 0.7;
-}
-
 .cursor {
   pointer-events: none;
+
+  .shape {
+    fill-opacity: 0.7;
+  }
 }
 </style>
