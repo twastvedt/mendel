@@ -20,18 +20,17 @@ function getDefault(): Family {
   return new Family("", "#FFFFFF", "", 6);
 }
 
-let formValue = getDefault();
-let valid = true;
+const formValue = ref(getDefault());
 const requiredRule = (v: unknown) => !!v || "Value required";
 
 const icon = computed(() =>
-  formValue.icon.replace("symbol ", `symbol id="edit-icon" `)
+  formValue.value.icon.replace("symbol ", `symbol id="edit-icon" `)
 );
 
 watch(() => props.value, resetForm);
 
 function resetForm(): void {
-  formValue = props.value ? Object.assign({}, props.value) : getDefault();
+  formValue.value = props.value ? Object.assign({}, props.value) : getDefault();
 
   form.value?.resetValidation();
 }
@@ -39,7 +38,7 @@ function resetForm(): void {
 async function save(): Promise<void> {
   const result = await form.value?.validate();
   if (result?.valid) {
-    emit("input", formValue);
+    emit("input", formValue.value);
     emit("close");
 
     resetForm();
@@ -55,7 +54,7 @@ resetForm();
 </script>
 <template>
   <v-card>
-    <v-form ref="form" v-model="valid" lazy-validation>
+    <v-form ref="form" @submit.prevent lazy-validation>
       <v-card-title>{{ isNew ? "New" : "Edit" }} Family</v-card-title>
       <v-card-text>
         <v-text-field
@@ -101,9 +100,7 @@ resetForm();
         </v-menu>
       </v-card-text>
       <v-card-actions>
-        <v-btn color="text-primary" :disabled="!valid" @click="save">
-          Save
-        </v-btn>
+        <v-btn color="primary" type="submit" @click="save"> Save </v-btn>
       </v-card-actions>
     </v-form>
   </v-card>

@@ -72,7 +72,7 @@ function newVariety(newVariety?: Variety): void {
 </script>
 
 <template>
-  <v-toolbar density="compact" floating>
+  <v-toolbar density="compact" floating elevation="1">
     <v-btn-toggle
       v-model="store.toolName"
       borderless

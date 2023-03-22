@@ -4,7 +4,7 @@ import { Variety } from "@mendel/common/src";
 import { useGardenStore } from "../state/gardenStore";
 import { VForm } from "vuetify/components";
 
-const garden = useGardenStore();
+const gardenStore = useGardenStore();
 
 const emit = defineEmits<{
   (e: "close"): void;
@@ -17,14 +17,12 @@ const props = defineProps<{
   value?: Variety;
 }>();
 
-let formValue = getDefault();
-const families = garden.families ?? [];
-let valid = true;
+const formValue = ref(getDefault());
 const requiredRule = (v: unknown) => !!v || "Value required";
 
 function updateColor(): void {
-  if (formValue.family) {
-    formValue.color = formValue.family.color;
+  if (formValue.value.family) {
+    formValue.value.color = formValue.value.family.color;
   }
 }
 
@@ -37,7 +35,7 @@ function getDefault(): Variety {
 watch(() => props.value, resetForm);
 
 function resetForm(): void {
-  formValue = props.value ? Object.assign({}, props.value) : getDefault();
+  formValue.value = props.value ? Object.assign({}, props.value) : getDefault();
 
   form.value?.resetValidation();
 }
@@ -45,9 +43,9 @@ function resetForm(): void {
 async function save(): Promise<void> {
   const result = await form.value?.validate();
   if (result?.valid) {
-    formValue.familyId = formValue.family?.id;
+    formValue.value.familyId = formValue.value.family?.id;
 
-    emit("input", formValue);
+    emit("input", formValue.value);
     emit("close");
 
     resetForm();
@@ -63,7 +61,7 @@ resetForm();
 </script>
 <template>
   <v-card>
-    <v-form ref="form" v-model="valid" lazy-validation>
+    <v-form ref="form" @submit.prevent lazy-validation>
       <v-card-title>{{ isNew ? "New" : "Edit" }} Variety</v-card-title>
       <v-card-text>
         <v-text-field
@@ -73,7 +71,7 @@ resetForm();
         ></v-text-field>
         <v-select
           v-model="formValue.family"
-          :items="families"
+          :items="gardenStore.families"
           item-title="name"
           return-object
           label="Family"
@@ -112,9 +110,7 @@ resetForm();
         </v-row>
       </v-card-text>
       <v-card-actions>
-        <v-btn color="text-primary" :disabled="!valid" @click="save">
-          Save
-        </v-btn>
+        <v-btn color="primary" type="submit" @click="save"> Save </v-btn>
       </v-card-actions>
     </v-form>
   </v-card>

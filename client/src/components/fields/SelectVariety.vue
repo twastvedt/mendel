@@ -35,7 +35,7 @@ function varietyFilter(item: Variety, queryText: string): boolean {
 <template>
   <v-select
     :model-value="props.value"
-    class="ml-3"
+    class="ms-3"
     :disabled="props.disabled"
     :items="varietyList"
     hide-details

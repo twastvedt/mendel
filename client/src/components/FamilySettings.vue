@@ -6,7 +6,7 @@ import EditFamily from "./EditFamily.vue";
 import EditDataTable from "./EditDataTable.vue";
 import type { Family } from "@mendel/common";
 
-const garden = useGardenStore();
+const gardenStore = useGardenStore();
 
 const headers: DataTableHeader[] = [
   {
@@ -32,34 +32,35 @@ const headers: DataTableHeader[] = [
 ];
 
 function plantCount(family: Family): number | undefined {
-  return garden.plantCount({ familyId: family.id });
+  return gardenStore.garden && gardenStore.plantCount({ familyId: family.id });
 }
 
 async function deleteFamily(family: Family): Promise<void> {
   const varieties =
     family.varieties?.length ??
-    garden.varieties.filter((v) => v.familyId === family.id).length;
+    gardenStore.varieties.filter((v) => v.familyId === family.id).length;
 
   if (varieties) {
     alert(`Can't delete family which still has ${varieties} varietie(s).`);
   } else {
-    garden.deleteFamily(family);
+    gardenStore.deleteFamily(family);
   }
 }
 </script>
 <template>
-  <v-container v-if="garden.families">
+  <v-container v-if="gardenStore.families">
     <EditDataTable
-      v-model="garden.families"
+      v-model="gardenStore.families"
       name="Families"
       :headers="headers"
       @delete="deleteFamily"
     >
       <template #default="props">
         <EditFamily
+          v-if="props"
           :value="props.value"
           @close="props.close"
-          @input="(item) => garden.editFamily(item)"
+          @input="(item) => gardenStore.editFamily(item)"
         />
       </template>
 
