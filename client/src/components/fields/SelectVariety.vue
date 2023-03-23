@@ -13,9 +13,16 @@ const props = defineProps<{
 const varietyList = computed(() => {
   const list: (Variety | { divider: boolean })[] = [];
 
+  let currentFamily: number | undefined;
+
   for (const variety of gardenStore.varieties) {
-    if (variety !== list[list.length - 1]) {
+    if (currentFamily === undefined) {
+      currentFamily = variety.familyId;
+    }
+
+    if (currentFamily !== undefined && variety.familyId !== currentFamily) {
       list.push({ divider: true });
+      currentFamily = variety.familyId;
     }
 
     list.push(variety);

@@ -65,54 +65,49 @@ function plantCount(variety: Variety): number | undefined {
   <v-container>
     <v-row>
       <v-col>
-        <v-data-table
-          :items="gardenStore.varieties"
-          name="Varieties"
-          :headers="headers"
-          class="elevation-1"
-        >
-          <template v-slot:top>
-            <v-toolbar>
-              <v-toolbar-title>Varieties</v-toolbar-title>
-            </v-toolbar>
-          </template>
-          <template #[`item.plants`]="{ item }">
-            {{ plantCount(item.raw) }}
-          </template>
+        <v-card>
+          <v-card-title>Varieties</v-card-title>
+          <v-data-table
+            :items="gardenStore.varieties"
+            name="Varieties"
+            :headers="headers"
+          >
+            <template #[`item.plants`]="{ item }">
+              {{ plantCount(item.raw) }}
+            </template>
 
-          <template #[`item.name`]="{ item }">
-            <svg class="icon avatar" :style="`fill: ${item.raw.color}`">
-              <use :href="`#family-${item.raw.familyId}`" />
-            </svg>
-            {{ item.raw.name }}
-            <!-- <v-list-item-avatar class="icon" :style="`fill: ${item.color}`">
+            <template #[`item.name`]="{ item }">
+              <svg class="icon avatar" :style="`fill: ${item.raw.color}`">
+                <use :href="`#family-${item.raw.familyId}`" />
+              </svg>
+              {{ item.raw.name }}
+              <!-- <v-list-item-avatar class="icon" :style="`fill: ${item.color}`">
           <svg><use :href="`#family-${item.familyId}`" /></svg>
         </v-list-item-avatar>
         <v-list-item-title v-text="item.name"></v-list-item-title> -->
-          </template>
-        </v-data-table>
+            </template>
+          </v-data-table>
+        </v-card>
       </v-col>
     </v-row>
     <v-row>
       <v-col>
-        <v-table class="elevation-1">
-          <template v-slot:top>
-            <v-toolbar>
-              <v-toolbar-title>Areas</v-toolbar-title>
-            </v-toolbar>
-          </template>
-          <template #default>
-            <tbody>
-              <tr v-for="(value, key) in areas" :key="key">
-                <td>{{ key }}</td>
-                <td v-if="value !== undefined">
-                  {{ Math.round(value).toLocaleString() }} sq. ft.
-                </td>
-                <td v-else>-</td>
-              </tr>
-            </tbody>
-          </template>
-        </v-table>
+        <v-card>
+          <v-card-title>Areas</v-card-title>
+          <v-table>
+            <template #default>
+              <tbody>
+                <tr v-for="(value, key) in areas" :key="key">
+                  <td>{{ key }}</td>
+                  <td v-if="value !== undefined">
+                    {{ Math.round(value).toLocaleString() }} sq. ft.
+                  </td>
+                  <td v-else>-</td>
+                </tr>
+              </tbody>
+            </template>
+          </v-table>
+        </v-card>
       </v-col>
     </v-row>
   </v-container>

@@ -72,7 +72,7 @@ function newVariety(newVariety?: Variety): void {
 </script>
 
 <template>
-  <v-toolbar density="compact" floating elevation="1">
+  <v-card density="compact" elevation="1" class="toolbar">
     <v-btn-toggle
       v-model="store.toolName"
       borderless
@@ -97,11 +97,25 @@ function newVariety(newVariety?: Variety): void {
       </v-btn>
     </v-btn-toggle>
 
-    <SelectVariety v-model="variety" :disabled="varietySelectDisabled" />
-  </v-toolbar>
+    <SelectVariety
+      v-model="variety"
+      :disabled="varietySelectDisabled"
+      class="dropdown"
+    />
+  </v-card>
 </template>
 
 <style scoped lang="scss">
+.toolbar {
+  display: flex;
+  align-items: center;
+  height: 48px;
+}
+
+.dropdown {
+  width: 400px;
+}
+
 .icon {
   stroke: black;
 }
