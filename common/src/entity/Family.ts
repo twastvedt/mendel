@@ -39,7 +39,7 @@ export class Family extends EntityBase {
   spacing!: number;
 
   @OneToMany(() => Variety, (v) => v.family, { cascade: true })
-  varieties?: Variety[];
+  varieties!: Variety[];
 
   static cleanCopy<T extends Family>(family: T): Omit<T, "varieties"> {
     const newFamily = Object.assign({}, family);

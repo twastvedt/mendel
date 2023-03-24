@@ -2,7 +2,7 @@ import { Entity, Column, OneToMany } from "typeorm";
 import { Bed } from "./Bed";
 import { EntityBase } from "./EntityBase";
 import { Point } from "./geoJson";
-import { Planting } from "./Planting";
+import { Plan } from "./Plan";
 
 @Entity()
 export class Garden extends EntityBase {
@@ -18,9 +18,8 @@ export class Garden extends EntityBase {
   })
   beds!: Bed[];
 
-  @OneToMany(() => Planting, (planting) => planting.garden, {
-    eager: true,
+  @OneToMany(() => Plan, (plan) => plan.garden, {
     cascade: true,
   })
-  plantings!: Planting[];
+  plans!: Plan[];
 }

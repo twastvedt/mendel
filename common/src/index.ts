@@ -5,6 +5,7 @@ export * from "./api/FamilyApi";
 export * from "./api/GardenApi";
 export * from "./api/PlantingApi";
 export * from "./api/PlantApi";
+export * from "./api/PlanApi";
 export * from "./api/VarietyApi";
 export * from "./api/typeHelpers";
 
@@ -14,5 +15,6 @@ export * from "./entity/Family";
 export * from "./entity/Garden";
 export * from "./entity/Planting";
 export * from "./entity/Plant";
+export * from "./entity/Plan";
 export * from "./entity/Variety";
 export * from "./entity/geoJson";

@@ -8,6 +8,7 @@ import VarietyRoutes from "./controller/Varieties";
 import GardenRoutes from "./controller/Gardens";
 import PlantingRoutes from "./controller/Plantings";
 import PlantRoutes from "./controller/Plants";
+import PlanRoutes from "./controller/Plans";
 import FamilyRoutes from "./controller/Families";
 import { dataSource } from "./dataSource";
 
@@ -32,6 +33,7 @@ dataSource
       .use(VarietyRoutes)
       .use(PlantingRoutes)
       .use(PlantRoutes)
+      .use(PlanRoutes)
       .use(FamilyRoutes);
 
     app.use((req, res, next) => {

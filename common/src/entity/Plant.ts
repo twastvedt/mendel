@@ -16,10 +16,6 @@ export class Plant extends EntityBase {
   })
   planting?: Planting;
 
-  constructor() {
-    super();
-  }
-
   static copy(oldPlant: Plant): Plant {
     return Object.assign({}, oldPlant);
   }

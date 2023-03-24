@@ -17,7 +17,7 @@ export class Planting extends EntityBase {
   plantDate?: Date;
 
   @Column("boolean")
-  areSeedlings: boolean;
+  areSeedlings = false;
 
   @Column("integer", { nullable: true })
   germinationRank?: number;
@@ -37,25 +37,20 @@ export class Planting extends EntityBase {
   @ManyToOne(() => Variety, (variety) => variety.plantings)
   variety?: Variety;
 
-  @Column("integer", { nullable: true })
-  gardenId?: number;
+  @Column("integer")
+  planId?: number;
 
-  @ManyToOne(() => Garden, (garden) => garden.plantings, {
+  @ManyToOne(() => Plan, (plan) => plan.plantings, {
     onDelete: "CASCADE",
   })
-  garden?: Garden;
+  plan?: Plan;
 
   @OneToMany(() => Plant, (plant) => plant.planting, {
     eager: true,
     cascade: true,
   })
-  plants?: Plant[];
+  plants!: Plant[];
 
-  constructor() {
-    super();
-
-    this.areSeedlings = false;
-  }
 
   static copy(oldPlanting: Planting): Planting {
     return Object.assign({}, oldPlanting);
@@ -65,7 +60,7 @@ export class Planting extends EntityBase {
     const newPlanting = Planting.copy(oldPlanting);
 
     delete newPlanting.variety;
-    delete newPlanting.garden;
+    delete newPlanting.plan;
 
     if (newPlanting.plants) {
       newPlanting.plants = newPlanting.plants.map((p) => Plant.cleanCopy(p));

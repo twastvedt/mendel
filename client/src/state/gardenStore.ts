@@ -8,6 +8,8 @@ import {
   Variety,
   gardenApi,
   varietyApi,
+  Plan,
+  planApi,
 } from "@mendel/common/src";
 import type { EntityId, Position } from "@mendel/common";
 import { Plant } from "@mendel/common/src/entity/Plant";
@@ -26,6 +28,8 @@ export const useGardenStore = defineStore("garden", () => {
 
   const varieties = ref<Variety[]>([]);
   const garden = ref<Garden>();
+  const currentPlan = ref<Plan>();
+  const plans = ref<Plan[]>();
   const families = ref<Family[]>();
 
   const ready = initialize();
@@ -34,8 +38,11 @@ export const useGardenStore = defineStore("garden", () => {
     rootStore.loading = true;
 
     families.value = await varietyApi.allByFamily.request();
-
     garden.value = await gardenApi.one.request({ routeParams: { id: 1 } });
+    plans.value = await planApi.all.request();
+    currentPlan.value = plans.value.reduce((prev, curr) =>
+      prev.updatedDate < curr.updatedDate ? prev : curr
+    );
 
     varieties.value = [];
 
@@ -68,7 +75,7 @@ export const useGardenStore = defineStore("garden", () => {
 
     delaunayPoints.length = 0;
 
-    garden.value.plantings.forEach((planting) => {
+    currentPlan.value.plantings.forEach((planting) => {
       inflatePlanting(planting);
 
       planting.plants?.forEach((p) => {
@@ -86,22 +93,45 @@ export const useGardenStore = defineStore("garden", () => {
     rootStore.loading = false;
   }
 
+  async function addPlan(plan: Plan): Promise<EntityId<Plan>> {
+    if (plan.garden) {
+      plan.gardenId = plan.garden.id;
+    } else if (plan.gardenId === undefined) {
+      plan.gardenId = garden.value?.id;
+      plan.garden = garden.value;
+    }
+
+    plans.value?.push(plan);
+
+    const newPlan = (await planApi.create.request({
+      data: plan.cleanCopy(),
+    })) as EntityId<Plan>;
+
+    Object.assign(plan, newPlan);
+
+    return plan as EntityId<Plan>;
+  }
+
+  async function editPlan(id: number, changes: Partial<Plan>): Promise<void> {
+    await planApi.update.request({ data: { ...changes, id } });
+  }
+
   async function addPlant(
     location: Position,
     varietyId: number
   ): Promise<EntityId<Plant>> {
-    if (!garden.value) {
-      throw new Error("No garden!");
+    if (!currentPlan.value) {
+      throw new Error("No plan!");
     }
 
-    let planting = garden.value.plantings.find(
+    let planting = currentPlan.value.plantings.find(
       (p) => p.varietyId === varietyId
     );
 
     if (!planting) {
       const newPlanting = new Planting();
       newPlanting.varietyId = varietyId;
-      newPlanting.gardenId = garden.value.id;
+      newPlanting.planId = currentPlan.value.id;
 
       planting = await addPlanting(newPlanting);
     }
@@ -139,12 +169,12 @@ export const useGardenStore = defineStore("garden", () => {
   }
 
   function inflatePlant(plant: Plant): Plant {
-    if (!garden.value) {
-      throw new Error("No garden!");
+    if (!currentPlan.value) {
+      throw new Error("No plan!");
     }
 
     if (!plant.planting) {
-      plant.planting = garden.value.plantings.find(
+      plant.planting = currentPlan.value.plantings.find(
         (p) => p.id === plant.plantingId
       );
     }
@@ -153,8 +183,8 @@ export const useGardenStore = defineStore("garden", () => {
   }
 
   function inflatePlanting(planting: Planting): Planting {
-    if (!garden.value) {
-      throw new Error("No garden!");
+    if (!currentPlan.value) {
+      throw new Error("No plan!");
     }
 
     if (planting.varietyId !== undefined) {
@@ -163,20 +193,20 @@ export const useGardenStore = defineStore("garden", () => {
       );
     }
 
-    planting.gardenId = garden.value.id;
-    planting.garden = garden.value;
+    planting.planId = currentPlan.value.id;
+    planting.plan = currentPlan.value;
 
     return planting;
   }
 
   async function addPlanting(planting: Planting): Promise<EntityId<Planting>> {
-    if (!garden.value) {
-      throw new Error("No garden!");
+    if (!currentPlan.value) {
+      throw new Error("No plan!");
     }
 
     inflatePlanting(planting);
 
-    garden.value.plantings.push(planting);
+    currentPlan.value.plantings.push(planting);
 
     const newPlanting = (await plantingApi.create.request({
       data: Planting.cleanCopy(planting),
@@ -197,8 +227,8 @@ export const useGardenStore = defineStore("garden", () => {
   }
 
   async function removePlant(plant: EntityId<Plant>): Promise<void> {
-    if (!garden.value) {
-      throw new Error("No garden!");
+    if (!currentPlan.value) {
+      throw new Error("No plan!");
     }
 
     await plantApi.delete.request({
@@ -210,7 +240,7 @@ export const useGardenStore = defineStore("garden", () => {
     let planting = plant.planting;
 
     if (!planting) {
-      planting = garden.value.plantings.find((p) => p.id === plant.id);
+      planting = currentPlan.value.plantings.find((p) => p.id === plant.id);
     }
 
     if (planting?.plants) {
@@ -246,20 +276,22 @@ export const useGardenStore = defineStore("garden", () => {
   async function removePlanting(
     idOrPlanting: Planting | number
   ): Promise<void> {
-    if (!garden.value) {
-      throw new Error("No garden!");
+    if (!currentPlan.value) {
+      throw new Error("No plan!");
     }
 
     let i;
 
     if (typeof idOrPlanting === "number") {
-      i = garden.value.plantings.findIndex((p) => p.id === idOrPlanting);
+      i = currentPlan.value.plantings.findIndex((p) => p.id === idOrPlanting);
     } else {
-      i = garden.value.plantings.findIndex((p) => p.id === idOrPlanting.id);
+      i = currentPlan.value.plantings.findIndex(
+        (p) => p.id === idOrPlanting.id
+      );
     }
 
     if (i !== undefined && i !== -1) {
-      const planting = garden.value.plantings[i];
+      const planting = currentPlan.value.plantings[i];
 
       if (planting?.plants) {
         planting.plants.forEach((plant) => {
@@ -275,7 +307,7 @@ export const useGardenStore = defineStore("garden", () => {
         await plantingApi.delete.request({ routeParams: { id: planting.id } });
       }
 
-      garden.value.plantings.splice(i, 1);
+      currentPlan.value.plantings.splice(i, 1);
     }
   }
 
@@ -283,22 +315,22 @@ export const useGardenStore = defineStore("garden", () => {
     varietyId?: number;
     familyId?: number;
   }): number {
-    if (!garden.value) {
-      throw new Error("No garden!");
+    if (!currentPlan.value) {
+      throw new Error("No plan!");
     }
 
     let plantings: Planting[];
 
     if (options?.varietyId !== undefined) {
-      plantings = garden.value.plantings.filter(
+      plantings = currentPlan.value.plantings.filter(
         (p) => p.varietyId === options.varietyId
       );
     } else if (options?.familyId !== undefined) {
-      plantings = garden.value.plantings.filter(
+      plantings = currentPlan.value.plantings.filter(
         (p) => p.variety?.familyId === options.familyId
       );
     } else {
-      plantings = garden.value.plantings;
+      plantings = currentPlan.value.plantings;
     }
 
     return plantings.reduce((t, p) => t + (p.plants?.length ?? 0), 0);
@@ -453,8 +485,12 @@ export const useGardenStore = defineStore("garden", () => {
     grid,
     varieties,
     garden,
+    currentPlan,
+    plans,
     families,
     initialize,
+    addPlan,
+    editPlan,
     addPlant,
     editPlant,
     inflatePlant,

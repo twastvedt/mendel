@@ -54,7 +54,7 @@ resetForm();
 </script>
 <template>
   <v-card>
-    <v-form ref="form" @submit.prevent lazy-validation>
+    <v-form ref="form" @submit.prevent="save" lazy-validation>
       <v-card-title>{{ isNew ? "New" : "Edit" }} Family</v-card-title>
       <v-card-text>
         <v-text-field
@@ -100,7 +100,7 @@ resetForm();
         </v-menu>
       </v-card-text>
       <v-card-actions>
-        <v-btn color="primary" type="submit" @click="save"> Save </v-btn>
+        <v-btn color="primary" type="submit"> Save </v-btn>
       </v-card-actions>
     </v-form>
   </v-card>

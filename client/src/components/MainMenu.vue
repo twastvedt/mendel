@@ -9,9 +9,7 @@
       title="Summary"
     />
 
-    <v-divider inset></v-divider>
-
-    <v-list-subheader inset>Settings</v-list-subheader>
+    <v-list-subheader>Settings</v-list-subheader>
 
     <v-list-item
       link

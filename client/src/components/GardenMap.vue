@@ -133,7 +133,7 @@ function elementStyle(elementType: UiElementType): Record<string, string> {
       @mouseleave="onHover"
     >
       <g ref="content" class="content">
-        <g v-if="gardenStore.garden">
+        <g v-if="gardenStore.garden && gardenStore.currentPlan">
           <g v-for="(bed, i) in gardenStore.garden.beds" :key="bed.id">
             <path
               class="bed"
@@ -167,7 +167,7 @@ function elementStyle(elementType: UiElementType): Record<string, string> {
           </g>
 
           <PlantingComponent
-            v-for="(planting, index) in gardenStore.garden.plantings"
+            v-for="(planting, index) in gardenStore.currentPlan.plantings"
             :key="`${index}-planting`"
             :planting="planting"
             :plants-interactive="isInteractive('plant')"

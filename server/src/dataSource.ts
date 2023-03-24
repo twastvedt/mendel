@@ -1,5 +1,13 @@
 import { DataSource } from "typeorm";
-import { Bed, Family, Garden, Plant, Planting, Variety } from "@mendel/common";
+import {
+  Bed,
+  Family,
+  Garden,
+  Plan,
+  Plant,
+  Planting,
+  Variety,
+} from "@mendel/common";
 import { SeedData1603059702825 } from "./migration/1603059702825-SeedData";
 
 export const dataSource = new DataSource({
@@ -11,6 +19,6 @@ export const dataSource = new DataSource({
   database: "mendel",
   synchronize: true,
   logging: false,
-  entities: [Bed, Family, Garden, Plant, Planting, Variety],
+  entities: [Bed, Family, Garden, Plan, Plant, Planting, Variety],
   migrations: [SeedData1603059702825],
 });
