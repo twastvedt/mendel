@@ -1,7 +1,9 @@
 import { Entity, Column, ManyToOne } from "typeorm";
-import { EntityBase } from "./EntityBase";
-import { Garden } from "./Garden";
+import { EntityBase, EntityLocal } from "./EntityBase";
+import { Garden, GardenLocal } from "./Garden";
 import { Polygon } from "./geoJson";
+
+export type BedLocal = EntityLocal<Bed, "gardenId", { garden?: GardenLocal }>;
 
 @Entity()
 export class Bed extends EntityBase {
@@ -15,7 +17,7 @@ export class Bed extends EntityBase {
   endDate?: Date;
 
   @Column("integer")
-  gardenId?: number;
+  gardenId!: number;
 
   @ManyToOne(() => Garden, (garden) => garden.beds, {
     onDelete: "CASCADE",

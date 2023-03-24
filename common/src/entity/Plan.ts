@@ -6,9 +6,15 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
 } from "typeorm";
-import { EntityBase } from "./EntityBase";
-import { Planting } from "./Planting";
-import { Garden } from "./Garden";
+import { EntityBase, EntityLocal } from "./EntityBase";
+import { Planting, PlantingLocal } from "./Planting";
+import { Garden, GardenLocal } from "./Garden";
+
+export type PlanLocal = EntityLocal<
+  Plan,
+  "gardenId" | "createdDate" | "updatedDate" | "draft",
+  { plantings: PlantingLocal[]; garden?: GardenLocal }
+>;
 
 @Entity()
 export class Plan extends EntityBase {
@@ -21,11 +27,11 @@ export class Plan extends EntityBase {
   @Column("smallint")
   year!: number;
 
-  @Column("boolean")
+  @Column("boolean", { default: false })
   draft = false;
 
   @Column("integer")
-  gardenId?: number;
+  gardenId!: number;
 
   @ManyToOne(() => Garden, (garden) => garden.plans, {
     onDelete: "CASCADE",
@@ -44,23 +50,19 @@ export class Plan extends EntityBase {
   @UpdateDateColumn()
   updatedDate!: Date;
 
-  cleanCopy(): Plan {
-    const newPlan = this.copy();
+  static localCopy(plan: Plan | PlanLocal, deep = true): PlanLocal {
+    const newPlan: PlanLocal = Object.assign({}, plan);
 
     delete newPlan.garden;
 
-    if (newPlan.plantings.length) {
-      newPlan.plantings = newPlan.plantings.map((p) => p.cleanCopy());
+    if (deep) {
+      newPlan.plantings = plan.plantings?.map((p) =>
+        Planting.localCopy(p, true)
+      );
+    } else {
+      newPlan.plantings = [];
     }
 
     return newPlan;
-  }
-
-  static initialize(plan: Partial<Plan>): Plan {
-    Object.setPrototypeOf(plan, Plan.prototype);
-
-    plan.plantings = [];
-
-    return plan as Plan;
   }
 }

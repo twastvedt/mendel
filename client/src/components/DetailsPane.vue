@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { watch } from "vue";
-import type { Variety } from "@mendel/common";
+import { watch, ref } from "vue";
+import type { VarietyLocal } from "@mendel/common";
 import { useRootStore } from "../state/rootStore";
 import type { UiElement, UiElementType } from "../types/entityTypes";
 import { getEntityIcon } from "../types/entityTypes";
@@ -8,7 +8,7 @@ import { getEntityIcon } from "../types/entityTypes";
 import SelectVariety from "./fields/SelectVariety.vue";
 
 const store = useRootStore();
-let variety: Variety | null = null;
+let variety = ref<VarietyLocal | undefined>(undefined);
 let title = "";
 
 watch(
@@ -21,12 +21,12 @@ watch(
       area: 0,
     };
 
-    let innerVariety: Variety | undefined | false;
+    let innerVariety: VarietyLocal | undefined | false;
 
     for (const item of selection) {
       totals[item.type]++;
 
-      let thisVariety: Variety | undefined;
+      let thisVariety: VarietyLocal | undefined;
 
       if (item.type === "plant") {
         thisVariety = item.item.planting?.variety;
@@ -43,7 +43,7 @@ watch(
       }
     }
 
-    variety = innerVariety ? innerVariety : null;
+    variety.value = innerVariety ? innerVariety : undefined;
 
     let titleParts = [];
 
@@ -96,7 +96,7 @@ watch(
           </v-list-item-title>
           <v-list-item-subtitle>
             {{ item.item.variety?.family?.name }}
-            ({{ item.item.plants?.length }})
+            ({{ item.item.plants.length }})
           </v-list-item-subtitle>
         </template>
 

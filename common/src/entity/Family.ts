@@ -1,6 +1,12 @@
 import { Entity, Column, OneToMany } from "typeorm";
-import { EntityBase } from "./EntityBase";
-import { Variety } from "./Variety";
+import { EntityBase, EntityLocal } from "./EntityBase";
+import { Variety, VarietyLocal } from "./Variety";
+
+export type FamilyLocal = EntityLocal<
+  Family,
+  never,
+  { varieties: VarietyLocal[] }
+>;
 
 @Entity()
 export class Family extends EntityBase {
@@ -41,10 +47,16 @@ export class Family extends EntityBase {
   @OneToMany(() => Variety, (v) => v.family, { cascade: true })
   varieties!: Variety[];
 
-  static cleanCopy<T extends Family>(family: T): Omit<T, "varieties"> {
-    const newFamily = Object.assign({}, family);
+  static localCopy(family: FamilyLocal, deep = true): FamilyLocal {
+    const newFamily: FamilyLocal = Object.assign({}, family);
 
-    delete newFamily.varieties;
+    if (deep) {
+      newFamily.varieties = family.varieties?.map((v) =>
+        Variety.localCopy(v, true)
+      );
+    } else {
+      newFamily.varieties = [];
+    }
 
     return newFamily;
   }

@@ -1,29 +1,32 @@
-import type { Position, EntityId } from "@mendel/common";
-import type { Plant } from "@mendel/common/src/entity/Plant";
+import type { HasId, Position } from "@mendel/common";
+import type { PlantLocal } from "@mendel/common/src/entity/Plant";
 import { Action } from "./Action";
 import { useGardenStore } from "@/state/gardenStore";
 
 export class AddPlantAction extends Action {
-  private plant?: EntityId<Plant>;
-  private gardenStore = useGardenStore();
+  _plant?: HasId<PlantLocal>;
+  _gardenStore = useGardenStore();
 
-  public constructor(private location: Position, private varietyId: number) {
+  public constructor(public _location: Position, public _varietyId: number) {
     super();
   }
 
   public async Do(): Promise<void> {
     await super.Do();
 
-    this.plant = await this.gardenStore.addPlant(this.location, this.varietyId);
+    this._plant = await this._gardenStore.addPlant(
+      this._location,
+      this._varietyId
+    );
   }
 
   public async Undo(): Promise<void> {
     await super.Undo();
 
-    if (this.plant?.id !== undefined) {
-      await this.gardenStore.removePlant(this.plant);
+    if (this._plant?.id !== undefined) {
+      await this._gardenStore.removePlant(this._plant);
 
-      delete this.plant;
+      delete this._plant;
     }
   }
 }

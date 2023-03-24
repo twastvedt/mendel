@@ -1,4 +1,4 @@
-import { Variety, Planting } from "@mendel/common/src";
+import { Variety, Planting, PlantingLocal } from "@mendel/common/src";
 import type { Position } from "@mendel/common";
 import type { Tool } from "./Tool";
 import { AddPlantingAction } from "../actions/AddPlantingAction";
@@ -27,7 +27,7 @@ export class DrawRowTool implements Tool {
   public cursorProps = {
     cursor: null as Position | null,
     locations: [] as Position[],
-    planting: null as Planting | null,
+    planting: null as PlantingLocal | null,
     rotationCenter: null as Position | null,
   };
 
@@ -36,12 +36,15 @@ export class DrawRowTool implements Tool {
   }
 
   public start(): void {
-    const planting = new Planting();
-    planting.variety = this.variety;
-    planting.varietyId = this.variety.id;
-    planting.shape = {
-      type: "LineString",
-      coordinates: [[0, 0]],
+    const planting: PlantingLocal = {
+      variety: this.variety,
+      varietyId: this.variety.id,
+      shape: {
+        type: "LineString",
+        coordinates: [[0, 0]],
+      },
+      plants: [],
+      isArea: false,
     };
 
     if (!this.variety.family) {
@@ -97,8 +100,17 @@ export class DrawRowTool implements Tool {
 
   public onClick(): Action | void {
     if (this.cursorProps.planting && this.index !== undefined) {
+      this.cursorProps.planting.plants = this.cursorProps.locations.map(
+        (coordinates) => ({
+          location: {
+            type: "Point",
+            coordinates,
+          },
+        })
+      );
+
       return new AddPlantingAction(
-        Planting.cleanCopy(this.cursorProps.planting)
+        Planting.localCopy(this.cursorProps.planting)
       );
     }
   }

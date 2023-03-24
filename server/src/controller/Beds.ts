@@ -16,7 +16,7 @@ addWrappedHandler(bedApi.one, router, one(Bed));
 addWrappedHandler(bedApi.garden, router, Bed, (request, repository) => {
   // TODO: awaiting fix in https://github.com/typeorm/typeorm/pull/9709.
   const query = {
-    where: { garden: request.params.garden },
+    where: { gardenId: request.params.gardenId },
   } as FindManyOptions<Bed>;
   return repository.find(query);
 });

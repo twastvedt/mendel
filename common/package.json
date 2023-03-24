@@ -5,7 +5,9 @@
   "main": "dist/index.js",
   "private": true,
   "scripts": {
-    "clean": "rimraf dist"
+    "clean": "rimraf dist",
+    "build": "tsc -b",
+    "watch": "npm run build -- --watch"
   },
   "dependencies": {
     "axios": "^0.26.1",

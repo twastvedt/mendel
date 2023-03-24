@@ -33,9 +33,11 @@ function newTool(newTool: string): void {
 
       break;
     case "drawRow":
-      if (variety.value) {
-        store.setTool(new DrawRowTool(variety.value));
+      if (!variety.value) {
+        variety.value = gardenStore.varieties[0];
       }
+
+      store.setTool(new DrawRowTool(variety.value));
       break;
     case "drawPlanting":
       if (!variety.value) {

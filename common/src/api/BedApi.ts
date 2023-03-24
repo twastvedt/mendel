@@ -1,10 +1,10 @@
-import { Bed } from "../entity/Bed";
+import { Bed, BedLocal } from "../entity/Bed";
 import { baseApi } from "./BaseApi";
 import { Endpoint } from "./Endpoint";
 
-export const bedApi = Object.assign(baseApi<Bed>("beds"), {
-  garden: new Endpoint<{ garden: number }, undefined, Bed[]>(
+export const bedApi = Object.assign(baseApi<Bed, BedLocal>("beds"), {
+  garden: new Endpoint<{ gardenId: number }, undefined, Bed[]>(
     "get",
-    "/gardens/:garden/beds"
+    "/gardens/:gardenId/beds"
   ),
 });

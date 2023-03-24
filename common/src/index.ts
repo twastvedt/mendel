@@ -18,3 +18,5 @@ export * from "./entity/Plant";
 export * from "./entity/Plan";
 export * from "./entity/Variety";
 export * from "./entity/geoJson";
+
+export * from "./typeHelpers";

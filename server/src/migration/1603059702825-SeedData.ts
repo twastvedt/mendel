@@ -1,32 +1,46 @@
-import { MigrationInterface, Polygon } from "typeorm";
+import { MigrationInterface } from "typeorm";
+import { Polygon, GardenLocal } from "@mendel/common";
 import { features } from "./SeedBeds.json";
 import fs from "fs";
 import path from "path";
 import { SVG, Container, registerWindow } from "@svgdotjs/svg.js";
 //@ts-ignore
 import { createSVGWindow } from "svgdom";
-import { Garden, Bed, Variety, Family } from "@mendel/common";
+import { Garden, Variety, Family } from "@mendel/common";
 import { dataSource } from "../dataSource";
 
 export class SeedData1603059702825 implements MigrationInterface {
   public async up(): Promise<void> {
-    const garden = await dataSource.getRepository(Garden).save({
+    const garden: GardenLocal = {
       name: "2307 Stillwater",
       location: {
         type: "Point",
         coordinates: [-93.003347, 44.968675],
       },
-    });
+      beds: [],
+      plans: [],
+    };
 
-    await dataSource.getRepository(Bed).save(
-      features
-        .filter((f) => f.geometry.type === "Polygon")
-        .map((f) => ({
-          shape: f.geometry as Polygon,
-          startDate: new Date(2019, 5, 15),
-          garden: garden,
-        }))
-    );
+    garden.beds = features
+      .filter((f) => f.geometry.type === "Polygon")
+      .map((f) => ({
+        shape: f.geometry as Polygon,
+        startDate: new Date(2019, 5, 15),
+      }));
+
+    garden.plans = [
+      {
+        name: "Test plan",
+        description: "A dummy plan created automatically.",
+        year: 2023,
+        createdDate: new Date(),
+        draft: false,
+        updatedDate: new Date(),
+        plantings: [],
+      },
+    ];
+
+    await dataSource.getRepository(Garden).save(garden);
 
     const window = createSVGWindow();
     const document = window.document;

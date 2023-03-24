@@ -198,7 +198,7 @@ function elementStyle(elementType: UiElementType): Record<string, string> {
       <DetailsPane />
     </v-navigation-drawer>
 
-    <v-footer app>
+    <v-footer app border>
       <template v-if="store.tool">
         {{ store.tool.helpText }}
       </template>

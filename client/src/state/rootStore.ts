@@ -12,7 +12,7 @@ export const useRootStore = defineStore("root", () => {
   const loading = ref(false);
   const scale = ref(1);
   const selection = ref<UiElement[]>([]);
-  const actions = ref<Action[]>([]);
+  const actions = [] as Action[];
 
   const toolName = ref("");
   const tool = ref<Tool | null>(null);
@@ -48,7 +48,7 @@ export const useRootStore = defineStore("root", () => {
       if (action) {
         action.Do();
 
-        actions.value.push(action);
+        actions.push(action);
       }
     } else if (event.ctrlKey || event.shiftKey) {
       if (element) {
@@ -72,9 +72,7 @@ export const useRootStore = defineStore("root", () => {
   }
 
   function updateTool(cursor: Position) {
-    if (tool.value) {
-      tool.value.onCursorMove?.(cursor);
-    }
+    tool.value?.onCursorMove?.(cursor);
   }
 
   function clearTool(): void {
@@ -89,7 +87,6 @@ export const useRootStore = defineStore("root", () => {
     loading,
     scale,
     selection,
-    actions,
     toolName,
     tool,
     cursorPosition,

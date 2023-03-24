@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, watch, computed } from "vue";
-import { Family } from "@mendel/common/src";
+import { Family, FamilyLocal } from "@mendel/common/src";
 import { VForm } from "vuetify/components";
 
 const emit = defineEmits<{
@@ -16,8 +16,14 @@ const props = defineProps<{
 
 const isNew = computed(() => !props.value);
 
-function getDefault(): Family {
-  return new Family("", "#FFFFFF", "", 6);
+function getDefault(): FamilyLocal {
+  return {
+    name: "",
+    color: "#FFFFFF",
+    icon: "",
+    spacing: 6,
+    varieties: [],
+  };
 }
 
 const formValue = ref(getDefault());

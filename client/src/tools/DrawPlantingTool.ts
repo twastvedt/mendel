@@ -1,4 +1,4 @@
-import { Variety, Planting } from "@mendel/common/src";
+import { Variety, Planting, PlantingLocal } from "@mendel/common/src";
 import type { Position } from "@mendel/common";
 import type { Tool } from "./Tool";
 import { AddPlantingAction } from "../actions/AddPlantingAction";
@@ -17,7 +17,7 @@ export enum Stage {
 }
 
 export class DrawPlantingTool implements Tool {
-  private planting?: Planting;
+  private planting?: PlantingLocal;
   private index?: number;
   private store = useRootStore();
 
@@ -29,7 +29,7 @@ export class DrawPlantingTool implements Tool {
   public cursorProps = {
     cursor: null as Position | null,
     plants: null as GridPoints | null,
-    planting: null as Planting | null,
+    planting: null as PlantingLocal | null,
     rotationCenter: null as Position | null,
     dividingLine: [] as Position[],
     stage: Stage.selecting,
@@ -50,12 +50,15 @@ export class DrawPlantingTool implements Tool {
   }
 
   public start(): void {
-    this.planting = new Planting();
-    this.planting.variety = this.variety;
-    this.planting.varietyId = this.variety.id;
-    this.planting.shape = {
-      type: "LineString",
-      coordinates: [[0, 0]],
+    this.planting = {
+      variety: this.variety,
+      varietyId: this.variety.id,
+      shape: {
+        type: "LineString",
+        coordinates: [[0, 0]],
+      },
+      plants: [],
+      isArea: true,
     };
 
     if (!this.variety.family) {
@@ -279,18 +282,15 @@ export class DrawPlantingTool implements Tool {
           .concat(
             plants.edgePoints.filter((e) => e.display).map((e) => e.point)
           )
-          .map((p) => {
-            const plant = new Plant();
-            plant.location = {
+          .map((p) => ({
+            location: {
               type: "Point",
               coordinates: [p[0] + plants.offset[0], p[1] + plants.offset[1]],
-            };
-
-            return plant;
-          });
+            },
+          }));
       }
 
-      return new AddPlantingAction(Planting.cleanCopy(this.planting));
+      return new AddPlantingAction(Planting.localCopy(this.planting));
     }
   }
 }

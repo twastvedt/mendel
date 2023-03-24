@@ -10,8 +10,16 @@ import {
   varietyApi,
   Plan,
   planApi,
+  VarietyLocal,
 } from "@mendel/common/src";
-import type { EntityId, Position } from "@mendel/common";
+import type {
+  Position,
+  PlanLocal,
+  PlantLocal,
+  PlantingLocal,
+  Modify,
+  HasId,
+} from "@mendel/common";
 import { Plant } from "@mendel/common/src/entity/Plant";
 import { Delaunay } from "d3-delaunay";
 import { PolygonGrid } from "../services/polygonGrid";
@@ -22,13 +30,13 @@ import { useRootStore } from "./rootStore";
 export const useGardenStore = defineStore("garden", () => {
   const rootStore = useRootStore();
 
-  const delaunayPoints = markRaw<Plant[]>([]);
+  const delaunayPoints = markRaw<PlantLocal[]>([]);
   const delaunay = shallowRef<Delaunay<Plant> | undefined>(undefined);
   const grid = shallowRef<PolygonGrid | undefined>(undefined);
 
   const varieties = ref<Variety[]>([]);
   const garden = ref<Garden>();
-  const currentPlan = ref<Plan>();
+  const currentPlan = ref<Modify<Plan, { plantings: PlantingLocal[] }>>();
   const plans = ref<Plan[]>();
   const families = ref<Family[]>();
 
@@ -78,7 +86,7 @@ export const useGardenStore = defineStore("garden", () => {
     currentPlan.value.plantings.forEach((planting) => {
       inflatePlanting(planting);
 
-      planting.plants?.forEach((p) => {
+      planting.plants.forEach((p) => {
         delaunayPoints.push(inflatePlant(p));
       });
     });
@@ -93,23 +101,24 @@ export const useGardenStore = defineStore("garden", () => {
     rootStore.loading = false;
   }
 
-  async function addPlan(plan: Plan): Promise<EntityId<Plan>> {
+  async function addPlan(plan: PlanLocal): Promise<Plan> {
     if (plan.garden) {
       plan.gardenId = plan.garden.id;
     } else if (plan.gardenId === undefined) {
       plan.gardenId = garden.value?.id;
-      plan.garden = garden.value;
     }
 
-    plans.value?.push(plan);
+    const response = await planApi.create.request({
+      data: Plan.localCopy(plan),
+    });
 
-    const newPlan = (await planApi.create.request({
-      data: plan.cleanCopy(),
-    })) as EntityId<Plan>;
+    const newPlan = { ...plan, ...(response as Plan) };
+    delete newPlan.garden;
 
-    Object.assign(plan, newPlan);
+    // TODO: Fix `as`.
+    plans.value?.push(newPlan as Plan);
 
-    return plan as EntityId<Plan>;
+    return newPlan as Plan;
   }
 
   async function editPlan(id: number, changes: Partial<Plan>): Promise<void> {
@@ -119,7 +128,7 @@ export const useGardenStore = defineStore("garden", () => {
   async function addPlant(
     location: Position,
     varietyId: number
-  ): Promise<EntityId<Plant>> {
+  ): Promise<Plant> {
     if (!currentPlan.value) {
       throw new Error("No plan!");
     }
@@ -129,9 +138,11 @@ export const useGardenStore = defineStore("garden", () => {
     );
 
     if (!planting) {
-      const newPlanting = new Planting();
-      newPlanting.varietyId = varietyId;
-      newPlanting.planId = currentPlan.value.id;
+      const newPlanting: PlantingLocal = {
+        varietyId: varietyId,
+        planId: currentPlan.value.id,
+        plants: [],
+      };
 
       planting = await addPlanting(newPlanting);
     }
@@ -140,10 +151,10 @@ export const useGardenStore = defineStore("garden", () => {
       throw new Error("Can't add plant to unsaved planting!");
     }
 
-    const plant = new Plant();
-    plant.location = { type: "Point", coordinates: location };
-    plant.plantingId = planting.id;
-    plant.planting = planting;
+    const plant: PlantLocal = {
+      location: { type: "Point", coordinates: location },
+      plantingId: planting.id,
+    };
 
     if (planting.plants) {
       planting.plants.push(plant);
@@ -152,8 +163,8 @@ export const useGardenStore = defineStore("garden", () => {
     }
 
     const newPlant = (await plantApi.create.request({
-      data: Plant.cleanCopy(plant),
-    })) as EntityId<Plant>;
+      data: Plant.localCopy(plant),
+    })) as Plant;
 
     Object.assign(plant, newPlant);
 
@@ -161,14 +172,14 @@ export const useGardenStore = defineStore("garden", () => {
 
     renewDelaunay();
 
-    return plant as EntityId<Plant>;
+    return plant as Plant;
   }
 
   async function editPlant(id: number, changes: Partial<Plant>): Promise<void> {
     await plantApi.update.request({ data: { ...changes, id } });
   }
 
-  function inflatePlant(plant: Plant): Plant {
+  function inflatePlant(plant: PlantLocal): PlantLocal {
     if (!currentPlan.value) {
       throw new Error("No plan!");
     }
@@ -182,7 +193,7 @@ export const useGardenStore = defineStore("garden", () => {
     return plant;
   }
 
-  function inflatePlanting(planting: Planting): Planting {
+  function inflatePlanting(planting: PlantingLocal): Planting {
     if (!currentPlan.value) {
       throw new Error("No plan!");
     }
@@ -196,10 +207,10 @@ export const useGardenStore = defineStore("garden", () => {
     planting.planId = currentPlan.value.id;
     planting.plan = currentPlan.value;
 
-    return planting;
+    return planting as Planting;
   }
 
-  async function addPlanting(planting: Planting): Promise<EntityId<Planting>> {
+  async function addPlanting(planting: PlantingLocal): Promise<Planting> {
     if (!currentPlan.value) {
       throw new Error("No plan!");
     }
@@ -209,8 +220,8 @@ export const useGardenStore = defineStore("garden", () => {
     currentPlan.value.plantings.push(planting);
 
     const newPlanting = (await plantingApi.create.request({
-      data: Planting.cleanCopy(planting),
-    })) as EntityId<Planting>;
+      data: Planting.localCopy(planting),
+    })) as Planting;
 
     Object.assign(planting, newPlanting);
 
@@ -223,10 +234,10 @@ export const useGardenStore = defineStore("garden", () => {
       renewDelaunay();
     }
 
-    return planting as EntityId<Planting>;
+    return planting as Planting;
   }
 
-  async function removePlant(plant: EntityId<Plant>): Promise<void> {
+  async function removePlant(plant: HasId<PlantLocal>): Promise<void> {
     if (!currentPlan.value) {
       throw new Error("No plan!");
     }
@@ -272,9 +283,9 @@ export const useGardenStore = defineStore("garden", () => {
   }
 
   async function removePlanting(id: number): Promise<void>;
-  async function removePlanting(planting: Planting): Promise<void>;
+  async function removePlanting(planting: PlantingLocal): Promise<void>;
   async function removePlanting(
-    idOrPlanting: Planting | number
+    idOrPlanting: PlantingLocal | number
   ): Promise<void> {
     if (!currentPlan.value) {
       throw new Error("No plan!");
@@ -319,7 +330,7 @@ export const useGardenStore = defineStore("garden", () => {
       throw new Error("No plan!");
     }
 
-    let plantings: Planting[];
+    let plantings: PlantingLocal[];
 
     if (options?.varietyId !== undefined) {
       plantings = currentPlan.value.plantings.filter(
@@ -333,10 +344,10 @@ export const useGardenStore = defineStore("garden", () => {
       plantings = currentPlan.value.plantings;
     }
 
-    return plantings.reduce((t, p) => t + (p.plants?.length ?? 0), 0);
+    return plantings.reduce((t, p) => t + p.plants.length, 0);
   }
 
-  async function editVariety(item: Variety): Promise<void> {
+  async function editVariety(item: VarietyLocal): Promise<void> {
     if (!families.value) {
       throw new Error("No families!");
     }
@@ -353,11 +364,11 @@ export const useGardenStore = defineStore("garden", () => {
       Object.assign(varieties.value[index], item);
 
       await varietyApi.update.request({
-        data: Variety.cleanCopy(item) as EntityId<Variety>,
+        data: Variety.localCopy(item) as Variety,
       });
     } else {
       const newVariety = (await varietyApi.create.request({
-        data: Variety.cleanCopy(item),
+        data: Variety.localCopy(item),
       })) as Variety;
 
       varieties.value.push(newVariety);
@@ -375,7 +386,7 @@ export const useGardenStore = defineStore("garden", () => {
     }
   }
 
-  async function deleteVariety(item: Variety): Promise<void> {
+  async function deleteVariety(item: VarietyLocal): Promise<void> {
     if (!families.value) {
       throw new Error("No families!");
     }
@@ -435,14 +446,14 @@ export const useGardenStore = defineStore("garden", () => {
 
       Object.assign(families.value[index], item);
 
-      const newFamily = Family.cleanCopy(item);
+      const newFamily = Family.localCopy(item);
 
       await familyApi.update.request({
-        data: newFamily as EntityId<Family>,
+        data: newFamily as Family,
       });
     } else {
       const newFamily = (await familyApi.create.request({
-        data: Family.cleanCopy(item),
+        data: Family.localCopy(item),
       })) as Family;
 
       families.value.push(newFamily);

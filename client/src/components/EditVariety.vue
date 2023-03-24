@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { watch, ref, computed } from "vue";
-import { Variety } from "@mendel/common/src";
+import type { VarietyLocal } from "@mendel/common/src";
 import { useGardenStore } from "../state/gardenStore";
 import { VForm } from "vuetify/components";
 
@@ -14,7 +14,7 @@ const emit = defineEmits<{
 const form = ref<VForm>();
 
 const props = defineProps<{
-  value?: Variety;
+  value?: VarietyLocal;
 }>();
 
 const formValue = ref(getDefault());
@@ -28,8 +28,12 @@ function updateColor(): void {
 
 const isNew = computed(() => !props.value);
 
-function getDefault(): Variety {
-  return new Variety("", "#FFFFFF");
+function getDefault(): VarietyLocal {
+  return {
+    name: "",
+    color: "#FFFFFF",
+    plantings: [],
+  };
 }
 
 watch(() => props.value, resetForm);

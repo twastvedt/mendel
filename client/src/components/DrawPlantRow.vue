@@ -19,6 +19,9 @@ const props = defineProps<{
       :plants-interactive="false"
     />
 
-    <RotationTool :cursor="props.cursor" :rotation-center="props.rotationCenter" />
+    <RotationTool
+      :cursor="props.cursor"
+      :rotation-center="props.rotationCenter"
+    />
   </g>
 </template>

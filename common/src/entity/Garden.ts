@@ -1,8 +1,17 @@
 import { Entity, Column, OneToMany } from "typeorm";
-import { Bed } from "./Bed";
-import { EntityBase } from "./EntityBase";
+import { Bed, BedLocal } from "./Bed";
+import { EntityBase, EntityLocal } from "./EntityBase";
 import { Point } from "./geoJson";
-import { Plan } from "./Plan";
+import { Plan, PlanLocal } from "./Plan";
+
+export type GardenLocal = EntityLocal<
+  Garden,
+  never,
+  {
+    plans: PlanLocal[];
+    beds: BedLocal[];
+  }
+>;
 
 @Entity()
 export class Garden extends EntityBase {

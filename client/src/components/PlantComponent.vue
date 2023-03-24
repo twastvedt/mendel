@@ -1,13 +1,13 @@
 <script setup lang="ts">
 import { withDefaults, computed } from "vue";
 import { useRootStore } from "../state/rootStore";
-import type { Variety } from "@mendel/common";
+import type { VarietyLocal } from "@mendel/common";
 
 const store = useRootStore();
 
 const props = withDefaults(
   defineProps<{
-    variety: Variety;
+    variety: VarietyLocal;
     drawSpacing?: boolean;
     interactive?: boolean;
   }>(),

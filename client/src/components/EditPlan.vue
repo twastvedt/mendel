@@ -1,23 +1,27 @@
 <script setup lang="ts">
 import { ref, watch, computed } from "vue";
-import { Plan } from "@mendel/common/src";
+import type { PlanLocal } from "@mendel/common/src";
 import { VForm } from "vuetify/components";
 
 const emit = defineEmits<{
   (e: "close"): void;
-  (e: "input", formValue: Plan): void;
+  (e: "input", formValue: PlanLocal): void;
 }>();
 
 const form = ref<VForm>();
 
 const props = defineProps<{
-  value?: Plan;
+  value?: PlanLocal;
 }>();
 
 const isNew = computed(() => !props.value);
 
-function getDefault(): Plan {
-  return new Plan();
+function getDefault(): PlanLocal {
+  return {
+    name: "",
+    plantings: [],
+    year: new Date().getFullYear(),
+  };
 }
 
 const formValue = ref(getDefault());

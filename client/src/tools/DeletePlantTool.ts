@@ -1,7 +1,7 @@
 import type { Tool } from "./Tool";
 import type { Action } from "../actions/Action";
 import { DeletePlantAction } from "../actions/DeletePlantAction";
-import type { EntityId, Position } from "@mendel/common";
+import type { HasId, Position } from "@mendel/common";
 import type { PlantElement, UiElementType } from "../types/entityTypes";
 import type { Plant } from "@mendel/common/src/entity/Plant";
 
@@ -15,6 +15,6 @@ export class DeletePlantTool implements Tool {
       return;
     }
 
-    return new DeletePlantAction(plant.item as EntityId<Plant>);
+    return new DeletePlantAction(plant.item as HasId<Plant>);
   }
 }

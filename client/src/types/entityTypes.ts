@@ -1,5 +1,11 @@
-import type { Bed, EntityBase, Planting } from "@mendel/common";
-import type { Plant } from "@mendel/common/src/entity/Plant";
+import type {
+  BedLocal,
+  EntityBase,
+  Planting,
+  PlantingLocal,
+  EntityLocalBase,
+} from "@mendel/common";
+import type { PlantLocal } from "@mendel/common/src/entity/Plant";
 
 export function isPlanting(entity?: EntityBase): entity is Planting {
   return !!(entity as Planting).shape;
@@ -9,27 +15,27 @@ export type UiElementType = "bed" | "planting" | "plant" | "area";
 
 export interface UiElementBase {
   type: UiElementType;
-  item: EntityBase;
+  item: EntityLocalBase;
 }
 
 export interface BedElement extends UiElementBase {
   type: "bed";
-  item: Bed;
+  item: BedLocal;
 }
 
 export interface PlantingElement extends UiElementBase {
   type: "planting";
-  item: Planting;
+  item: PlantingLocal;
 }
 
 export interface PlantElement extends UiElementBase {
   type: "plant";
-  item: Plant;
+  item: PlantLocal;
 }
 
 export interface AreaElement extends UiElementBase {
   type: "area";
-  item: EntityBase;
+  item: EntityLocalBase;
 }
 
 export type UiElement =

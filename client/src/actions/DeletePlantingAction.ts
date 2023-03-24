@@ -1,22 +1,22 @@
-import { plantingApi, Planting } from "@mendel/common/src";
-import type { EntityId } from "@mendel/common";
+import { plantingApi, Planting, PlantingLocal } from "@mendel/common/src";
+import type { HasId } from "@mendel/common";
 import { Action } from "./Action";
 import { useGardenStore } from "@/state/gardenStore";
 
 export class DeletePlantingAction extends Action {
-  private gardenStore = useGardenStore();
+  _gardenStore = useGardenStore();
 
-  public constructor(private planting: EntityId<Planting>) {
+  public constructor(public _planting: HasId<PlantingLocal>) {
     super();
   }
 
   public async Do(): Promise<void> {
     await super.Do();
 
-    this.gardenStore.removePlanting(this.planting.id);
+    this._gardenStore.removePlanting(this._planting.id);
 
     await plantingApi.delete.request({
-      routeParams: { id: this.planting.id },
+      routeParams: { id: this._planting.id },
     });
   }
 
@@ -24,9 +24,9 @@ export class DeletePlantingAction extends Action {
     await super.Undo();
 
     const newPlanting = (await plantingApi.create.request({
-      data: this.planting,
+      data: this._planting,
     })) as Planting;
 
-    this.gardenStore.addPlanting(Object.assign(this.planting, newPlanting));
+    this._gardenStore.addPlanting(Object.assign(this._planting, newPlanting));
   }
 }

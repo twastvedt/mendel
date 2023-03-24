@@ -1,7 +1,13 @@
 import { Entity, Column, ManyToOne, OneToMany } from "typeorm";
-import { EntityBase } from "./EntityBase";
-import { Family } from "./Family";
-import { Planting } from "./Planting";
+import { EntityBase, EntityLocal } from "./EntityBase";
+import { Family, FamilyLocal } from "./Family";
+import { Planting, PlantingLocal } from "./Planting";
+
+export type VarietyLocal = EntityLocal<
+  Variety,
+  "familyId",
+  { plantings: PlantingLocal[]; family?: FamilyLocal }
+>;
 
 @Entity()
 export class Variety extends EntityBase {
@@ -29,7 +35,7 @@ export class Variety extends EntityBase {
   color!: string;
 
   @Column("integer")
-  familyId?: number;
+  familyId!: number;
 
   @ManyToOne(() => Family, (family) => family.varieties, {
     onDelete: "CASCADE",
@@ -40,13 +46,20 @@ export class Variety extends EntityBase {
     onDelete: "CASCADE",
     cascade: true,
   })
-  plantings?: Planting[];
+  plantings!: Planting[];
 
-  static cleanCopy(variety: Variety): Variety {
-    const newVariety = Object.assign({}, variety);
+  static localCopy(variety: Variety | VarietyLocal, deep = true): VarietyLocal {
+    const newVariety: VarietyLocal = Object.assign({}, variety);
 
     delete newVariety.family;
-    delete newVariety.plantings;
+
+    if (deep) {
+      newVariety.plantings = variety.plantings?.map((p) =>
+        Planting.localCopy(p, true)
+      );
+    } else {
+      newVariety.plantings = [];
+    }
 
     return newVariety;
   }

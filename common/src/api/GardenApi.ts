@@ -1,4 +1,4 @@
-import { Garden } from "../entity/Garden";
+import { Garden, GardenLocal } from "../entity/Garden";
 import { baseApi } from "./BaseApi";
 
-export const gardenApi = baseApi<Garden>("gardens");
+export const gardenApi = baseApi<Garden, GardenLocal>("gardens");

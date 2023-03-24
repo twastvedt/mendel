@@ -32,7 +32,9 @@ const headers: DataTableHeader[] = [
 ];
 
 function plantCount(family: Family): number | undefined {
-  return gardenStore.plan && gardenStore.plantCount({ familyId: family.id });
+  return (
+    gardenStore.currentPlan && gardenStore.plantCount({ familyId: family.id })
+  );
 }
 
 async function deleteFamily(family: Family): Promise<void> {

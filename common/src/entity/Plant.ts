@@ -1,7 +1,13 @@
 import { Entity, Column, ManyToOne } from "typeorm";
-import { EntityBase } from "./EntityBase";
+import { EntityBase, EntityLocal } from "./EntityBase";
 import { Point } from "./geoJson";
-import { Planting } from "./Planting";
+import { Planting, PlantingLocal } from "./Planting";
+
+export type PlantLocal = EntityLocal<
+  Plant,
+  "plantingId",
+  { planting?: PlantingLocal }
+>;
 
 @Entity()
 export class Plant extends EntityBase {
@@ -16,12 +22,8 @@ export class Plant extends EntityBase {
   })
   planting?: Planting;
 
-  static copy(oldPlant: Plant): Plant {
-    return Object.assign({}, oldPlant);
-  }
-
-  static cleanCopy(oldPlant: Plant): Plant {
-    const newPlant = Plant.copy(oldPlant);
+  static localCopy(plant: Plant | PlantLocal): PlantLocal {
+    const newPlant: PlantLocal = Object.assign({}, plant);
 
     delete newPlant.planting;
 

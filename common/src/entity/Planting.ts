@@ -1,9 +1,15 @@
 import { Entity, Column, ManyToOne, OneToMany } from "typeorm";
-import { EntityBase } from "./EntityBase";
-import { Garden } from "./Garden";
+import { EntityBase, EntityLocal } from "./EntityBase";
 import { LineString } from "./geoJson";
-import { Plant } from "./Plant";
-import { Variety } from "./Variety";
+import { Plan, PlanLocal } from "./Plan";
+import { Plant, PlantLocal } from "./Plant";
+import { Variety, VarietyLocal } from "./Variety";
+
+export type PlantingLocal = EntityLocal<
+  Planting,
+  "varietyId" | "planId" | "areSeedlings",
+  { variety?: VarietyLocal; plan?: PlanLocal; plants: PlantLocal[] }
+>;
 
 @Entity()
 export class Planting extends EntityBase {
@@ -13,10 +19,16 @@ export class Planting extends EntityBase {
   })
   shape?: LineString;
 
+  /**
+   * Is the line represented by `shape` (if present) an area?
+   */
+  @Column("boolean", { nullable: true })
+  isArea?: boolean;
+
   @Column("date", { nullable: true })
   plantDate?: Date;
 
-  @Column("boolean")
+  @Column("boolean", { default: false })
   areSeedlings = false;
 
   @Column("integer", { nullable: true })
@@ -31,14 +43,14 @@ export class Planting extends EntityBase {
   @Column("integer", { nullable: true })
   yeildRank?: number;
 
-  @Column("integer", { nullable: true })
-  varietyId?: number;
+  @Column("integer")
+  varietyId!: number;
 
   @ManyToOne(() => Variety, (variety) => variety.plantings)
   variety?: Variety;
 
   @Column("integer")
-  planId?: number;
+  planId!: number;
 
   @ManyToOne(() => Plan, (plan) => plan.plantings, {
     onDelete: "CASCADE",
@@ -51,21 +63,29 @@ export class Planting extends EntityBase {
   })
   plants!: Plant[];
 
-
-  static copy(oldPlanting: Planting): Planting {
-    return Object.assign({}, oldPlanting);
-  }
-
-  static cleanCopy(oldPlanting: Planting): Planting {
-    const newPlanting = Planting.copy(oldPlanting);
+  static localCopy(
+    planting: Planting | PlantingLocal,
+    deep = true
+  ): PlantingLocal {
+    const newPlanting: PlantingLocal = Object.assign({}, planting);
 
     delete newPlanting.variety;
     delete newPlanting.plan;
 
-    if (newPlanting.plants) {
-      newPlanting.plants = newPlanting.plants.map((p) => Plant.cleanCopy(p));
+    if (deep) {
+      newPlanting.plants = planting.plants?.map((p) => Plant.localCopy(p));
+    } else {
+      newPlanting.plants = [];
     }
 
     return newPlanting;
+  }
+
+  static initialize(planting: Planting): Planting {
+    Object.setPrototypeOf(planting, Planting.prototype);
+
+    planting.plants ??= [];
+
+    return planting;
   }
 }

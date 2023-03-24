@@ -1,10 +1,10 @@
 <script setup lang="ts">
-import type { Planting, Position, Variety } from "@mendel/common";
+import type { PlantingLocal, Position, VarietyLocal } from "@mendel/common";
 import { useRootStore } from "../state/rootStore";
 import type { PlantElement } from "../types/entityTypes";
 import PlantComponent from "./PlantComponent.vue";
 import polylabel from "polylabel";
-import type { Plant } from "@mendel/common/dist/entity/Plant";
+import type { PlantLocal } from "@mendel/common/dist/entity/Plant";
 import { computed } from "vue";
 import { pathGenerator, makeTransform } from "@/services/projection";
 
@@ -14,13 +14,13 @@ const makeTransformLocal = makeTransform;
 const store = useRootStore();
 
 const props = defineProps<{
-  planting: Planting;
+  planting: PlantingLocal;
   locations?: Position[];
   isCursor?: boolean;
   plantsInteractive: boolean;
 }>();
 
-const variety = computed((): Variety => {
+const variety = computed((): VarietyLocal => {
   if (props.planting.variety) {
     return props.planting.variety;
   }
@@ -35,24 +35,32 @@ const classList = computed(
 );
 
 const labelTransform = computed((): string | undefined => {
-  if (props.planting.shape) {
-    return makeTransform(
-      polylabel([props.planting.shape.coordinates]) as [number, number]
-    );
+  const planting = props.planting;
+
+  if (planting.shape) {
+    if (planting.isArea) {
+      return makeTransform(
+        polylabel([planting.shape.coordinates]) as [number, number]
+      );
+    }
+
+    const coordinates = planting.shape.coordinates;
+
+    return makeTransform([
+      (coordinates[1][0] + coordinates[0][0]) / 2,
+      (coordinates[1][1] + coordinates[0][1]) / 2,
+    ]);
   }
 
   return undefined;
 });
 
-const plantLocations = computed((): Position[] => {
-  return (
-    props.locations ??
-    props.planting.plants?.map((p) => p.location.coordinates) ??
-    []
-  );
-});
+const plantLocations = computed(
+  (): Position[] =>
+    props.locations ?? props.planting.plants.map((p) => p.location.coordinates)
+);
 
-function plantClick(event: PointerEvent, plant: Plant): void {
+function plantClick(event: PointerEvent, plant: PlantLocal): void {
   store.onClick(event, {
     type: "plant",
     item: plant,
@@ -66,14 +74,19 @@ function plantClick(event: PointerEvent, plant: Plant): void {
       v-if="planting.shape"
       ref="shape"
       :d="pathGeneratorLocal(planting.shape)"
-      :fill="variety.color"
-      :stroke="variety.color"
+      :fill="planting.isArea ? variety.color : 'none'"
+      :stroke="planting.isArea ? 'none' : variety.color"
       class="shape"
       @click="$emit('click', $event)"
     />
 
     <PlantComponent
-      v-if="!isCursor && store.scaleRange > 1 && !plantLocations.length"
+      v-if="
+        !isCursor &&
+        store.scaleRange > 1 &&
+        !plantLocations.length &&
+        !planting.plants.length
+      "
       :transform="labelTransform"
       :draw-spacing="false"
       :variety="variety"
@@ -88,16 +101,14 @@ function plantClick(event: PointerEvent, plant: Plant): void {
         :interactive="false"
       />
     </template>
-    <template v-if="planting.plants">
-      <PlantComponent
-        v-for="(plant, i) in planting.plants"
-        :key="`plant-${i}`"
-        :variety="variety"
-        :transform="makeTransformLocal(plant.location.coordinates)"
-        :interactive="plantsInteractive"
-        @click.stop="plantClick($event, plant)"
-      />
-    </template>
+    <PlantComponent
+      v-for="(plant, i) in planting.plants"
+      :key="`plant-${i}`"
+      :variety="variety"
+      :transform="makeTransformLocal(plant.location.coordinates)"
+      :interactive="plantsInteractive"
+      @click.stop="plantClick($event, plant)"
+    />
     <title>
       {{ variety.name }} <span v-if="variety.family">{{
         variety.family?.name
@@ -111,7 +122,8 @@ function plantClick(event: PointerEvent, plant: Plant): void {
 <style scoped lang="scss">
 .shape {
   opacity: 0.5;
-  stroke: none;
+  stroke-width: 10px;
+  stroke-linecap: round;
 
   &:hover {
     opacity: 0.3;
