@@ -24,7 +24,7 @@ import { Plant } from "@mendel/common/src/entity/Plant";
 import { Delaunay } from "d3-delaunay";
 import { PolygonGrid } from "../services/polygonGrid";
 import { defineStore } from "pinia";
-import { ref, shallowRef, markRaw } from "vue";
+import { ref, shallowRef, markRaw, toRaw } from "vue";
 import { useRootStore } from "./rootStore";
 
 export const useGardenStore = defineStore("garden", () => {
@@ -94,7 +94,7 @@ export const useGardenStore = defineStore("garden", () => {
     renewDelaunay();
 
     grid.value = new PolygonGrid(
-      garden.value.beds.map((b) => b.shape.coordinates[0]),
+      garden.value.beds.map((b) => toRaw(b.shape.coordinates[0])),
       6
     );
 

@@ -10,6 +10,7 @@ import { DrawPlantingTool } from "../tools/DrawPlantingTool";
 import SelectVariety from "./fields/SelectVariety.vue";
 import { useGardenStore } from "@/state/gardenStore";
 import type { PolygonGrid } from "@/services/polygonGrid";
+import { Tool } from "@/tools/Tool";
 
 const store = useRootStore();
 const gardenStore = useGardenStore();
@@ -59,8 +60,6 @@ function newTool(newTool: string): void {
   }
 }
 
-watch(variety, newVariety);
-
 function newVariety(newVariety?: Variety): void {
   if (
     newVariety &&
@@ -102,6 +101,7 @@ function newVariety(newVariety?: Variety): void {
     <SelectVariety
       v-model="variety"
       :disabled="varietySelectDisabled"
+      @update:model-value="newVariety"
       class="dropdown"
     />
   </v-card>

@@ -77,7 +77,7 @@ export const useRootStore = defineStore("root", () => {
 
   function clearTool(): void {
     if (tool.value) {
-      tool.value?.stop?.();
+      tool.value.stop?.();
 
       tool.value = null;
     }
