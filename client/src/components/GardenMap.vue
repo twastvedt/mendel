@@ -133,7 +133,7 @@ function elementStyle(elementType: UiElementType): Record<string, string> {
       @mouseleave="onHover"
     >
       <g ref="content" class="content">
-        <g v-if="gardenStore.garden && gardenStore.currentPlan">
+        <template v-if="gardenStore.garden">
           <g v-for="(bed, i) in gardenStore.garden.beds" :key="bed.id">
             <path
               class="bed"
@@ -143,34 +143,36 @@ function elementStyle(elementType: UiElementType): Record<string, string> {
               @mouseenter="onHover($event, bed, i)"
               @mouseleave="onHover($event)"
             />
-
-            <!-- <circle
-            v-for="(point, i) in bed.shape.coordinates[0]"
-            :key="`p${i}`"
-            :cx="point[0]"
-            :cy="point[1]"
-            r="0.5"
-          /> -->
           </g>
+        </template>
 
-          <g v-if="gardenStore.grid">
-            <path
-              v-for="(area, i) in gardenStore.grid.areas"
-              :key="i"
-              class="area"
-              :style="elementStyle('area')"
-              :d="pathFromPointsLocal(area.polygon)"
-              @click.stop="store.onClick($event, { type: 'area', item: area })"
-              @mouseenter="onHover($event, area, i)"
-              @mouseleave="onHover($event)"
-            />
-          </g>
+        <g v-if="gardenStore.grid">
+          <path
+            v-for="(area, i) in gardenStore.grid.areas"
+            :key="i"
+            class="area"
+            :style="elementStyle('area')"
+            :d="pathFromPointsLocal(area.polygon)"
+            @click.stop="store.onClick($event, { type: 'area', item: area })"
+            @mouseenter="onHover($event, area, i)"
+            @mouseleave="onHover($event)"
+          />
+        </g>
 
+        <g
+          v-for="planDisplay in gardenStore.displayPlans"
+          :key="planDisplay.plan.id"
+          :class="[
+            'plan',
+            { transparent: planDisplay.transparent },
+            planDisplay.style,
+          ]"
+        >
           <PlantingComponent
-            v-for="(planting, index) in gardenStore.currentPlan.plantings"
+            v-for="(planting, index) in planDisplay.plan.plantings"
             :key="`${index}-planting`"
             :planting="planting"
-            :plants-interactive="isInteractive('plant')"
+            :plants-interactive="planDisplay.editable && isInteractive('plant')"
             :style="elementStyle('planting')"
             @click.stop="
               store.onClick($event, { type: 'planting', item: planting })
@@ -178,13 +180,13 @@ function elementStyle(elementType: UiElementType): Record<string, string> {
             @mouseover="onHover($event, planting, index)"
             @mouseleave="onHover($event)"
           />
-
-          <component
-            :is="store.tool.cursorComponent"
-            v-if="store.tool?.cursorComponent"
-            v-bind="store.tool.cursorProps"
-          />
         </g>
+
+        <component
+          v-if="store.tool?.cursorComponent"
+          :is="store.tool.cursorComponent"
+          v-bind="store.tool.cursorProps"
+        />
       </g>
     </svg>
 
@@ -229,6 +231,12 @@ function elementStyle(elementType: UiElementType): Record<string, string> {
 
   &::v-deep * {
     vector-effect: non-scaling-stroke;
+  }
+}
+
+.plan {
+  &.transparent {
+    opacity: 0.2;
   }
 }
 

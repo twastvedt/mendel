@@ -21,10 +21,26 @@ function edit(): void {
     return-object
     hide-details
     variant="outlined"
-    v-model="gardenStore.currentPlan"
+    :value="gardenStore.currentPlan"
+    :model-value="gardenStore.currentPlan"
+    @update:model-value="gardenStore.setCurrentPlan"
   >
     <template #selection="{ item }">
-      <v-app-bar-title>{{ item.raw.name }}</v-app-bar-title>
+      <div class="text-h6 me-6">{{ item.title }}</div>
+      <div class="text-medium-emphasis text-h6 font-weight-regular">
+        {{ item.raw.year }}
+      </div>
+    </template>
+
+    <template #item="{ item, props }">
+      <v-list-item v-bind="props">
+        <template #title="{ title }">
+          <span class="me-6">{{ title }}</span>
+          <span class="text-medium-emphasis">
+            {{ item.raw.year }}
+          </span>
+        </template>
+      </v-list-item>
     </template>
   </v-select>
   <v-btn icon>

@@ -27,6 +27,18 @@ import { defineStore } from "pinia";
 import { ref, shallowRef, markRaw, toRaw } from "vue";
 import { useRootStore } from "./rootStore";
 
+/**
+ * We don't need immediate display of Plans before saving to the database, so we can assume all plans have an id.
+ */
+type PlanClient = Modify<Plan, { plantings: PlantingLocal[] }>;
+
+interface PlanDisplay {
+  plan: PlanClient;
+  editable: boolean;
+  transparent: boolean;
+  style: "colors" | "full" | "nitrogen";
+}
+
 export const useGardenStore = defineStore("garden", () => {
   const rootStore = useRootStore();
 
@@ -36,8 +48,9 @@ export const useGardenStore = defineStore("garden", () => {
 
   const varieties = ref<Variety[]>([]);
   const garden = ref<Garden>();
-  const currentPlan = ref<Modify<Plan, { plantings: PlantingLocal[] }>>();
-  const plans = ref<Plan[]>();
+  const displayPlans = ref<PlanDisplay[]>([]);
+  const currentPlan = ref<PlanClient>();
+  const plans = ref<Plan[]>([]);
   const families = ref<Family[]>();
 
   const ready = initialize();
@@ -47,9 +60,11 @@ export const useGardenStore = defineStore("garden", () => {
 
     families.value = await varietyApi.allByFamily.request();
     garden.value = await gardenApi.one.request({ routeParams: { id: 1 } });
+
     plans.value = await planApi.all.request();
-    currentPlan.value = plans.value.reduce((prev, curr) =>
-      prev.updatedDate < curr.updatedDate ? prev : curr
+
+    plans.value.sort(
+      (a, b) => b.updatedDate.valueOf() - a.updatedDate.valueOf()
     );
 
     varieties.value = [];
@@ -81,17 +96,9 @@ export const useGardenStore = defineStore("garden", () => {
 
     document.body.prepend(symbols);
 
-    delaunayPoints.length = 0;
+    plans.value.forEach((plan) => plan.plantings.forEach(inflatePlanting));
 
-    currentPlan.value.plantings.forEach((planting) => {
-      inflatePlanting(planting);
-
-      planting.plants.forEach((p) => {
-        delaunayPoints.push(inflatePlant(p));
-      });
-    });
-
-    renewDelaunay();
+    setCurrentPlan();
 
     grid.value = new PolygonGrid(
       garden.value.beds.map((b) => toRaw(b.shape.coordinates[0])),
@@ -101,7 +108,60 @@ export const useGardenStore = defineStore("garden", () => {
     rootStore.loading = false;
   }
 
-  async function addPlan(plan: PlanLocal): Promise<Plan> {
+  function setCurrentPlan(active?: PlanClient): PlanClient {
+    let currentPlanLocal: PlanClient;
+
+    if (active) {
+      currentPlanLocal = active;
+
+      if (active.id !== currentPlan.value?.id) {
+        currentPlan.value = active;
+
+        delaunayPoints.length = 0;
+
+        active.plantings.forEach((planting) => {
+          planting.plants.forEach((p) => {
+            delaunayPoints.push(p);
+          });
+        });
+
+        renewDelaunay();
+      }
+    } else {
+      if (!currentPlan.value) {
+        currentPlan.value = plans.value[0];
+      }
+
+      currentPlanLocal = currentPlan.value;
+    }
+
+    displayPlans.value = [
+      {
+        plan: currentPlanLocal,
+        editable: true,
+        style: "full",
+        transparent: false,
+      },
+    ];
+
+    const nextPlan = plans.value.find((p) => p.year < currentPlanLocal.year);
+
+    if (nextPlan) {
+      displayPlans.value.unshift({
+        plan: nextPlan,
+        editable: false,
+        style: "full",
+        transparent: true,
+      });
+    }
+
+    return currentPlanLocal;
+  }
+
+  /**
+   * Add a new plan to the database and set it as the current plan.
+   */
+  async function addPlan(plan: PlanLocal): Promise<PlanClient> {
     if (plan.garden) {
       plan.gardenId = plan.garden.id;
     } else if (plan.gardenId === undefined) {
@@ -116,9 +176,9 @@ export const useGardenStore = defineStore("garden", () => {
     delete newPlan.garden;
 
     // TODO: Fix `as`.
-    plans.value?.push(newPlan as Plan);
+    plans.value.unshift(newPlan as Plan);
 
-    return newPlan as Plan;
+    return setCurrentPlan(newPlan as Plan);
   }
 
   async function editPlan(id: number, changes: Partial<Plan>): Promise<void> {
@@ -179,23 +239,9 @@ export const useGardenStore = defineStore("garden", () => {
     await plantApi.update.request({ data: { ...changes, id } });
   }
 
-  function inflatePlant(plant: PlantLocal): PlantLocal {
-    if (!currentPlan.value) {
-      throw new Error("No plan!");
-    }
-
-    if (!plant.planting) {
-      plant.planting = currentPlan.value.plantings.find(
-        (p) => p.id === plant.plantingId
-      );
-    }
-
-    return plant;
-  }
-
   function inflatePlanting(planting: PlantingLocal): Planting {
-    if (!currentPlan.value) {
-      throw new Error("No plan!");
+    if (planting.planId !== undefined) {
+      planting.plan = plans.value.find((p) => p.id === planting.planId);
     }
 
     if (planting.varietyId !== undefined) {
@@ -204,8 +250,10 @@ export const useGardenStore = defineStore("garden", () => {
       );
     }
 
-    planting.planId = currentPlan.value.id;
-    planting.plan = currentPlan.value;
+    planting.plants.forEach((p) => {
+      p.plantingId = planting.id;
+      p.planting = planting;
+    });
 
     return planting as Planting;
   }
@@ -213,6 +261,10 @@ export const useGardenStore = defineStore("garden", () => {
   async function addPlanting(planting: PlantingLocal): Promise<Planting> {
     if (!currentPlan.value) {
       throw new Error("No plan!");
+    }
+
+    if (planting.planId !== currentPlan.value.id) {
+      throw new Error("Adding planting to non-current plan not yet supported.");
     }
 
     inflatePlanting(planting);
@@ -225,14 +277,11 @@ export const useGardenStore = defineStore("garden", () => {
 
     Object.assign(planting, newPlanting);
 
-    if (planting.plants) {
-      planting.plants.forEach((p) => {
-        p.plantingId = newPlanting.id;
-        delaunayPoints.push(p);
-      });
+    planting.plants.forEach((p) => {
+      delaunayPoints.push(p);
+    });
 
-      renewDelaunay();
-    }
+    renewDelaunay();
 
     return planting as Planting;
   }
@@ -497,14 +546,15 @@ export const useGardenStore = defineStore("garden", () => {
     varieties,
     garden,
     currentPlan,
+    displayPlans,
     plans,
     families,
     initialize,
     addPlan,
+    setCurrentPlan,
     editPlan,
     addPlant,
     editPlant,
-    inflatePlant,
     inflatePlanting,
     addPlanting,
     removePlant,
