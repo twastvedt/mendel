@@ -17,6 +17,7 @@ import type {
   PlanLocal,
   PlantLocal,
   PlantingLocal,
+  FamilyLocal,
   Modify,
   HasId,
 } from "@mendel/common";
@@ -159,30 +160,43 @@ export const useGardenStore = defineStore("garden", () => {
   }
 
   /**
-   * Add a new plan to the database and set it as the current plan.
+   * Add/edit a plan in the database. If new, set it as the current plan.
    */
-  async function addPlan(plan: PlanLocal): Promise<PlanClient> {
-    if (plan.garden) {
-      plan.gardenId = plan.garden.id;
-    } else if (plan.gardenId === undefined) {
-      plan.gardenId = garden.value?.id;
+  async function editPlan(plan: PlanLocal): Promise<PlanClient> {
+    if (plan.id !== undefined) {
+      const existingPlan = plans.value.find((p) => p.id === plan.id);
+
+      if (!existingPlan) {
+        throw new Error(`Could not find matching plan to edit. Id: ${plan.id}`);
+      }
+
+      Object.assign(existingPlan, plan);
+
+      const data: Partial<PlanLocal> = Plan.localCopy(plan, false);
+      delete data.updatedDate;
+      delete data.plantings;
+
+      await planApi.update.request({ data: data as HasId<PlanLocal> });
+
+      return existingPlan;
+    } else {
+      if (plan.garden) {
+        plan.gardenId = plan.garden.id;
+      } else if (plan.gardenId === undefined) {
+        plan.gardenId = garden.value?.id;
+      }
+
+      const response = await planApi.create.request({
+        data: Plan.localCopy(plan),
+      });
+
+      const newPlan = { ...plan, ...(response as Plan) };
+
+      // TODO: Fix `as`.
+      plans.value.unshift(newPlan as Plan);
+
+      return setCurrentPlan(newPlan as Plan);
     }
-
-    const response = await planApi.create.request({
-      data: Plan.localCopy(plan),
-    });
-
-    const newPlan = { ...plan, ...(response as Plan) };
-    delete newPlan.garden;
-
-    // TODO: Fix `as`.
-    plans.value.unshift(newPlan as Plan);
-
-    return setCurrentPlan(newPlan as Plan);
-  }
-
-  async function editPlan(id: number, changes: Partial<Plan>): Promise<void> {
-    await planApi.update.request({ data: { ...changes, id } });
   }
 
   async function addPlant(
@@ -221,6 +235,8 @@ export const useGardenStore = defineStore("garden", () => {
     } else {
       planting.plants = [plant];
     }
+
+    plant.planting = planting;
 
     const newPlant = (await plantApi.create.request({
       data: Plant.localCopy(plant),
@@ -263,7 +279,9 @@ export const useGardenStore = defineStore("garden", () => {
       throw new Error("No plan!");
     }
 
-    if (planting.planId !== currentPlan.value.id) {
+    if (planting.planId === undefined) {
+      planting.planId = currentPlan.value.id;
+    } else if (planting.planId !== currentPlan.value.id) {
       throw new Error("Adding planting to non-current plan not yet supported.");
     }
 
@@ -276,6 +294,9 @@ export const useGardenStore = defineStore("garden", () => {
     })) as Planting;
 
     Object.assign(planting, newPlanting);
+
+    // We need to do this again to inflate the new plant objects which get overwritten above. TODO: improve?
+    inflatePlanting(planting);
 
     planting.plants.forEach((p) => {
       delaunayPoints.push(p);
@@ -300,7 +321,9 @@ export const useGardenStore = defineStore("garden", () => {
     let planting = plant.planting;
 
     if (!planting) {
-      planting = currentPlan.value.plantings.find((p) => p.id === plant.id);
+      planting = currentPlan.value.plantings.find(
+        (p) => p.id === plant.plantingId
+      );
     }
 
     if (planting?.plants) {
@@ -495,7 +518,8 @@ export const useGardenStore = defineStore("garden", () => {
 
       Object.assign(families.value[index], item);
 
-      const newFamily = Family.localCopy(item);
+      const newFamily: Partial<FamilyLocal> = Family.localCopy(item, false);
+      delete newFamily.varieties;
 
       await familyApi.update.request({
         data: newFamily as Family,
@@ -550,7 +574,6 @@ export const useGardenStore = defineStore("garden", () => {
     plans,
     families,
     initialize,
-    addPlan,
     setCurrentPlan,
     editPlan,
     addPlant,

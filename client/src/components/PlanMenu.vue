@@ -44,7 +44,7 @@ function edit(): void {
     </template>
   </v-select>
   <v-btn icon>
-    <v-icon @click="edit()"> mdi-pencil </v-icon>
+    <v-icon @click="edit"> mdi-pencil </v-icon>
   </v-btn>
 
   <v-dialog v-model="showDialog" max-width="400">
@@ -58,7 +58,7 @@ function edit(): void {
 
     <EditPlan
       @close="showDialog = false"
-      @input="gardenStore.addPlan"
+      @input="gardenStore.editPlan"
       :value="newPlan ? undefined : gardenStore.currentPlan"
     />
   </v-dialog>

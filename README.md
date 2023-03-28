@@ -2,7 +2,10 @@
 
 ## To Do
 
-add content and styling to details pane
+- remove family color
+- add content and styling to details pane
+- delaunay not picking up plants from previous session when adding new plant of same family
+- Icon display in family edit view
 
 ## Development
 

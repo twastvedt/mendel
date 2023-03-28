@@ -10,23 +10,27 @@ const gardenStore = useGardenStore();
 
 const headers: DataTableHeader[] = [
   {
+    title: "",
+    key: "icon",
+    width: 32,
+  },
+  {
     title: "Name",
     key: "name",
   },
   {
-    title: "Color",
-    key: "color",
-  },
-  {
     title: "Spacing",
+    align: "end",
     key: "spacing",
   },
   {
     title: "Nitrogen",
+    align: "end",
     key: "nitrogen",
   },
   {
-    title: "Plants",
+    title: "Plants (current plan)",
+    align: "end",
     key: "plants",
   },
 ];
@@ -70,8 +74,8 @@ async function deleteFamily(family: Family): Promise<void> {
         {{ plantCount(item.raw) }}
       </template>
 
-      <template #[`item.color`]="{ item }">
-        <svg class="svgicon" style="height: 32px; width: 32px">
+      <template #[`item.icon`]="{ item }">
+        <svg class="plantIcon">
           <use :href="`#family-${item.raw.id}`" :fill="item.raw.color" />
         </svg>
       </template>

@@ -10,6 +10,11 @@ const gardenStore = useGardenStore();
 
 const varietyHeaders: DataTableHeader[] = [
   {
+    title: "",
+    key: "icon",
+    width: 32,
+  },
+  {
     title: "Name",
     key: "name",
   },
@@ -22,7 +27,8 @@ const varietyHeaders: DataTableHeader[] = [
     key: "family.name",
   },
   {
-    title: "Plants",
+    title: "Plants (current plan)",
+    align: "end",
     key: "plants",
   },
 ];
@@ -51,8 +57,8 @@ function plantCount(variety: Variety): number | undefined {
         {{ plantCount(item.raw) }}
       </template>
 
-      <template #[`item.color`]="{ item }">
-        <svg class="svgicon" style="height: 32px; width: 32px">
+      <template #[`item.icon`]="{ item }">
+        <svg class="plantIcon">
           <use :href="`#family-${item.raw.family.id}`" :fill="item.raw.color" />
         </svg>
       </template>

@@ -16,7 +16,7 @@ dataSource
   .initialize()
   .then(async (connection) => {
     // TODO: Remove for production.
-    await connection.synchronize(true);
+    // await connection.synchronize(true);
 
     connection.runMigrations();
 

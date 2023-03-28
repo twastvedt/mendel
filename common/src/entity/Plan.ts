@@ -50,8 +50,8 @@ export class Plan extends EntityBase {
   @UpdateDateColumn()
   updatedDate!: Date;
 
-  static localCopy(plan: Plan | PlanLocal, deep = true): PlanLocal {
-    const newPlan: PlanLocal = Object.assign({}, plan);
+  static localCopy<T extends PlanLocal>(plan: T, deep = true): T & PlanLocal {
+    const newPlan: T = Object.assign({}, plan);
 
     delete newPlan.garden;
 

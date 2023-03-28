@@ -11,6 +11,11 @@ const gardenStore = useGardenStore();
 
 const headers: DataTableHeader[] = [
   {
+    title: "",
+    key: "icon",
+    width: 32,
+  },
+  {
     title: "Name",
     key: "name",
   },
@@ -20,10 +25,12 @@ const headers: DataTableHeader[] = [
   },
   {
     title: "Spacing",
+    align: "end",
     key: "spacing",
   },
   {
-    title: "Plants",
+    title: "Plants (current plan)",
+    align: "end",
     key: "plants",
   },
 ];
@@ -76,15 +83,10 @@ function plantCount(variety: Variety): number | undefined {
               {{ plantCount(item.raw) }}
             </template>
 
-            <template #[`item.name`]="{ item }">
-              <svg class="icon avatar" :style="`fill: ${item.raw.color}`">
+            <template #[`item.icon`]="{ item }">
+              <svg class="plantIcon" :style="`fill: ${item.raw.color}`">
                 <use :href="`#family-${item.raw.familyId}`" />
               </svg>
-              {{ item.raw.name }}
-              <!-- <v-list-item-avatar class="icon" :style="`fill: ${item.color}`">
-          <svg><use :href="`#family-${item.familyId}`" /></svg>
-        </v-list-item-avatar>
-        <v-list-item-title v-text="item.name"></v-list-item-title> -->
             </template>
           </v-data-table>
         </v-card>
@@ -112,15 +114,3 @@ function plantCount(variety: Variety): number | undefined {
     </v-row>
   </v-container>
 </template>
-<style scoped lang="scss">
-.icon {
-  stroke: black;
-}
-
-.avatar {
-  height: 32px;
-  width: 32px;
-  margin-right: 8px;
-  vertical-align: middle;
-}
-</style>

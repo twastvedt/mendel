@@ -1,13 +1,60 @@
 import { MigrationInterface } from "typeorm";
-import { Polygon, GardenLocal } from "@mendel/common";
+import { Polygon, GardenLocal, FamilyLocal } from "@mendel/common";
 import { features } from "./SeedBeds.json";
-import fs from "fs";
-import path from "path";
+import { readdir, readFile } from "fs/promises";
+import { parse, join } from "path";
 import { SVG, Container, registerWindow } from "@svgdotjs/svg.js";
 //@ts-ignore
 import { createSVGWindow } from "svgdom";
-import { Garden, Variety, Family } from "@mendel/common";
+import { Garden, Family } from "@mendel/common";
 import { dataSource } from "../dataSource";
+
+async function loadSvgs(container: Container): Promise<Map<string, string>> {
+  const files = await readdir(join(__dirname, "./icons"), {
+    withFileTypes: true,
+  });
+
+  const svgs = await Promise.all(
+    files.map(async (file) => {
+      const d = await readFile(join(__dirname, `./icons/${file.name}`));
+
+      const svgString = d.toString();
+      const start = svgString.indexOf("<svg");
+
+      container.svg(svgString.substring(start));
+
+      const svg = container.findOne("svg");
+
+      if (!svg) {
+        throw new Error(`No svg found parsing file ${file.name}.`);
+      }
+
+      const artboard = svg.findOne("svg>rect:first-child");
+
+      if (artboard?.attr("id")) {
+        artboard.remove();
+      }
+
+      const symbol = container
+        .symbol()
+        .attr("viewBox", svg.attr("viewBox"))
+        .attr("style", svg.attr("style"));
+
+      svg.children().forEach((c) => symbol.add(c));
+
+      let result = symbol.svg();
+
+      result = result.replace("fill:none;", "");
+
+      svg.remove();
+      symbol.remove();
+
+      return result;
+    })
+  );
+
+  return new Map(files.map((f, i) => [parse(f.name).name, svgs[i]]));
+}
 
 export class SeedData1603059702825 implements MigrationInterface {
   public async up(): Promise<void> {
@@ -46,68 +93,183 @@ export class SeedData1603059702825 implements MigrationInterface {
     const document = window.document;
     registerWindow(window, document);
 
-    const draw = SVG(document.documentElement) as Container;
+    const container = SVG(document.documentElement) as Container;
 
-    const svgs = await Promise.all([
-      this.loadSvg(draw, "tomato"),
-      this.loadSvg(draw, "cherry tomato"),
-      this.loadSvg(draw, "potato"),
+    const svgs = await loadSvgs(container);
+
+    await dataSource.getRepository(Family).save<FamilyLocal>([
+      {
+        name: "Tomato",
+        color: "#ff4518",
+        icon: svgs.get("tomato") ?? "",
+        spacing: 24,
+        varieties: [
+          {
+            name: "Cherokee Purple",
+            color: "#98082f",
+            plantings: [],
+          },
+          {
+            name: "Black Krim",
+            color: "#6c0521",
+            plantings: [],
+          },
+        ],
+      },
+      {
+        name: "Cherry Tomato",
+        color: "#ff4518",
+        icon: svgs.get("cherry tomato") ?? "",
+        spacing: 12,
+        varieties: [
+          {
+            name: "Yellow Pear",
+            color: "#fadc17",
+            plantings: [],
+          },
+          {
+            name: "Tommy Toe",
+            color: "#E03518",
+            plantings: [],
+          },
+        ],
+      },
+      {
+        name: "Potato",
+        color: "#d9cbaf",
+        icon: svgs.get("potato") ?? "",
+        spacing: 4,
+        varieties: [
+          {
+            name: "Butterball",
+            color: "#EAD284",
+            plantings: [],
+          },
+          {
+            name: "Purple Viking",
+            color: "#907096",
+            plantings: [],
+          },
+        ],
+      },
+      {
+        name: "Radish",
+        color: "#C8172E",
+        icon: svgs.get("radish") ?? "",
+        spacing: 3,
+        varieties: [
+          {
+            name: "Radish",
+            color: "#C8172E",
+            plantings: [],
+          },
+        ],
+      },
+      {
+        name: "Carrot",
+        color: "#F76610",
+        icon: svgs.get("carrot") ?? "",
+        spacing: 3,
+        varieties: [
+          {
+            name: "Carrot",
+            color: "#F76610",
+            plantings: [],
+          },
+        ],
+      },
+      {
+        name: "Garlic",
+        color: "#DEDAD7",
+        icon: svgs.get("garlic") ?? "",
+        spacing: 8,
+        varieties: [
+          {
+            name: "Garlic",
+            color: "#DEDAD7",
+            plantings: [],
+          },
+        ],
+      },
+      {
+        name: "Hot Pepper",
+        color: "#B81F14",
+        icon: svgs.get("pepper") ?? "",
+        spacing: 15,
+        varieties: [
+          {
+            name: "Hot Pepper",
+            color: "#B81F14",
+            plantings: [],
+          },
+        ],
+      },
+      {
+        name: "Broccoli",
+        color: "#A6C653",
+        icon: svgs.get("broccoli") ?? "",
+        spacing: 18,
+        varieties: [
+          {
+            name: "Broccoli",
+            color: "#A6C653",
+            plantings: [],
+          },
+        ],
+      },
+      {
+        name: "Pea",
+        color: "#86A71F",
+        icon: svgs.get("pea") ?? "",
+        spacing: 4,
+        varieties: [
+          {
+            name: "Sweet Pea",
+            color: "#86A71F",
+            plantings: [],
+          },
+        ],
+      },
+      {
+        name: "Eggplant",
+        color: "#5C3F5B",
+        icon: svgs.get("eggplant") ?? "",
+        spacing: 24,
+        varieties: [
+          {
+            name: "Eggplant",
+            color: "#5C3F5B",
+            plantings: [],
+          },
+        ],
+      },
+      {
+        name: "Winter Squash",
+        color: "#F1B56B",
+        icon: svgs.get("winter squash") ?? "",
+        spacing: 30,
+        varieties: [
+          {
+            name: "Butternut Squash",
+            color: "#F1B56B",
+            plantings: [],
+          },
+        ],
+      },
+      {
+        name: "Pumpkin",
+        color: "#E45604",
+        icon: svgs.get("pumpkin") ?? "",
+        spacing: 30,
+        varieties: [
+          {
+            name: "Pumpkin",
+            color: "#E45604",
+            plantings: [],
+          },
+        ],
+      },
     ]);
-
-    const tomato = new Family("Tomato", "#ff4518", svgs[0], 10);
-
-    const cherry = new Family("Cherry Tomato", "#ff4518", svgs[1], 8);
-
-    const potato = new Family("Potato", "#d9cbaf", svgs[2], 4);
-
-    await dataSource.getRepository(Family).save([tomato, cherry, potato]);
-
-    await dataSource
-      .getRepository(Variety)
-      .save([
-        new Variety("Cherokee Purple", "#98082f", tomato),
-        new Variety("Yellow Pear", "#fadc17", cherry),
-        new Variety("Black Krum", "#6c0521", cherry),
-      ]);
-  }
-
-  private async loadSvg(draw: Container, name: string): Promise<string> {
-    return new Promise((resolve, reject) => {
-      fs.readFile(path.join(__dirname, `./icons/${name}.svg`), (err, data) => {
-        if (err) {
-          reject(err);
-        } else {
-          const svgString = data.toString();
-          const start = svgString.indexOf("<svg");
-
-          draw.svg(svgString.substr(start));
-
-          const svg = draw.findOne("svg");
-
-          const artboard = svg?.findOne("svg>rect:first-child");
-
-          if (artboard?.attr("id")) {
-            artboard.remove();
-          }
-
-          const symbol = draw
-            .symbol()
-            .attr("viewBox", svg?.attr("viewBox"))
-            .attr("style", svg?.attr("style"));
-
-          svg?.children().forEach((c) => symbol.add(c));
-
-          let result = symbol.svg();
-
-          result = result.replace("fill:none;", "");
-
-          svg?.remove();
-          symbol.remove();
-
-          resolve(result);
-        }
-      });
-    });
   }
 
   public async down(): Promise<void> {
