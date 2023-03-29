@@ -4,7 +4,7 @@
 
 {
   "name": "garden-data",
-  "dockerComposeFile": ["../dev/docker-compose.yml"],
+  "dockerComposeFile": ["../docker/docker-compose-dev.yml"],
   "forwardPorts": [8000, 3000, 3001],
   "service": "app",
   "workspaceFolder": "/mendel",

@@ -6,9 +6,7 @@ services:
       POSTGRES_DB: mendel
       POSTGRES_PASSWORD: mendel
       POSTGRES_USER: mendel
-    container_name: db
-    networks:
-      - mendelnet
+    container_name: mendel-db
 
   app:
     build:
@@ -16,10 +14,5 @@ services:
       dockerfile: docker/Dockerfile
     depends_on:
       - db
-    networks:
-      - mendelnet
     ports:
-      - "80:3000"
-
-networks:
-  mendelnet:
+      - "2468:3000"
