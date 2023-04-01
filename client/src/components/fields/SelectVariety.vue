@@ -2,6 +2,7 @@
 import { useGardenStore } from "../../state/gardenStore";
 import type { Variety } from "@mendel/common";
 import { computed } from "vue";
+import PlantIcon from "../PlantIcon.vue";
 
 const gardenStore = useGardenStore();
 
@@ -54,9 +55,11 @@ function varietyFilter(item: Variety, queryText: string): boolean {
     @update:model-value="$emit('input', $event)"
   >
     <template #selection="{ item }">
-      <svg class="icon avatar" :style="`fill: ${item.raw.color}`">
-        <use :href="`#family-${item.raw.familyId}`" />
-      </svg>
+      <plant-icon
+        class="plantAvatar"
+        :color="item.raw.color"
+        :family-id="item.raw.familyId"
+      />
       {{ item.raw.name }} - {{ item.raw.family?.name }}
     </template>
     <template #item="{ item, props }">
@@ -68,8 +71,11 @@ function varietyFilter(item: Variety, queryText: string): boolean {
         :subtitle="item.raw.family?.name"
       >
         <template #prepend>
-          <v-avatar class="icon" :style="`fill: ${item.raw.color}`">
-            <svg><use :href="`#family-${item.raw.familyId}`" /></svg>
+          <v-avatar>
+            <plant-icon
+              :color="item.raw.color"
+              :family-id="item.raw.familyId"
+            />
           </v-avatar>
         </template>
       </v-list-item>
@@ -78,16 +84,6 @@ function varietyFilter(item: Variety, queryText: string): boolean {
 </template>
 
 <style scoped lang="scss">
-.icon {
-  stroke: black;
-}
-
-.avatar {
-  height: 32px;
-  width: 32px;
-  margin-right: 8px;
-}
-
 .v-icon.badge {
   height: 50%;
   width: 50%;

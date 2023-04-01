@@ -2,6 +2,14 @@ import "reflect-metadata";
 import express, { static as _static, json } from "express";
 import { join } from "path";
 import cors from "cors";
+import { config } from "dotenv";
+
+const production = process.env.NODE_ENV === "production";
+
+config({
+  path: join(__dirname, `../../.env${production ? ".production" : ""}.local`),
+});
+config({ path: join(__dirname, "../../.env") });
 
 import BedRoutes from "./controller/Beds";
 import VarietyRoutes from "./controller/Varieties";
@@ -16,11 +24,9 @@ dataSource
   .initialize()
   .then(async (connection) => {
     // TODO: Remove for production.
-    // await connection.synchronize(true);
+    await connection.synchronize(false);
 
     connection.runMigrations();
-
-    const production = process.env.NODE_ENV === "production";
 
     console.log(
       `Starting Express in ${production ? "production" : "development"} mode.`

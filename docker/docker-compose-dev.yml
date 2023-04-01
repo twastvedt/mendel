@@ -9,7 +9,6 @@ services:
       POSTGRES_DB: mendel
       POSTGRES_PASSWORD: mendel
       POSTGRES_USER: mendel
-    container_name: db
     ports:
       - 5432:5432
     networks:

@@ -2,6 +2,7 @@
 import { withDefaults, computed } from "vue";
 import { useRootStore } from "../state/rootStore";
 import type { VarietyLocal } from "@mendel/common";
+import PlantIcon from "./PlantIcon.vue";
 
 const store = useRootStore();
 
@@ -44,14 +45,14 @@ const title = computed((): string => {
         :r="family.spacing / 2"
         class="spacingCircle"
       />
-      <use
-        :width="iconSize"
-        :height="iconSize"
+      <PlantIcon
+        no-svg
+        :size="iconSize"
+        :color="variety.color"
+        :family-id="family.id"
+        class="icon"
         :x="-iconSize / 2"
         :y="-iconSize / 2"
-        :href="`#family-${family.id}`"
-        :fill="variety.color"
-        class="icon"
       />
     </template>
 

@@ -81,7 +81,16 @@ export const useGardenStore = defineStore("garden", () => {
       .slice()
       .sort((a, b) => a.name.localeCompare(b.name))
       .forEach((f) => {
-        content += f.icon.replace("symbol ", `symbol id="family-${f.id}" `);
+        if (f.icon) {
+          content += f.icon.replace("symbol ", `symbol id="family-${f.id}" `);
+        } else {
+          content += `<symbol id="family-${
+            f.id
+          }" viewBox="0 0 50 50"><text class="textIcon" x="50%" y="50%" font-size="32">${f.name.substring(
+            0,
+            2
+          )}</text></symbol>`;
+        }
 
         f.varieties
           ?.slice()

@@ -1,7 +1,11 @@
-.plantIcon {
-  stroke: black;
-  height: 32px;
-  width: 32px;
+.plantAvatar {
   margin-right: 8px;
   vertical-align: middle;
+}
+
+.textIcon {
+  dominant-baseline: middle;
+  text-anchor: middle;
+  text-transform: none;
+  font-weight: 900;
 }

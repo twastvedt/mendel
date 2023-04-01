@@ -75,11 +75,7 @@ resetForm();
           label="Spacing (inches)"
         />
 
-        <v-text-field
-          v-model="formValue.icon"
-          :rules="[requiredRule]"
-          label="Icon SVG"
-        />
+        <v-text-field v-model="formValue.icon" label="Icon SVG" />
 
         <v-text-field v-model="formValue.nitrogen" label="Nitrogen" />
 
@@ -90,7 +86,17 @@ resetForm();
               <svg class="svgicon">
                 <!-- eslint-disable-next-line vue/no-v-html -->
                 <defs v-html="icon" />
-                <use href="#edit-icon" :fill="formValue.color" />
+                <use v-if="icon" href="#edit-icon" :fill="formValue.color" />
+                <text
+                  v-else
+                  :fill="formValue.color"
+                  class="textIcon"
+                  x="50%"
+                  y="50%"
+                  font-size="24"
+                >
+                  {{ formValue.name.substring(0, 2) }}
+                </text>
               </svg>
             </v-btn>
           </template>
@@ -115,11 +121,12 @@ resetForm();
 <style scoped lang="scss">
 .svgicon {
   stroke: black;
-  height: 44px;
+  height: 52px;
 }
 
 .bigSquareButton {
   width: 52px !important;
+  height: 52px !important;
   padding: 0 !important;
   min-width: 0 !important;
 }

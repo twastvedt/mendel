@@ -12,8 +12,8 @@ import { SeedData1603059702825 } from "./migration/1603059702825-SeedData";
 
 export const dataSource = new DataSource({
   type: "postgres",
-  host: "mendel-db",
-  port: 5432,
+  host: process.env.DB_HOST,
+  port: parseInt(process.env.DB_PORT ?? "5432"),
   username: "mendel",
   password: "mendel",
   database: "mendel",

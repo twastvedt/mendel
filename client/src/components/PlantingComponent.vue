@@ -60,6 +60,20 @@ const plantLocations = computed(
     props.locations ?? props.planting.plants.map((p) => p.location.coordinates)
 );
 
+const title = computed(() => {
+  let text = variety.value.name;
+
+  if (variety.value.family) {
+    text += ` ${variety.value.family.name}`;
+  }
+
+  if (plantLocations.value.length) {
+    text += `\n${plantLocations.value.length}`;
+  }
+
+  return text;
+});
+
 function plantClick(event: PointerEvent, plant: PlantLocal): void {
   store.onClick(event, {
     type: "plant",
@@ -109,13 +123,7 @@ function plantClick(event: PointerEvent, plant: PlantLocal): void {
       :interactive="plantsInteractive"
       @click.stop="plantClick($event, plant)"
     />
-    <title>
-      {{ variety.name }} <span v-if="variety.family">{{
-        variety.family?.name
-      }}</span> <template v-if="plantLocations.length"> <br/> &#xA;
-      {{ plantLocations.length }}
-      </template>
-    </title>
+    <title>{{ title }}</title>
   </g>
 </template>
 

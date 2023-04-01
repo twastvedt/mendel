@@ -6,6 +6,7 @@ import { polygonArea } from "d3-polygon";
 import { bboxArea, polygonBounds } from "../geometry/polygonTools";
 import type { Variety } from "@mendel/common";
 import { computed } from "vue";
+import PlantIcon from "./PlantIcon.vue";
 
 const gardenStore = useGardenStore();
 
@@ -84,9 +85,11 @@ function plantCount(variety: Variety): number | undefined {
             </template>
 
             <template #[`item.icon`]="{ item }">
-              <svg class="plantIcon" :style="`fill: ${item.raw.color}`">
-                <use :href="`#family-${item.raw.familyId}`" />
-              </svg>
+              <plant-icon
+                class="plantAvatar"
+                :color="item.raw.color"
+                :family-id="item.raw.familyId"
+              />
             </template>
           </v-data-table>
         </v-card>

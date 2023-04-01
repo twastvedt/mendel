@@ -6,6 +6,7 @@ import type { UiElement, UiElementType } from "../types/entityTypes";
 import { getEntityIcon } from "../types/entityTypes";
 
 import SelectVariety from "./fields/SelectVariety.vue";
+import PlantIcon from "./PlantIcon.vue";
 
 const store = useRootStore();
 let variety = ref<VarietyLocal | undefined>(undefined);
@@ -77,7 +78,7 @@ watch(
 
       <v-spacer></v-spacer>
 
-      <v-btn icon>
+      <v-btn icon @click="() => (store.showDetails = false)">
         <v-icon>mdi-close</v-icon>
       </v-btn>
     </v-toolbar>
@@ -110,21 +111,17 @@ watch(
         </template>
 
         <template #append>
-          <v-avatar v-if="item.type == 'planting'">
-            <svg
-              class="icon avatar"
-              :style="`fill: ${item.item.variety?.color}`"
-            >
-              <use :href="`#family-${item.item.variety?.familyId}`" />
-            </svg>
+          <v-avatar v-if="item.type == 'planting' && item.item.variety">
+            <PlantIcon
+              :color="item.item.variety?.color"
+              :family-id="item.item.variety?.familyId"
+            />
           </v-avatar>
-          <v-avatar v-if="item.type == 'plant'">
-            <svg
-              class="icon avatar"
-              :style="`fill: ${item.item.planting?.variety?.color}`"
-            >
-              <use :href="`#family-${item.item.planting?.variety?.familyId}`" />
-            </svg>
+          <v-avatar v-if="item.type == 'plant' && item.item.planting?.variety">
+            <PlantIcon
+              :color="item.item.planting.variety.color"
+              :family-id="item.item.planting.variety.familyId"
+            />
           </v-avatar>
         </template>
 

@@ -6,9 +6,11 @@ import type { UiElement } from "../types/entityTypes";
 import { defineStore } from "pinia";
 import { ref, computed } from "vue";
 
-axios.defaults.baseURL = "http://localhost:3000";
+axios.defaults.baseURL =
+  import.meta.env.VITE_SERVER_URL ?? "http://localhost:3000";
 
 export const useRootStore = defineStore("root", () => {
+  const showDetails = ref(false);
   const loading = ref(false);
   const scale = ref(1);
   const selection = ref<UiElement[]>([]);
@@ -36,10 +38,16 @@ export const useRootStore = defineStore("root", () => {
 
         toolName.value = "";
       } else {
-        selection.value = [];
+        setSelection();
       }
     }
   });
+
+  function setSelection(newSelection?: UiElement[]): void {
+    selection.value = newSelection ?? [];
+
+    showDetails.value = !!newSelection?.length;
+  }
 
   function onClick(event: MouseEvent, element?: UiElement): void {
     if (tool.value) {
@@ -52,15 +60,17 @@ export const useRootStore = defineStore("root", () => {
       }
     } else if (event.ctrlKey || event.shiftKey) {
       if (element) {
-        selection.value.push(element);
+        setSelection([...selection.value, element]);
       }
     } else {
       if (element) {
-        selection.value = [element];
+        setSelection([element]);
       } else {
-        selection.value = [];
+        setSelection();
       }
     }
+
+    event.stopImmediatePropagation();
   }
 
   function setTool(newTool: Tool): void {
@@ -91,6 +101,7 @@ export const useRootStore = defineStore("root", () => {
     tool,
     cursorPosition,
     scaleRange,
+    showDetails,
     onClick,
     setTool,
     updateTool,

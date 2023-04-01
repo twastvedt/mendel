@@ -3,6 +3,7 @@ import { watch, ref, computed } from "vue";
 import type { VarietyLocal } from "@mendel/common/src";
 import { useGardenStore } from "../state/gardenStore";
 import { VForm } from "vuetify/components";
+import PlantIcon from "./PlantIcon.vue";
 
 const gardenStore = useGardenStore();
 
@@ -89,12 +90,12 @@ resetForm();
             <v-menu :close-on-content-click="false" location="bottom">
               <template #activator="{ props }">
                 <v-btn x-large v-bind="props" class="bigSquareButton">
-                  <svg v-if="formValue.family" class="svgicon">
-                    <use
-                      :href="`#family-${formValue.family.id}`"
-                      :fill="formValue.color"
-                    />
-                  </svg>
+                  <plant-icon
+                    v-if="formValue.family"
+                    :size="44"
+                    :color="formValue.color"
+                    :family-id="formValue.family.id"
+                  />
                 </v-btn>
               </template>
               <v-card>
@@ -120,13 +121,9 @@ resetForm();
   </v-card>
 </template>
 <style scoped lang="scss">
-.svgicon {
-  stroke: black;
-  height: 44px;
-}
-
 .bigSquareButton {
   width: 52px !important;
+  height: 52px !important;
   padding: 0 !important;
   min-width: 0 !important;
 }

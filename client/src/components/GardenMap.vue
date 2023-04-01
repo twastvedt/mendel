@@ -191,7 +191,7 @@ function elementStyle(elementType: UiElementType): Record<string, string> {
     </svg>
 
     <v-navigation-drawer
-      v-if="store.selection.length"
+      :model-value="store.showDetails"
       width="300"
       location="right"
       absolute

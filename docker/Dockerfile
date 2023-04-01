@@ -8,6 +8,7 @@ ENV NODE_ENV=production
 COPY package*.json tsconfig*.json .eslintrc.js ./ 
 COPY client/package.json client/
 COPY common/package.json common/
+COPY .env.production.local .env.production
 
 RUN npm ci
 

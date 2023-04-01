@@ -5,6 +5,7 @@ import type { DataTableHeader } from "@/types/vuetifyTypes";
 import EditFamily from "./EditFamily.vue";
 import EditDataTable from "./EditDataTable.vue";
 import type { Family } from "@mendel/common";
+import PlantIcon from "./PlantIcon.vue";
 
 const gardenStore = useGardenStore();
 
@@ -75,9 +76,11 @@ async function deleteFamily(family: Family): Promise<void> {
       </template>
 
       <template #[`item.icon`]="{ item }">
-        <svg class="plantIcon">
-          <use :href="`#family-${item.raw.id}`" :fill="item.raw.color" />
-        </svg>
+        <PlantIcon
+          class="plantAvatar"
+          :color="item.raw.color"
+          :family-id="item.raw.id"
+        />
       </template>
     </EditDataTable>
   </v-container>
