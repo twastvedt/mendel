@@ -1,8 +1,12 @@
+import type { Relation } from "typeorm";
 import { Entity, Column, OneToMany } from "typeorm";
-import { Bed, BedLocal } from "./Bed";
-import { EntityBase, EntityLocal } from "./EntityBase";
-import { Point } from "./geoJson";
-import { Plan, PlanLocal } from "./Plan";
+import type { BedLocal } from "./Bed.js";
+import { Bed } from "./Bed.js";
+import type { EntityLocal } from "./EntityBase.js";
+import { EntityBase } from "./EntityBase.js";
+import type { Point } from "./geoJson.js";
+import type { PlanLocal } from "./Plan.js";
+import { Plan } from "./Plan.js";
 
 export type GardenLocal = EntityLocal<
   Garden,
@@ -25,10 +29,10 @@ export class Garden extends EntityBase {
     eager: true,
     cascade: true,
   })
-  beds!: Bed[];
+  beds!: Relation<Bed>[];
 
   @OneToMany(() => Plan, (plan) => plan.garden, {
     cascade: true,
   })
-  plans!: Plan[];
+  plans!: Relation<Plan>[];
 }

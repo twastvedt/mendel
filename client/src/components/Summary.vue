@@ -47,8 +47,8 @@ const totalArea = computed((): number | undefined => {
           [
             ...beds[0].shape.coordinates[0][0],
             ...beds[0].shape.coordinates[0][1],
-          ]
-        )
+          ],
+        ),
       ) / 144
     );
   }
@@ -60,7 +60,7 @@ const areas = {
   Beds:
     (gardenStore.garden?.beds.reduce(
       (total, bed) => total + polygonArea(bed.shape.coordinates[0]),
-      0
+      0,
     ) ?? 0) / 144,
   Total: totalArea.value,
 };
@@ -81,14 +81,14 @@ function plantCount(variety: Variety): number | undefined {
             :headers="headers"
           >
             <template #[`item.plants`]="{ item }">
-              {{ plantCount(item.raw) }}
+              {{ plantCount(item) }}
             </template>
 
             <template #[`item.icon`]="{ item }">
               <plant-icon
                 class="plantAvatar"
-                :color="item.raw.color"
-                :family-id="item.raw.familyId"
+                :color="item.color"
+                :family-id="item.familyId"
               />
             </template>
           </v-data-table>

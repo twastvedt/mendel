@@ -1,7 +1,7 @@
 version: "3"
 services:
   db:
-    image: ghcr.io/baosystems/postgis:14-3.2
+    image: postgis/postgis:14-3.2-alpine
     environment:
       POSTGRES_DB: mendel
       POSTGRES_PASSWORD: mendel

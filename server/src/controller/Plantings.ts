@@ -1,7 +1,7 @@
 import express from "express";
 import { plantingApi, Planting } from "@mendel/common";
-import { all, create, one, remove, update } from "./handlers";
-import { addWrappedHandler } from "./addRoutes";
+import { all, create, one, remove, update } from "./handlers.js";
+import { addWrappedHandler } from "./addRoutes.js";
 
 const router = express.Router();
 

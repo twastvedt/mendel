@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { watch, ref, computed } from "vue";
-import type { VarietyLocal } from "@mendel/common/src";
+import type { FamilyLocal, VarietyLocal } from "@mendel/common";
 import { useGardenStore } from "../state/gardenStore";
 import { VForm } from "vuetify/components";
 import PlantIcon from "./PlantIcon.vue";
@@ -9,7 +9,7 @@ const gardenStore = useGardenStore();
 
 const emit = defineEmits<{
   (e: "close"): void;
-  (e: "input", formValue: unknown): void;
+  (e: "input", formValue: VarietyLocal): void;
 }>();
 
 const form = ref<VForm>();
@@ -76,7 +76,7 @@ resetForm();
         ></v-text-field>
         <v-select
           v-model="formValue.family"
-          :items="gardenStore.families"
+          :items="gardenStore.families as FamilyLocal[]"
           item-title="name"
           return-object
           label="Family"

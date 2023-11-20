@@ -1,9 +1,14 @@
+import type { Relation } from "typeorm";
 import { Entity, Column, ManyToOne, OneToMany } from "typeorm";
-import { EntityBase, EntityLocal } from "./EntityBase";
-import { LineString } from "./geoJson";
-import { Plan, PlanLocal } from "./Plan";
-import { Plant, PlantLocal } from "./Plant";
-import { Variety, VarietyLocal } from "./Variety";
+import type { EntityLocal } from "./EntityBase.js";
+import { EntityBase } from "./EntityBase.js";
+import type { LineString } from "./geoJson.js";
+import type { PlanLocal } from "./Plan.js";
+import { Plan } from "./Plan.js";
+import type { PlantLocal } from "./Plant.js";
+import { Plant } from "./Plant.js";
+import type { VarietyLocal } from "./Variety.js";
+import { Variety } from "./Variety.js";
 
 export type PlantingLocal = EntityLocal<
   Planting,
@@ -47,7 +52,7 @@ export class Planting extends EntityBase {
   varietyId!: number;
 
   @ManyToOne(() => Variety, (variety) => variety.plantings)
-  variety?: Variety;
+  variety?: Relation<Variety>;
 
   @Column("integer")
   planId!: number;
@@ -55,17 +60,17 @@ export class Planting extends EntityBase {
   @ManyToOne(() => Plan, (plan) => plan.plantings, {
     onDelete: "CASCADE",
   })
-  plan?: Plan;
+  plan?: Relation<Plan>;
 
   @OneToMany(() => Plant, (plant) => plant.planting, {
     eager: true,
     cascade: true,
   })
-  plants!: Plant[];
+  plants!: Relation<Plant>[];
 
   static localCopy(
     planting: Planting | PlantingLocal,
-    deep = true
+    deep = true,
   ): PlantingLocal {
     const newPlanting: PlantingLocal = Object.assign({}, planting);
 

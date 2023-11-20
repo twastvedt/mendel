@@ -1,12 +1,12 @@
 {
   "extends": "../tsconfig-base.json",
   "compilerOptions": {
-    "target": "ESNext",
-    "module": "ESNext",
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"]
     },
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
     "outDir": "dist",
     "rootDir": "src",
     "tsBuildInfoFile": "dist/.tsbuildinfo",
@@ -14,7 +14,8 @@
     "typeRoots": ["./node_modules/@types", "../node_modules/vuetify/types"],
     "types": ["node"],
     "verbatimModuleSyntax": true,
-    "jsx": "preserve"
+    "jsx": "preserve",
+    "isolatedModules": true
   },
   "include": ["env.d.ts", "src/**/*", "src/**/*.vue"],
   "references": [{ "path": "../common" }]

@@ -1,4 +1,5 @@
-import axios, { AxiosRequestConfig, AxiosStatic } from "axios";
+import type { AxiosRequestConfig, AxiosStatic } from "axios";
+import axios from "axios";
 
 type PartialAxios = Omit<AxiosRequestConfig, "data">;
 

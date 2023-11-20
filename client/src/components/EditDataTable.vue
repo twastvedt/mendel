@@ -1,22 +1,26 @@
-<script setup lang="ts">
-// import type { DataTableHeader } from 'vuetify/labs/VDataTable';
+<script setup lang="ts" generic="T">
+// import type { DataTableHeader } from 'vuetify/components/VDataTable';
 import type { DataTableHeader } from "@/types/vuetifyTypes";
-import { computed, ref, useSlots } from "vue";
+import { computed, ref, shallowRef, useSlots } from "vue";
 
 const dataTableSlots = Object.fromEntries(
   Object.entries(useSlots()).filter(
-    ([key]) => key !== "default" && key !== "expanded-item"
-  )
+    ([key]) => key !== "default" && key !== "expanded-item",
+  ),
 );
 
 const props = defineProps<{
-  modelValue: unknown[];
+  modelValue: T[];
   name: string;
   headers: DataTableHeader[];
   showExpand?: boolean;
 }>();
 
-const expanded = ref<unknown[]>([]);
+defineEmits<{
+  (e: "delete", item: T): void;
+}>();
+
+const expanded = shallowRef<T[]>([]);
 const search = ref("");
 const showDialog = ref(false);
 const currentIndex = ref<number | undefined>(undefined);
@@ -43,7 +47,7 @@ const fullHeaders = computed(() => {
   return headers;
 });
 
-function editItem(item: unknown): void {
+function editItem(item: T): void {
   currentIndex.value = props.modelValue.indexOf(item);
 
   showDialog.value = true;
@@ -113,10 +117,8 @@ function expandAll(v: Event): void {
       </template>
 
       <template #[`item.actions`]="{ item }">
-        <v-icon small class="me-2" @click="editItem(item.raw)">
-          mdi-pencil
-        </v-icon>
-        <v-icon small @click="$emit('delete', item.raw)"> mdi-delete </v-icon>
+        <v-icon small class="me-2" @click="editItem(item)"> mdi-pencil </v-icon>
+        <v-icon small @click="$emit('delete', item)"> mdi-delete </v-icon>
       </template>
 
       <template #expanded-item="props">

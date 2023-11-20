@@ -2,15 +2,16 @@
   "name": "@mendel/common",
   "version": "1.0.0",
   "description": "Common library for Mendel client and server.",
-  "main": "dist/index.js",
+  "exports": "./src/index.ts",
   "private": true,
+  "type": "module",
   "scripts": {
     "clean": "rimraf dist",
     "build": "tsc -b",
     "watch": "npm run build -- --watch"
   },
   "dependencies": {
-    "axios": "^0.26.1",
-    "typeorm": "0.3.12"
+    "axios": "^1.6.2",
+    "typeorm": "0.3.17"
   }
 }

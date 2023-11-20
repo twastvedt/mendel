@@ -1,7 +1,7 @@
-import { Entity, Column, ManyToOne } from "typeorm";
-import { EntityBase, EntityLocal } from "./EntityBase";
-import { Garden, GardenLocal } from "./Garden";
-import { Polygon } from "./geoJson";
+import { Entity, Column, ManyToOne, type Relation } from "typeorm";
+import { EntityBase, type EntityLocal } from "./EntityBase.js";
+import { Garden, type GardenLocal } from "./Garden.js";
+import type { Polygon } from "./geoJson.js";
 
 export type BedLocal = EntityLocal<Bed, "gardenId", { garden?: GardenLocal }>;
 
@@ -22,5 +22,5 @@ export class Bed extends EntityBase {
   @ManyToOne(() => Garden, (garden) => garden.beds, {
     onDelete: "CASCADE",
   })
-  garden?: Garden;
+  garden?: Relation<Garden>;
 }

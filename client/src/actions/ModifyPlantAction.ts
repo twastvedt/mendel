@@ -1,5 +1,4 @@
-import type { HasId } from "@mendel/common";
-import type { Plant } from "@mendel/common/src/entity/Plant";
+import type { HasId, Plant } from "@mendel/common";
 import { Action } from "./Action";
 import { useGardenStore } from "@/state/gardenStore";
 
@@ -9,7 +8,7 @@ export class ModifyPlantAction extends Action {
 
   public constructor(
     public _plant: HasId<Plant>,
-    public _changes: Partial<Plant>
+    public _changes: Partial<Plant>,
   ) {
     super();
   }

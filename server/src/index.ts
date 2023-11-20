@@ -3,24 +3,26 @@ import express, { static as _static, json } from "express";
 import { join } from "path";
 import cors from "cors";
 import { config } from "dotenv";
+import { fileURLToPath } from "url";
 
 const production = process.env.NODE_ENV === "production";
+const __dirname = fileURLToPath(new URL(".", import.meta.url));
 
 config({
   path: join(__dirname, `../../.env${production ? ".production" : ""}.local`),
 });
 config({ path: join(__dirname, "../../.env") });
 
-import BedRoutes from "./controller/Beds";
-import VarietyRoutes from "./controller/Varieties";
-import GardenRoutes from "./controller/Gardens";
-import PlantingRoutes from "./controller/Plantings";
-import PlantRoutes from "./controller/Plants";
-import PlanRoutes from "./controller/Plans";
-import FamilyRoutes from "./controller/Families";
-import { dataSource } from "./dataSource";
+import { getDataSource } from "./dataSource.js";
+import BedRoutes from "./controller/Beds.js";
+import VarietyRoutes from "./controller/Varieties.js";
+import GardenRoutes from "./controller/Gardens.js";
+import PlantingRoutes from "./controller/Plantings.js";
+import PlantRoutes from "./controller/Plants.js";
+import PlanRoutes from "./controller/Plans.js";
+import FamilyRoutes from "./controller/Families.js";
 
-dataSource
+getDataSource()
   .initialize()
   .then(async (connection) => {
     // TODO: Remove for production.
@@ -29,7 +31,7 @@ dataSource
     connection.runMigrations();
 
     console.log(
-      `Starting Express in ${production ? "production" : "development"} mode.`
+      `Starting Express in ${production ? "production" : "development"} mode.`,
     );
 
     const app = express()
@@ -46,11 +48,11 @@ dataSource
       res.setHeader("Access-Control-Allow-Origin", "*");
       res.setHeader(
         "Access-Control-Allow-Methods",
-        "OPTIONS, GET, POST, PUT, PATCH, DELETE"
+        "OPTIONS, GET, POST, PUT, PATCH, DELETE",
       );
       res.setHeader(
         "Access-Control-Allow-Headers",
-        "Content-Type, Authorization"
+        "Content-Type, Authorization",
       );
       next();
     });

@@ -1,15 +1,15 @@
-import { Endpoint } from "@mendel/common";
-import {
+import type { Endpoint } from "@mendel/common";
+import type {
   RequestHandler,
   Router,
   Request,
   Response,
   NextFunction,
 } from "express";
-import { ParamsDictionary } from "express-serve-static-core";
+import type { ParamsDictionary } from "express-serve-static-core";
 import type { ParsedQs } from "qs";
-import { EntityTarget, ObjectLiteral, Repository } from "typeorm";
-import { dataSource } from "../dataSource";
+import type { EntityTarget, ObjectLiteral, Repository } from "typeorm";
+import { getDataSource } from "../dataSource.js";
 
 type ExpressMethod =
   | "all"
@@ -46,7 +46,7 @@ type ExpressMethod =
 export function addAsyncRoute<
   TParams extends ParamsDictionary,
   TResponse,
-  TData
+  TData,
 >(
   router: Router,
   method: ExpressMethod,
@@ -54,8 +54,8 @@ export function addAsyncRoute<
   handler: (
     req: Request<TParams, TResponse, TData, ParsedQs, Record<string, unknown>>,
     res: Response,
-    next: NextFunction
-  ) => void | Promise<void>
+    next: NextFunction,
+  ) => void | Promise<void>,
 ): void {
   router[method](
     path,
@@ -68,10 +68,10 @@ export function addAsyncRoute<
         Record<string, unknown>
       >,
       res,
-      next
+      next,
     ) => {
       Promise.resolve(handler(req, res, next)).catch(next);
-    }
+    },
   );
 }
 
@@ -81,14 +81,14 @@ export function addAsyncRoute<
 export function addWrappedAsyncRoute<
   TParams extends ParamsDictionary,
   TResponse,
-  TData
+  TData,
 >(
   router: Router,
   method: ExpressMethod,
   path: string,
   handler: (
-    req: Request<TParams, TResponse, TData, ParsedQs, Record<string, unknown>>
-  ) => Promise<unknown> | unknown
+    req: Request<TParams, TResponse, TData, ParsedQs, Record<string, unknown>>,
+  ) => Promise<unknown> | unknown,
 ): void {
   addAsyncRoute<TParams, TResponse, TData>(
     router,
@@ -104,7 +104,7 @@ export function addWrappedAsyncRoute<
           }
         })
         .catch(next);
-    }
+    },
   );
 }
 
@@ -117,11 +117,11 @@ export function addWrappedAsyncRoute<
 export function addHandler<
   TParams extends { [P in keyof TParams]: string | number | Date } | undefined,
   TData,
-  TResponse
+  TResponse,
 >(
   endpoint: Endpoint<TParams, TData, TResponse>,
   router: Router,
-  resolver: RequestHandler
+  resolver: RequestHandler,
 ): void {
   router[endpoint.method](endpoint.resource, resolver);
 }
@@ -130,7 +130,7 @@ export function addWrappedHandler<
   TParams extends { [P in keyof TParams]: string | number | Date } | undefined,
   TData,
   TResponse,
-  TEntity extends ObjectLiteral
+  TEntity extends ObjectLiteral,
 >(
   endpoint: Endpoint<TParams, TData, TResponse>,
   router: Router,
@@ -143,13 +143,13 @@ export function addWrappedHandler<
       ParsedQs,
       Record<string, unknown>
     >,
-    repository: Repository<TEntity>
-  ) => Promise<TResponse> | TResponse
+    repository: Repository<TEntity>,
+  ) => Promise<TResponse> | TResponse,
 ): void;
 export function addWrappedHandler<
   TParams extends { [P in keyof TParams]: string | number | Date } | undefined,
   TData,
-  TResponse
+  TResponse,
 >(
   endpoint: Endpoint<TParams, TData, TResponse>,
   router: Router,
@@ -160,13 +160,13 @@ export function addWrappedHandler<
       TData,
       ParsedQs,
       Record<string, unknown>
-    >
-  ) => Promise<TResponse> | TResponse
+    >,
+  ) => Promise<TResponse> | TResponse,
 ): void;
 export function addWrappedHandler<
   TParams extends { [P in keyof TParams]: string | number | Date } | undefined,
   TData,
-  TResponse
+  TResponse,
 >(
   endpoint: Endpoint<TParams, TData, TResponse>,
   router: Router,
@@ -181,8 +181,8 @@ export function addWrappedHandler<
             ParsedQs,
             Record<string, unknown>
           >,
-          repository: Repository<ObjectLiteral>
-        ) => Promise<TResponse> | TResponse
+          repository: Repository<ObjectLiteral>,
+        ) => Promise<TResponse> | TResponse,
       ]
     | [
         handler: (
@@ -192,8 +192,8 @@ export function addWrappedHandler<
             TData,
             ParsedQs,
             Record<string, unknown>
-          >
-        ) => Promise<TResponse> | TResponse
+          >,
+        ) => Promise<TResponse> | TResponse,
       ]
 ): void {
   if (rest.length === 2) {
@@ -208,9 +208,9 @@ export function addWrappedHandler<
           TData,
           ParsedQs,
           Record<string, unknown>
-        >
+        >,
       ) => {
-        const repository = dataSource.manager.getRepository(rest[0]);
+        const repository = getDataSource().manager.getRepository(rest[0]);
 
         return (
           rest[1] as (
@@ -221,10 +221,10 @@ export function addWrappedHandler<
               ParsedQs,
               Record<string, unknown>
             >,
-            repository: Repository<ObjectLiteral>
+            repository: Repository<ObjectLiteral>,
           ) => Promise<unknown> | unknown
         )(request, repository);
-      }
+      },
     );
   } else {
     addWrappedAsyncRoute(
@@ -238,8 +238,8 @@ export function addWrappedHandler<
           TData,
           ParsedQs,
           Record<string, unknown>
-        >
-      ) => Promise<unknown> | unknown
+        >,
+      ) => Promise<unknown> | unknown,
     );
   }
 }

@@ -51,14 +51,14 @@ function plantCount(variety: Variety): number | undefined {
       </template>
 
       <template #[`item.plants`]="{ item }">
-        {{ plantCount(item.raw) }}
+        {{ plantCount(item) }}
       </template>
 
       <template #[`item.icon`]="{ item }">
         <PlantIcon
           class="plantAvatar"
-          :color="item.raw.color"
-          :family-id="item.raw.familyId"
+          :color="item.color"
+          :family-id="item.familyId"
         />
       </template>
     </EditDataTable>

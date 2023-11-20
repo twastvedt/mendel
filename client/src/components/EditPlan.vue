@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { ref, watch, computed } from "vue";
-import type { PlanLocal } from "@mendel/common/src";
+import type { PlanLocal } from "@mendel/common";
 import { VForm } from "vuetify/components";
 
 const emit = defineEmits<{

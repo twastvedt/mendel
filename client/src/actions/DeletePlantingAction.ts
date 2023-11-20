@@ -1,5 +1,5 @@
-import { plantingApi, Planting, PlantingLocal } from "@mendel/common/src";
-import type { HasId } from "@mendel/common";
+import { plantingApi } from "@mendel/common";
+import type { HasId, PlantingLocal , Planting } from "@mendel/common";
 import { Action } from "./Action";
 import { useGardenStore } from "@/state/gardenStore";
 

@@ -1,7 +1,10 @@
+import type { Relation } from "typeorm";
 import { Entity, Column, ManyToOne } from "typeorm";
-import { EntityBase, EntityLocal } from "./EntityBase";
-import { Point } from "./geoJson";
-import { Planting, PlantingLocal } from "./Planting";
+import type { EntityLocal } from "./EntityBase.js";
+import { EntityBase } from "./EntityBase.js";
+import type { Point } from "./geoJson.js";
+import type { PlantingLocal } from "./Planting.js";
+import { Planting } from "./Planting.js";
 
 export type PlantLocal = EntityLocal<
   Plant,
@@ -20,7 +23,7 @@ export class Plant extends EntityBase {
   @ManyToOne(() => Planting, (planting) => planting.plants, {
     onDelete: "CASCADE",
   })
-  planting?: Planting;
+  planting?: Relation<Planting>;
 
   static localCopy(plant: Plant | PlantLocal): PlantLocal {
     const newPlant: PlantLocal = Object.assign({}, plant);

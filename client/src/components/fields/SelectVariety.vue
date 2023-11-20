@@ -55,15 +55,17 @@ function varietyFilter(item: Variety, queryText: string): boolean {
     @update:model-value="$emit('input', $event)"
   >
     <template #selection="{ item }">
-      <plant-icon
-        class="plantAvatar"
-        :color="item.raw.color"
-        :family-id="item.raw.familyId"
-      />
-      {{ item.raw.name }} - {{ item.raw.family?.name }}
+      <template v-if="!('divider' in item.raw)">
+        <plant-icon
+          class="plantAvatar"
+          :color="item.raw.color"
+          :family-id="item.raw.familyId"
+        />
+        {{ item.raw.name }} - {{ item.raw.family?.name }}
+      </template>
     </template>
     <template #item="{ item, props }">
-      <v-divider v-if="item.raw.divider" />
+      <v-divider v-if="'divider' in item.raw" />
       <v-list-item
         v-else
         v-bind="props"

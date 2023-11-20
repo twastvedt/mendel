@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import type { PlanClient } from "@/state/gardenStore";
 import { useGardenStore } from "@/state/gardenStore";
 import { ref } from "vue";
 import EditPlan from "./EditPlan.vue";
@@ -15,7 +16,7 @@ function edit(): void {
 </script>
 <template>
   <v-select
-    :items="gardenStore.plans"
+    :items="gardenStore.plans as PlanClient[]"
     item-title="name"
     item-value="id"
     return-object

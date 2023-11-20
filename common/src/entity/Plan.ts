@@ -1,14 +1,19 @@
+import type {
+  Relation} from "typeorm";
 import {
   Entity,
   Column,
   OneToMany,
   ManyToOne,
   CreateDateColumn,
-  UpdateDateColumn,
+  UpdateDateColumn
 } from "typeorm";
-import { EntityBase, EntityLocal } from "./EntityBase";
-import { Planting, PlantingLocal } from "./Planting";
-import { Garden, GardenLocal } from "./Garden";
+import type { EntityLocal } from "./EntityBase.js";
+import { EntityBase } from "./EntityBase.js";
+import type { PlantingLocal } from "./Planting.js";
+import { Planting } from "./Planting.js";
+import type { GardenLocal } from "./Garden.js";
+import { Garden } from "./Garden.js";
 
 export type PlanLocal = EntityLocal<
   Plan,
@@ -36,13 +41,13 @@ export class Plan extends EntityBase {
   @ManyToOne(() => Garden, (garden) => garden.plans, {
     onDelete: "CASCADE",
   })
-  garden?: Garden;
+  garden?: Relation<Garden>;
 
   @OneToMany(() => Planting, (planting) => planting.plan, {
     eager: true,
     cascade: true,
   })
-  plantings!: Planting[];
+  plantings!: Relation<Planting>[];
 
   @CreateDateColumn()
   createdDate!: Date;
@@ -57,7 +62,7 @@ export class Plan extends EntityBase {
 
     if (deep) {
       newPlan.plantings = plan.plantings?.map((p) =>
-        Planting.localCopy(p, true)
+        Planting.localCopy(p, true),
       );
     } else {
       newPlan.plantings = [];

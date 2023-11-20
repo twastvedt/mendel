@@ -1,6 +1,9 @@
+import type { Relation } from "typeorm";
 import { Entity, Column, OneToMany } from "typeorm";
-import { EntityBase, EntityLocal } from "./EntityBase";
-import { Variety, VarietyLocal } from "./Variety";
+import type { EntityLocal } from "./EntityBase.js";
+import { EntityBase } from "./EntityBase.js";
+import type { VarietyLocal } from "./Variety.js";
+import { Variety } from "./Variety.js";
 
 export type FamilyLocal = EntityLocal<
   Family,
@@ -15,7 +18,7 @@ export class Family extends EntityBase {
     color: string,
     icon: string,
     spacing: number,
-    nitrogen?: number
+    nitrogen?: number,
   ) {
     super();
 
@@ -45,14 +48,14 @@ export class Family extends EntityBase {
   spacing!: number;
 
   @OneToMany(() => Variety, (v) => v.family, { cascade: true })
-  varieties!: Variety[];
+  varieties!: Relation<Variety>[];
 
   static localCopy(family: FamilyLocal, deep = true): FamilyLocal {
     const newFamily: FamilyLocal = Object.assign({}, family);
 
     if (deep) {
       newFamily.varieties = family.varieties?.map((v) =>
-        Variety.localCopy(v, true)
+        Variety.localCopy(v, true),
       );
     } else {
       newFamily.varieties = [];

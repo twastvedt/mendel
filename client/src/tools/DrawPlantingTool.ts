@@ -1,5 +1,5 @@
-import { Variety, Planting, PlantingLocal } from "@mendel/common/src";
-import type { Position } from "@mendel/common";
+import { Planting } from "@mendel/common";
+import type { PlantingLocal, Variety, Position } from "@mendel/common";
 import type { Tool } from "./Tool";
 import { AddPlantingAction } from "../actions/AddPlantingAction";
 import type { Action } from "../actions/Action";
@@ -7,7 +7,6 @@ import { useRootStore } from "../state/rootStore";
 import drawPlanting from "../components/DrawPlanting.vue";
 import type { GridPoints, PolygonGrid } from "../services/polygonGrid";
 import type { UiElementType } from "../types/entityTypes";
-import { Plant } from "@mendel/common/src/entity/Plant";
 import { markRaw } from "vue";
 
 export enum Stage {
@@ -21,7 +20,10 @@ export class DrawPlantingTool implements Tool {
   private index?: number;
   private store = useRootStore();
 
-  public constructor(private variety: Variety, private grid: PolygonGrid) {}
+  public constructor(
+    private variety: Variety,
+    private grid: PolygonGrid,
+  ) {}
 
   public interactiveElements = new Set<UiElementType>(["area"]);
 
@@ -180,7 +182,7 @@ export class DrawPlantingTool implements Tool {
           props.snapped = false;
           const indices = this.grid.splitPolygon(
             this.index,
-            props.dividingLine
+            props.dividingLine,
           );
 
           this.onHover(point, indices[0]);
@@ -205,7 +207,7 @@ export class DrawPlantingTool implements Tool {
     if (props.rotationCenter) {
       this.grid.rotation = Math.atan2(
         point[1] - props.rotationCenter[1],
-        point[0] - props.rotationCenter[0]
+        point[0] - props.rotationCenter[0],
       );
     } else {
       this.grid.setCursor(point);
@@ -280,7 +282,7 @@ export class DrawPlantingTool implements Tool {
       if (plants) {
         this.planting.plants = plants.interiorPoints
           .concat(
-            plants.edgePoints.filter((e) => e.display).map((e) => e.point)
+            plants.edgePoints.filter((e) => e.display).map((e) => e.point),
           )
           .map((p) => ({
             location: {

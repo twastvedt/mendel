@@ -1,7 +1,7 @@
 import express from "express";
 import { varietyApi, Variety, Family } from "@mendel/common";
-import { one, all, create, update, remove } from "./handlers";
-import { addWrappedHandler } from "./addRoutes";
+import { one, all, create, update, remove } from "./handlers.js";
+import { addWrappedHandler } from "./addRoutes.js";
 
 const router = express.Router();
 
@@ -12,7 +12,7 @@ addWrappedHandler(
   async (request, repository) =>
     repository.find({
       relations: ["varieties"],
-    })
+    }),
 );
 
 addWrappedHandler(varietyApi.all, router, all(Variety));

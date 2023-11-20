@@ -1,5 +1,4 @@
-import type { HasId, Position } from "@mendel/common";
-import type { PlantLocal } from "@mendel/common/src/entity/Plant";
+import type { HasId, Position, PlantLocal } from "@mendel/common";
 import { Action } from "./Action";
 import { useGardenStore } from "@/state/gardenStore";
 
@@ -7,7 +6,10 @@ export class AddPlantAction extends Action {
   _plant?: HasId<PlantLocal>;
   _gardenStore = useGardenStore();
 
-  public constructor(public _location: Position, public _varietyId: number) {
+  public constructor(
+    public _location: Position,
+    public _varietyId: number,
+  ) {
     super();
   }
 
@@ -16,7 +18,7 @@ export class AddPlantAction extends Action {
 
     this._plant = await this._gardenStore.addPlant(
       this._location,
-      this._varietyId
+      this._varietyId,
     );
   }
 

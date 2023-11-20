@@ -4,8 +4,8 @@ import type {
   Planting,
   PlantingLocal,
   EntityLocalBase,
+  PlantLocal,
 } from "@mendel/common";
-import type { PlantLocal } from "@mendel/common/src/entity/Plant";
 
 export function isPlanting(entity?: EntityBase): entity is Planting {
   return !!(entity as Planting).shape;

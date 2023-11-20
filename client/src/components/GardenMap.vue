@@ -8,7 +8,7 @@ import type { D3ZoomEvent } from "d3-zoom";
 import PlantingComponent from "./PlantingComponent.vue";
 import MapToolbar from "./MapToolbar.vue";
 import DetailsPane from "./DetailsPane.vue";
-import type { UiElementType } from "../types/entityTypes";
+import type { AreaElement, UiElementType } from "../types/entityTypes";
 import { nextTick, onMounted, ref } from "vue";
 import { pathGenerator, pathFromPoints } from "@/services/projection";
 
@@ -87,7 +87,7 @@ function zoomFit(animate: boolean): void {
 
     zoomable.call(
       zoomBehavior.transform,
-      d3.zoomIdentity.translate(translate[0], translate[1]).scale(scale)
+      d3.zoomIdentity.translate(translate[0], translate[1]).scale(scale),
     );
   }
 }
@@ -153,7 +153,9 @@ function elementStyle(elementType: UiElementType): Record<string, string> {
             class="area"
             :style="elementStyle('area')"
             :d="pathFromPointsLocal(area.polygon)"
-            @click.stop="store.onClick($event, { type: 'area', item: area })"
+            @click.stop="
+              store.onClick($event, { type: 'area', item: area } as AreaElement)
+            "
             @mouseenter="onHover($event, area, i)"
             @mouseleave="onHover($event)"
           />

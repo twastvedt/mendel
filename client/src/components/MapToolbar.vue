@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed, ref, watch } from "vue";
+import { computed, ref } from "vue";
 import { useRootStore } from "../state/rootStore";
 import { DrawPlantTool } from "../tools/DrawPlantTool";
 import { DeletePlantTool } from "../tools/DeletePlantTool";
@@ -10,7 +10,6 @@ import { DrawPlantingTool } from "../tools/DrawPlantingTool";
 import SelectVariety from "./fields/SelectVariety.vue";
 import { useGardenStore } from "@/state/gardenStore";
 import type { PolygonGrid } from "@/services/polygonGrid";
-import { Tool } from "@/tools/Tool";
 
 const store = useRootStore();
 const gardenStore = useGardenStore();
@@ -47,7 +46,7 @@ function newTool(newTool: string): void {
 
       if (gardenStore.grid) {
         store.setTool(
-          new DrawPlantingTool(variety.value, gardenStore.grid as PolygonGrid)
+          new DrawPlantingTool(variety.value, gardenStore.grid as PolygonGrid),
         );
       }
       break;

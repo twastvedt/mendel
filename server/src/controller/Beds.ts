@@ -1,9 +1,9 @@
 import { bedApi, Bed } from "@mendel/common";
 import express from "express";
 
-import { all, create, one } from "./handlers";
-import { addWrappedHandler } from "./addRoutes";
-import { FindManyOptions } from "typeorm";
+import { all, create, one } from "./handlers.js";
+import { addWrappedHandler } from "./addRoutes.js";
+import type { FindManyOptions } from "typeorm";
 
 const router = express.Router();
 

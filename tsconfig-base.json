@@ -2,10 +2,10 @@
   "compilerOptions": {
     "composite": true,
     "target": "esnext",
-    "module": "commonjs",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
     "strict": true,
     "importHelpers": true,
-    "moduleResolution": "node",
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "skipLibCheck": true,

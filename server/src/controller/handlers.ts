@@ -1,17 +1,23 @@
 import type { Request } from "express";
-import {
+import type {
   DeepPartial,
   EntityTarget,
   FindOptionsWhere,
   ObjectLiteral,
 } from "typeorm";
 import type { ParsedQs } from "qs";
-import { EntityBase } from "@mendel/common";
-import { QueryDeepPartialEntity } from "typeorm/query-builder/QueryPartialEntity";
-import { dataSource } from "../dataSource";
+import type { EntityBase } from "@mendel/common";
+import type { QueryDeepPartialEntity } from "typeorm/query-builder/QueryPartialEntity.d.ts";
+import { getDataSource } from "../dataSource.js";
 
 type SimpleHandler<TParams, TData, TResponse> = (
-  request: Request<TParams, TResponse, TData, ParsedQs, Record<string, unknown>>
+  request: Request<
+    TParams,
+    TResponse,
+    TData,
+    ParsedQs,
+    Record<string, unknown>
+  >,
 ) => Promise<TResponse> | TResponse;
 
 // type ApiHandlers<TApi> = { [K in keyof TApi]: TApi[K] extends Endpoint<infer TResponse, infer TData, infer TParams> ? (
@@ -33,10 +39,10 @@ type SimpleHandler<TParams, TData, TResponse> = (
 // }
 
 export function one<T extends ObjectLiteral & EntityBase>(
-  entity: EntityTarget<T>
+  entity: EntityTarget<T>,
 ): SimpleHandler<{ id: number }, undefined, T> {
   return async (request) => {
-    const repository = dataSource.manager.getRepository(entity);
+    const repository = getDataSource().manager.getRepository(entity);
 
     // TODO: awaiting fix in https://github.com/typeorm/typeorm/pull/9709.
     const query = { id: request.params.id } as FindOptionsWhere<T>;
@@ -52,10 +58,10 @@ export function one<T extends ObjectLiteral & EntityBase>(
 }
 
 export function remove<T extends ObjectLiteral>(
-  entity: EntityTarget<T>
+  entity: EntityTarget<T>,
 ): SimpleHandler<{ id: number }, undefined, void> {
   return async (request) => {
-    const repository = dataSource.manager.getRepository(entity);
+    const repository = getDataSource().manager.getRepository(entity);
 
     const result = await repository.delete(request.params.id);
 
@@ -66,10 +72,10 @@ export function remove<T extends ObjectLiteral>(
 }
 
 export function all<T extends ObjectLiteral>(
-  entity: EntityTarget<T>
+  entity: EntityTarget<T>,
 ): SimpleHandler<undefined, undefined, T[]> {
   return async () => {
-    const repository = dataSource.manager.getRepository(entity);
+    const repository = getDataSource().manager.getRepository(entity);
 
     const entities = await repository.find();
 
@@ -78,10 +84,10 @@ export function all<T extends ObjectLiteral>(
 }
 
 export function create<T extends ObjectLiteral>(
-  entity: EntityTarget<T>
+  entity: EntityTarget<T>,
 ): SimpleHandler<undefined, T | T[], T | T[]> {
   return async (request) => {
-    const repository = dataSource.manager.getRepository(entity);
+    const repository = getDataSource().manager.getRepository(entity);
 
     if (Array.isArray(request.body)) {
       return repository.save(request.body as DeepPartial<T>[]);
@@ -92,14 +98,14 @@ export function create<T extends ObjectLiteral>(
 }
 
 export function update<T extends EntityBase>(
-  entity: EntityTarget<T>
+  entity: EntityTarget<T>,
 ): SimpleHandler<undefined, Partial<T> & { id: number }, void> {
   return async (request) => {
-    const repository = dataSource.manager.getRepository(entity);
+    const repository = getDataSource().manager.getRepository(entity);
 
     await repository.update(
       request.body.id,
-      request.body as QueryDeepPartialEntity<T>
+      request.body as QueryDeepPartialEntity<T>,
     );
   };
 }

@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import { ref, watch, computed } from "vue";
-import { Family, FamilyLocal } from "@mendel/common/src";
+import type { Family, FamilyLocal } from "@mendel/common";
 import { VForm } from "vuetify/components";
 
 const emit = defineEmits<{
   (e: "close"): void;
-  (e: "input", formValue: unknown): void;
+  (e: "input", formValue: FamilyLocal): void;
 }>();
 
 const form = ref<VForm>();
@@ -30,7 +30,7 @@ const formValue = ref(getDefault());
 const requiredRule = (v: unknown) => !!v || "Value required";
 
 const icon = computed(() =>
-  formValue.value.icon.replace("symbol ", `symbol id="edit-icon" `)
+  formValue.value.icon.replace("symbol ", `symbol id="edit-icon" `),
 );
 
 watch(() => props.value, resetForm);
@@ -79,7 +79,7 @@ resetForm();
 
         <v-text-field v-model="formValue.nitrogen" label="Nitrogen" />
 
-        <div class="text-caption">Color</div>
+        <div class="text-caption">Default color</div>
         <v-menu :close-on-content-click="false" location="bottom">
           <template #activator="{ props }">
             <v-btn x-large v-bind="props" class="bigSquareButton">

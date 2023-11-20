@@ -1,7 +1,7 @@
 import express from "express";
 import { planApi, Plan } from "@mendel/common";
-import { all, create, one, remove, update } from "./handlers";
-import { addWrappedHandler } from "./addRoutes";
+import { all, create, one, remove, update } from "./handlers.js";
+import { addWrappedHandler } from "./addRoutes.js";
 
 const router = express.Router();
 
@@ -17,7 +17,7 @@ addWrappedHandler(
       take: 1,
     });
     return plans[0];
-  }
+  },
 );
 
 addWrappedHandler(planApi.all, router, all(Plan));

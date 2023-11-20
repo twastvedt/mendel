@@ -1,7 +1,7 @@
 import { familyApi, Family } from "@mendel/common";
 import express from "express";
-import { one, all, create, update, remove } from "./handlers";
-import { addWrappedHandler } from "./addRoutes";
+import { one, all, create, update, remove } from "./handlers.js";
+import { addWrappedHandler } from "./addRoutes.js";
 
 const router = express.Router();
 

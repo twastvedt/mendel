@@ -1,12 +1,8 @@
 import "vuetify/styles";
 import { createVuetify } from "vuetify";
-import { VDataTable } from "vuetify/labs/VDataTable";
 import colors from "vuetify/lib/util/colors";
 
 export default createVuetify({
-  components: {
-    VDataTable,
-  },
   theme: {
     themes: {
       light: {

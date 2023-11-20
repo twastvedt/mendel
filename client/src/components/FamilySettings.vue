@@ -72,14 +72,14 @@ async function deleteFamily(family: Family): Promise<void> {
       </template>
 
       <template #[`item.plants`]="{ item }">
-        {{ plantCount(item.raw) }}
+        {{ plantCount(item) }}
       </template>
 
       <template #[`item.icon`]="{ item }">
         <PlantIcon
           class="plantAvatar"
-          :color="item.raw.color"
-          :family-id="item.raw.id"
+          :color="item.color"
+          :family-id="item.id"
         />
       </template>
     </EditDataTable>

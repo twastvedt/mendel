@@ -1,10 +1,14 @@
 <script setup lang="ts">
-import type { PlantingLocal, Position, VarietyLocal } from "@mendel/common";
+import type {
+  PlantingLocal,
+  Position,
+  VarietyLocal,
+  PlantLocal,
+} from "@mendel/common";
 import { useRootStore } from "../state/rootStore";
 import type { PlantElement } from "../types/entityTypes";
 import PlantComponent from "./PlantComponent.vue";
 import polylabel from "polylabel";
-import type { PlantLocal } from "@mendel/common/dist/entity/Plant";
 import { computed } from "vue";
 import { pathGenerator, makeTransform } from "@/services/projection";
 
@@ -31,7 +35,7 @@ const variety = computed((): VarietyLocal => {
 const classList = computed(
   (): (Record<string, unknown> | string | undefined)[] => {
     return [{ cursor: props.isCursor }];
-  }
+  },
 );
 
 const labelTransform = computed((): string | undefined => {
@@ -40,7 +44,9 @@ const labelTransform = computed((): string | undefined => {
   if (planting.shape) {
     if (planting.isArea) {
       return makeTransform(
-        polylabel([planting.shape.coordinates]) as [number, number]
+        polylabel([planting.shape.coordinates]) as [number, number] & {
+          distance: number;
+        },
       );
     }
 
@@ -57,7 +63,7 @@ const labelTransform = computed((): string | undefined => {
 
 const plantLocations = computed(
   (): Position[] =>
-    props.locations ?? props.planting.plants.map((p) => p.location.coordinates)
+    props.locations ?? props.planting.plants.map((p) => p.location.coordinates),
 );
 
 const title = computed(() => {

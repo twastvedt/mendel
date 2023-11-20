@@ -1,7 +1,6 @@
 import {
   Family,
   familyApi,
-  Garden,
   plantApi,
   Planting,
   plantingApi,
@@ -9,9 +8,9 @@ import {
   gardenApi,
   varietyApi,
   Plan,
+  Plant,
   planApi,
-  VarietyLocal,
-} from "@mendel/common/src";
+} from "@mendel/common";
 import type {
   Position,
   PlanLocal,
@@ -20,8 +19,9 @@ import type {
   FamilyLocal,
   Modify,
   HasId,
+  VarietyLocal,
+  Garden,
 } from "@mendel/common";
-import { Plant } from "@mendel/common/src/entity/Plant";
 import { Delaunay } from "d3-delaunay";
 import { PolygonGrid } from "../services/polygonGrid";
 import { defineStore } from "pinia";
@@ -31,7 +31,7 @@ import { useRootStore } from "./rootStore";
 /**
  * We don't need immediate display of Plans before saving to the database, so we can assume all plans have an id.
  */
-type PlanClient = Modify<Plan, { plantings: PlantingLocal[] }>;
+export type PlanClient = Modify<Plan, { plantings: PlantingLocal[] }>;
 
 interface PlanDisplay {
   plan: PlanClient;
@@ -65,14 +65,14 @@ export const useGardenStore = defineStore("garden", () => {
     plans.value = await planApi.all.request();
 
     plans.value.sort(
-      (a, b) => b.updatedDate.valueOf() - a.updatedDate.valueOf()
+      (a, b) => b.updatedDate.valueOf() - a.updatedDate.valueOf(),
     );
 
     varieties.value = [];
 
     const symbols = document.createElementNS(
       "http://www.w3.org/2000/svg",
-      "svg"
+      "svg",
     );
 
     let content = "";
@@ -88,7 +88,7 @@ export const useGardenStore = defineStore("garden", () => {
             f.id
           }" viewBox="0 0 50 50"><text class="textIcon" x="50%" y="50%" font-size="32">${f.name.substring(
             0,
-            2
+            2,
           )}</text></symbol>`;
         }
 
@@ -112,7 +112,7 @@ export const useGardenStore = defineStore("garden", () => {
 
     grid.value = new PolygonGrid(
       garden.value.beds.map((b) => toRaw(b.shape.coordinates[0])),
-      6
+      6,
     );
 
     rootStore.loading = false;
@@ -210,14 +210,14 @@ export const useGardenStore = defineStore("garden", () => {
 
   async function addPlant(
     location: Position,
-    varietyId: number
+    varietyId: number,
   ): Promise<Plant> {
     if (!currentPlan.value) {
       throw new Error("No plan!");
     }
 
     let planting = currentPlan.value.plantings.find(
-      (p) => p.varietyId === varietyId
+      (p) => p.varietyId === varietyId,
     );
 
     if (!planting) {
@@ -271,7 +271,7 @@ export const useGardenStore = defineStore("garden", () => {
 
     if (planting.varietyId !== undefined) {
       planting.variety = varieties.value.find(
-        (v) => v.id === planting.varietyId
+        (v) => v.id === planting.varietyId,
       );
     }
 
@@ -331,7 +331,7 @@ export const useGardenStore = defineStore("garden", () => {
 
     if (!planting) {
       planting = currentPlan.value.plantings.find(
-        (p) => p.id === plant.plantingId
+        (p) => p.id === plant.plantingId,
       );
     }
 
@@ -356,7 +356,7 @@ export const useGardenStore = defineStore("garden", () => {
       delaunay.value = Delaunay.from(
         delaunayPoints,
         (p) => p.location.coordinates[0],
-        (p) => p.location.coordinates[1]
+        (p) => p.location.coordinates[1],
       );
     } else {
       delaunay.value = undefined;
@@ -366,7 +366,7 @@ export const useGardenStore = defineStore("garden", () => {
   async function removePlanting(id: number): Promise<void>;
   async function removePlanting(planting: PlantingLocal): Promise<void>;
   async function removePlanting(
-    idOrPlanting: PlantingLocal | number
+    idOrPlanting: PlantingLocal | number,
   ): Promise<void> {
     if (!currentPlan.value) {
       throw new Error("No plan!");
@@ -378,7 +378,7 @@ export const useGardenStore = defineStore("garden", () => {
       i = currentPlan.value.plantings.findIndex((p) => p.id === idOrPlanting);
     } else {
       i = currentPlan.value.plantings.findIndex(
-        (p) => p.id === idOrPlanting.id
+        (p) => p.id === idOrPlanting.id,
       );
     }
 
@@ -415,11 +415,11 @@ export const useGardenStore = defineStore("garden", () => {
 
     if (options?.varietyId !== undefined) {
       plantings = currentPlan.value.plantings.filter(
-        (p) => p.varietyId === options.varietyId
+        (p) => p.varietyId === options.varietyId,
       );
     } else if (options?.familyId !== undefined) {
       plantings = currentPlan.value.plantings.filter(
-        (p) => p.variety?.familyId === options.familyId
+        (p) => p.variety?.familyId === options.familyId,
       );
     } else {
       plantings = currentPlan.value.plantings;
@@ -438,7 +438,7 @@ export const useGardenStore = defineStore("garden", () => {
 
       if (index === -1) {
         throw new Error(
-          `Could not find matching variety id to edit: ${item.id}`
+          `Could not find matching variety id to edit: ${item.id}`,
         );
       }
 
@@ -455,7 +455,7 @@ export const useGardenStore = defineStore("garden", () => {
       varieties.value.push(newVariety);
 
       const family = families.value.find(
-        (f) => f.id === item.familyId ?? item.family?.id
+        (f) => f.id === item.familyId ?? item.family?.id,
       );
 
       if (family) {
@@ -480,7 +480,7 @@ export const useGardenStore = defineStore("garden", () => {
 
     if (index === -1) {
       throw new Error(
-        `Could not find matching variety id to delete: ${item.id}`
+        `Could not find matching variety id to delete: ${item.id}`,
       );
     }
 
@@ -501,7 +501,7 @@ export const useGardenStore = defineStore("garden", () => {
 
       if (index === -1) {
         throw new Error(
-          `Could not find matching variety id in variety's family: ${item.id}`
+          `Could not find matching variety id in variety's family: ${item.id}`,
         );
       }
 
@@ -511,7 +511,7 @@ export const useGardenStore = defineStore("garden", () => {
     await varietyApi.delete.request({ routeParams: { id: item.id } });
   }
 
-  async function editFamily(item: Family): Promise<void> {
+  async function editFamily(item: FamilyLocal): Promise<void> {
     if (!families.value) {
       throw new Error("No families!");
     }
@@ -521,7 +521,7 @@ export const useGardenStore = defineStore("garden", () => {
 
       if (index === -1) {
         throw new Error(
-          `Could not find matching family id to edit: ${item.id}`
+          `Could not find matching family id to edit: ${item.id}`,
         );
       }
 
@@ -562,7 +562,7 @@ export const useGardenStore = defineStore("garden", () => {
 
     if (index === -1) {
       throw new Error(
-        `Could not find matching family id to delete: ${item.id}`
+        `Could not find matching family id to delete: ${item.id}`,
       );
     }
 

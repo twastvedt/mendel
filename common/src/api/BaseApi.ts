@@ -1,5 +1,5 @@
-import { EntityBase } from "../entity/EntityBase";
-import { Endpoint } from "./Endpoint";
+import type { EntityBase } from "../entity/EntityBase.js";
+import { Endpoint } from "./Endpoint.js";
 
 // eslint-disable-next-line @typescript-eslint/explicit-module-boundary-types
 export function baseApi<T extends EntityBase, TLocal>(endpoint: string) {
@@ -10,17 +10,17 @@ export function baseApi<T extends EntityBase, TLocal>(endpoint: string) {
 
     create: new Endpoint<undefined, TLocal | TLocal[], T | T[]>(
       "post",
-      `/${endpoint}/`
+      `/${endpoint}/`,
     ),
 
     update: new Endpoint<undefined, Partial<TLocal> & EntityBase, undefined>(
       "put",
-      `/${endpoint}`
+      `/${endpoint}`,
     ),
 
     delete: new Endpoint<{ id: number }, undefined, undefined>(
       "delete",
-      `/${endpoint}/:id`
+      `/${endpoint}/:id`,
     ),
   };
 }
