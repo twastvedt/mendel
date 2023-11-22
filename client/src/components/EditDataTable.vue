@@ -75,7 +75,7 @@ function expandAll(v: Event): void {
         hide-details
       >
         <template #append>
-          <v-dialog v-model="showDialog">
+          <v-dialog v-model="showDialog" max-width="600px">
             <template #activator="{ props }">
               <v-btn
                 icon
