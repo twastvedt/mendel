@@ -120,7 +120,7 @@ function elementStyle(elementType: UiElementType): Record<string, string> {
 }
 </script>
 <template>
-  <v-layout class="mapContainer">
+  <v-layout class="mapContainer bg-mapBackground">
     <MapToolbar class="ma-3 toolbar" />
 
     <svg
@@ -213,7 +213,7 @@ function elementStyle(elementType: UiElementType): Record<string, string> {
     </v-footer>
   </v-layout>
 </template>
-<style scoped lang="scss">
+<style scoped>
 .mapContainer {
   width: 100%;
   height: 100%;
@@ -231,7 +231,7 @@ function elementStyle(elementType: UiElementType): Record<string, string> {
   flex: 1 0 auto;
   display: block;
 
-  &::v-deep * {
+  &:deep(*) {
     vector-effect: non-scaling-stroke;
   }
 }
@@ -243,13 +243,13 @@ function elementStyle(elementType: UiElementType): Record<string, string> {
 }
 
 .bed {
-  fill: rgba($color: #ffffff, $alpha: 0.5);
+  fill: rgba(255, 255, 255, 0.05);
   stroke: #000000;
   stroke-width: 1px;
 }
 
 .area {
-  fill: rgba($color: #ffffff, $alpha: 0.15);
+  fill: rgba(255, 255, 255, 0.05);
   stroke: #999999;
   stroke-dasharray: 5;
   mix-blend-mode: multiply;

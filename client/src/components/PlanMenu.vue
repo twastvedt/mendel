@@ -48,7 +48,7 @@ function edit(): void {
     <v-icon @click="edit"> mdi-pencil </v-icon>
   </v-btn>
 
-  <v-dialog v-model="showDialog" max-width="400">
+  <v-dialog v-model="showDialog" max-width="400" overlay-color="black">
     <template #activator="{ props }">
       <v-btn icon>
         <v-icon v-bind="props" @click="newPlan = true" color="primary"

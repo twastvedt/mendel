@@ -15,7 +15,7 @@ const props = withDefaults(
   {
     drawSpacing: true,
     interactive: true,
-  }
+  },
 );
 
 const family = computed(() => {
@@ -67,7 +67,7 @@ const title = computed((): string => {
   </g>
 </template>
 
-<style scoped lang="scss">
+<style scoped>
 .interactive {
   pointer-events: auto;
 }

@@ -133,7 +133,7 @@ function plantClick(event: PointerEvent, plant: PlantLocal): void {
   </g>
 </template>
 
-<style scoped lang="scss">
+<style scoped>
 .shape {
   opacity: 0.5;
   stroke-width: 10px;

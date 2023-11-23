@@ -42,7 +42,7 @@ const projectedCursor = computed((): Position | null => {
     />
   </g>
 </template>
-<style lang="scss" scoped>
+<style scoped>
 .rotationLine {
   stroke: black;
   stroke-width: 2px;

@@ -118,7 +118,7 @@ resetForm();
   </v-card>
 </template>
 
-<style scoped lang="scss">
+<style scoped>
 .svgicon {
   stroke: black;
   height: 52px;

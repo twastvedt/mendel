@@ -19,6 +19,11 @@ export const useRootStore = defineStore("root", () => {
   const toolName = ref("");
   const tool = ref<Tool | null>(null);
 
+  // If this gets big enough, maybe it should be a separate store.
+  const drawSettings = ref({
+    overlap: false,
+  });
+
   const cursorPosition = ref<Position>([0, 0]);
 
   const scaleRange = computed(() => {
@@ -102,6 +107,7 @@ export const useRootStore = defineStore("root", () => {
     cursorPosition,
     scaleRange,
     showDetails,
+    drawSettings,
     onClick,
     setTool,
     updateTool,

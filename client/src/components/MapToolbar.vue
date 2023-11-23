@@ -22,6 +22,15 @@ const varietySelectDisabled = computed(() => {
 
 const variety = ref<Variety | undefined>(undefined);
 
+type DrawSetting = keyof typeof store.drawSettings;
+
+function updateDrawSettings(value: DrawSetting[]) {
+  store.drawSettings.overlap = value.includes("overlap");
+}
+const updateDrawSettingsRetyped = updateDrawSettings as (
+  value: unknown,
+) => void;
+
 function newTool(newTool: string): void {
   switch (newTool) {
     case "drawPlant":
@@ -103,10 +112,15 @@ function newVariety(newVariety?: Variety): void {
       @update:model-value="newVariety"
       class="dropdown"
     />
+    <v-btn-toggle multiple @update:model-value="updateDrawSettingsRetyped">
+      <v-btn icon title="Overlap" value="overlap">
+        <v-icon>mdi-set-none</v-icon>
+      </v-btn>
+    </v-btn-toggle>
   </v-card>
 </template>
 
-<style scoped lang="scss">
+<style scoped>
 .toolbar {
   display: flex;
   align-items: center;

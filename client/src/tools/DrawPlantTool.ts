@@ -6,6 +6,7 @@ import { Vector } from "../Vector";
 import plantComponent from "../components/PlantComponent.vue";
 import type { UiElementType } from "../types/entityTypes";
 import { useGardenStore } from "@/state/gardenStore";
+import { useRootStore } from "@/state/rootStore";
 import { markRaw } from "vue";
 import { makeTransform } from "@/services/projection";
 
@@ -16,6 +17,7 @@ export class DrawPlantTool implements Tool {
   private tempVec = new Vector(0, 0);
   private lastClosestIndex?: number;
   private gardenStore = useGardenStore();
+  private rootStore = useRootStore();
 
   public helpText = "Click to draw a plant.";
   public cursorComponent = markRaw(plantComponent);
@@ -53,16 +55,16 @@ export class DrawPlantTool implements Tool {
     if (this.location && this.variety.family && this.active) {
       this.cursor.set(...point);
 
-      if (this.gardenStore.delaunay) {
+      if (!this.rootStore.drawSettings.overlap && this.gardenStore.delaunay) {
         const thisRadius = this.variety.family.spacing / 2;
 
         this.lastClosestIndex = this.gardenStore.delaunay.find(
           ...point,
-          this.lastClosestIndex
+          this.lastClosestIndex,
         );
 
         const neighbors = this.gardenStore.delaunay.neighbors(
-          this.lastClosestIndex
+          this.lastClosestIndex,
         );
 
         const closestPlants: {
@@ -80,7 +82,7 @@ export class DrawPlantTool implements Tool {
 
           if (delaunayPoint.planting?.variety?.family) {
             const plantVector = Vector.fromArray(
-              delaunayPoint.location.coordinates
+              delaunayPoint.location.coordinates,
             );
 
             const distance =

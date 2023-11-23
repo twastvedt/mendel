@@ -120,7 +120,7 @@ resetForm();
     </v-form>
   </v-card>
 </template>
-<style scoped lang="scss">
+<style scoped>
 .bigSquareButton {
   width: 52px !important;
   height: 52px !important;

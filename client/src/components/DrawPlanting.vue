@@ -45,7 +45,7 @@ const plantsClass = computed(() => ({
 const projectedLineHead = computed(() =>
   props.dividingLine[0] && props.stage !== Stage.selectingAfterLine
     ? projectionTools.projection(props.dividingLine[0])
-    : null
+    : null,
 );
 </script>
 <template>
@@ -100,7 +100,7 @@ const projectedLineHead = computed(() =>
   </g>
 </template>
 
-<style lang="scss" scoped>
+<style scoped>
 g {
   pointer-events: none;
 }

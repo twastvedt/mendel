@@ -85,7 +85,7 @@ function varietyFilter(item: Variety, queryText: string): boolean {
   </v-select>
 </template>
 
-<style scoped lang="scss">
+<style scoped >
 .v-icon.badge {
   height: 50%;
   width: 50%;
