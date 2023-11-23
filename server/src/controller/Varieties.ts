@@ -12,6 +12,9 @@ addWrappedHandler(
   async (request, repository) =>
     repository.find({
       relations: ["varieties"],
+      order: {
+        name: "ASC",
+      },
     }),
 );
 

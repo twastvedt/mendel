@@ -32,18 +32,27 @@ const varietyList = computed(() => {
   return list;
 });
 
-function varietyFilter(item: Variety, queryText: string): boolean {
+function varietyFilter(
+  value: string,
+  query: string,
+  item?: { raw: Variety },
+): boolean {
+  if (!item) {
+    return false;
+  }
+
   return (
-    `${item.name} ${item.family?.name}`
+    `${item.raw.name} ${item.raw.family?.name}`
       .toLocaleLowerCase()
-      .indexOf(queryText.toLocaleLowerCase()) > -1
+      .indexOf(query.toLocaleLowerCase()) > -1
   );
 }
 </script>
 <template>
-  <v-select
+  <v-autocomplete
     :model-value="props.value"
     class="ms-3"
+    auto-select-first
     :disabled="props.disabled"
     :items="varietyList"
     hide-details
@@ -51,7 +60,7 @@ function varietyFilter(item: Variety, queryText: string): boolean {
     item-value="id"
     no-data-text="No plant varieties found"
     return-object
-    :filter="varietyFilter"
+    :custom-filter="varietyFilter"
     @update:model-value="$emit('input', $event)"
   >
     <template #selection="{ item }">
@@ -82,10 +91,10 @@ function varietyFilter(item: Variety, queryText: string): boolean {
         </template>
       </v-list-item>
     </template>
-  </v-select>
+  </v-autocomplete>
 </template>
 
-<style scoped >
+<style scoped>
 .v-icon.badge {
   height: 50%;
   width: 50%;

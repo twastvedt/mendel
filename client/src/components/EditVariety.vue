@@ -74,16 +74,17 @@ resetForm();
           label="Name"
           :rules="[requiredRule]"
         ></v-text-field>
-        <v-select
+        <v-autocomplete
           v-model="formValue.family"
           :items="gardenStore.families as FamilyLocal[]"
+          auto-select-first
           item-title="name"
           return-object
           label="Family"
           persistent-hint
           :rules="[requiredRule]"
           @update:model-value="updateColor"
-        ></v-select>
+        ></v-autocomplete>
         <v-row>
           <v-col>
             <div class="text-caption">Color</div>
