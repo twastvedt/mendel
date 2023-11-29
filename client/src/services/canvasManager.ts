@@ -1,72 +1,103 @@
-import type { Garden, Position } from "@mendel/common";
+import { useGardenStore } from "@/state/gardenStore";
+import type { Position } from "@mendel/common";
+import { interpolateRgbBasis } from "d3-interpolate";
 
-interface Result {
-  type: "fill" | "stroke";
-  index: number;
-}
+export class BackgroundImage {
+  blobUrl?: string;
+  width = 0;
+  height = 0;
+  offset = [0, 0] as Position;
+  margin = 18;
+  /**
+   * Factor to grow areas. Defaults to fill gaps in circle packing.
+   */
+  grow = 2 / Math.sqrt(3);
 
-export class CanvasManager {
-  private canvas: HTMLCanvasElement;
-  private context: CanvasRenderingContext2D;
+  resolution = 2;
+  offscreen = new OffscreenCanvas(500, 500);
+  context: OffscreenCanvasRenderingContext2D;
+  gardenStore = useGardenStore();
+  blur = 24;
+  colorRange = ["#ff0000", "white", "#00ff00"];
+  dataRange = [-5, 5] as [number, number];
 
-  private colorIds = new Map<number, Result>();
-
-  constructor(private garden: Garden, private snapDistance: number) {
-    this.canvas = document.createElement("canvas");
-    const context = this.canvas.getContext("2d");
-
+  constructor() {
+    const context = this.offscreen.getContext("2d");
     if (!context) {
       throw new Error("Could not get canvas context.");
     }
-
-    context.lineWidth = snapDistance * 2;
-
-    const colorStep = (0xffffff / garden.beds.length) * 2;
-
-    let color = colorStep;
-
-    garden.beds.forEach((b, index) => {
-      const path = this.toPath(b.shape.coordinates[0]);
-
-      context.fillStyle = "#" + color.toString(16).padStart(6, "0");
-
-      this.colorIds.set(color, { type: "fill", index });
-
-      context.fill(path);
-
-      color += colorStep;
-
-      context.strokeStyle = "#" + color.toString(16).padStart(6, "0");
-
-      this.colorIds.set(color, { type: "stroke", index });
-
-      context.stroke(path);
-
-      color += colorStep;
-    });
-
     this.context = context;
   }
 
-  testPoint(point: Position): Result | undefined {
-    const data = this.context.getImageData(...point, 1, 1).data;
-
-    const color = data[0] * 256 * 256 + data[1] * 256 + data[2];
-
-    return this.colorIds.get(color);
-  }
-
-  toPath(polygon: Position[]): Path2D {
-    const path = new Path2D();
-
-    path.moveTo(...polygon[0]);
-
-    for (let i = 1; i < polygon.length; i++) {
-      path.lineTo(...polygon[i]);
+  async update() {
+    if (!this.gardenStore.grid) {
+      throw new Error("Grid needed");
     }
 
-    path.closePath();
+    const colorInterpolater = interpolateRgbBasis(this.colorRange);
+    const interpolater = (v: number) =>
+      colorInterpolater(
+        (v - this.dataRange[0]) / (this.dataRange[1] - this.dataRange[0]),
+      );
 
-    return path;
+    const bounds = this.gardenStore.grid.bounds.reduce((b, n) => [
+      Math.min(b[0], n[0]),
+      Math.min(b[1], n[1]),
+      Math.max(b[2], n[2]),
+      Math.max(b[3], n[3]),
+    ]);
+
+    this.width = bounds[2] - bounds[0] + this.margin * 2;
+    this.height = bounds[3] - bounds[1] + this.margin * 2;
+    this.offset = [bounds[0] - this.margin, -bounds[3] - this.margin];
+
+    const transform = (c: Position) =>
+      [
+        (c[0] + this.margin - bounds[0]) * this.resolution,
+        (-c[1] + this.margin + bounds[3]) * this.resolution,
+      ] as Position;
+
+    this.offscreen.width = this.width * this.resolution;
+    this.offscreen.height = this.height * this.resolution;
+    this.context.filter = `blur(${this.blur}px)`;
+
+    this.gardenStore.currentPlan?.plantings.forEach((pl) => {
+      if (pl.variety?.family?.nitrogen) {
+        this.context.fillStyle = interpolater(pl.variety.family.nitrogen);
+        pl.plants.forEach((p) => {
+          this.context.beginPath();
+          this.context.arc(
+            ...transform(p.location.coordinates),
+            (pl.variety!.family!.spacing / 2) * this.grow * this.resolution,
+            0,
+            2 * Math.PI,
+          );
+          this.context.fill();
+        });
+      }
+    });
+
+    if (this.blobUrl) {
+      URL.revokeObjectURL(this.blobUrl);
+    }
+
+    this.blobUrl = URL.createObjectURL(await this.offscreen.convertToBlob());
+  }
+
+  drawFuzzyCircle(location: Position, radius: number, blur = 0) {
+    const circle = new Path2D();
+    circle.arc(...location, radius + blur / 2, 0, 2 * Math.PI);
+    const gradient = this.context.createRadialGradient(
+      ...location,
+      radius - blur / 2,
+      ...location,
+      radius + blur / 2,
+    );
+
+    gradient.addColorStop(0, "black");
+    gradient.addColorStop(1, "transparent");
+
+    this.context.fillStyle = gradient;
+    this.context.fill(circle);
   }
 }

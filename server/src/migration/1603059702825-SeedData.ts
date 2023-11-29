@@ -3,7 +3,7 @@ import type { Polygon, GardenLocal, FamilyLocal } from "@mendel/common";
 import seedBeds from "./SeedBeds.json" assert { type: "json" };
 import { readdir, readFile } from "fs/promises";
 import { parse, join } from "path";
-import type { Container} from "@svgdotjs/svg.js";
+import type { Container } from "@svgdotjs/svg.js";
 import { SVG, registerWindow } from "@svgdotjs/svg.js";
 //@ts-ignore
 import { createSVGWindow } from "svgdom";
@@ -106,6 +106,7 @@ export class SeedData1603059702825 implements MigrationInterface {
           color: "#ff4518",
           icon: svgs.get("tomato") ?? "",
           spacing: 24,
+          nitrogen: -3,
           varieties: [
             {
               name: "Cherokee Purple",
@@ -124,6 +125,7 @@ export class SeedData1603059702825 implements MigrationInterface {
           color: "#ff4518",
           icon: svgs.get("cherry tomato") ?? "",
           spacing: 12,
+          nitrogen: -3,
           varieties: [
             {
               name: "Yellow Pear",
@@ -225,6 +227,7 @@ export class SeedData1603059702825 implements MigrationInterface {
           color: "#86A71F",
           icon: svgs.get("pea") ?? "",
           spacing: 4,
+          nitrogen: 3,
           varieties: [
             {
               name: "Sweet Pea",

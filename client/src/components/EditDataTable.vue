@@ -5,7 +5,7 @@ import { computed, ref, shallowRef, useSlots } from "vue";
 
 const dataTableSlots = Object.fromEntries(
   Object.entries(useSlots()).filter(
-    ([key]) => key !== "default" && key !== "expanded-item",
+    ([key]) => key !== "default" && key !== "expanded-row",
   ),
 );
 
@@ -120,10 +120,10 @@ function expandAll(v: Event): void {
         <v-icon small class="me-2" @click="editItem(item)"> mdi-pencil </v-icon>
         <v-icon small @click="$emit('delete', item)"> mdi-delete </v-icon>
       </template>
-
-      <template #expanded-item="props">
-        <slot name="expanded-item" v-bind="props" />
-      </template>
+      <!--
+      <template #expanded-row="props">
+        <slot name="expanded-row" v-bind="props" />
+      </template> -->
 
       <template v-for="(_, name) in dataTableSlots" #[name]="slotData">
         <slot :name="name" v-bind="slotData || {}" />

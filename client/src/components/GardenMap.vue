@@ -11,6 +11,7 @@ import DetailsPane from "./DetailsPane.vue";
 import type { AreaElement, UiElementType } from "../types/entityTypes";
 import { nextTick, onMounted, ref } from "vue";
 import { pathGenerator, pathFromPoints } from "@/services/projection";
+import { BackgroundImage } from "@/services/canvasManager";
 
 const pathGeneratorLocal = pathGenerator;
 const pathFromPointsLocal = pathFromPoints;
@@ -23,6 +24,12 @@ const content = ref<SVGGElement>();
 
 let zoomBehavior!: d3.ZoomBehavior<SVGSVGElement, unknown>;
 let svg: d3.Selection<SVGSVGElement, unknown, null, undefined>;
+
+let backgroundImage = ref(new BackgroundImage());
+
+gardenStore.ready.then(() => {
+  backgroundImage.value.update();
+});
 
 function zoomed(e: D3ZoomEvent<SVGSVGElement, unknown>): void {
   if (
@@ -132,8 +139,33 @@ function elementStyle(elementType: UiElementType): Record<string, string> {
       @click="store.onClick($event)"
       @mouseleave="onHover"
     >
+      <defs>
+        <template v-if="gardenStore.garden">
+          <clipPath
+            id="beds-clip"
+            :transform="`translate(${backgroundImage.offset
+              .map((c) => -c)
+              .join(' ')})`"
+          >
+            <path
+              v-for="bed in gardenStore.garden.beds"
+              :key="bed.id"
+              :d="pathGeneratorLocal(bed.shape)"
+            />
+          </clipPath>
+        </template>
+      </defs>
       <g ref="content" class="content">
         <template v-if="gardenStore.garden">
+          <image
+            v-if="backgroundImage.blobUrl"
+            clip-path="url(#beds-clip)"
+            :width="backgroundImage.width"
+            :height="backgroundImage.height"
+            :transform="`translate(${backgroundImage.offset.join(' ')})`"
+            :href="backgroundImage.blobUrl"
+          />
+
           <g v-for="(bed, i) in gardenStore.garden.beds" :key="bed.id">
             <path
               class="bed"
