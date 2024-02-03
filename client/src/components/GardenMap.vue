@@ -27,9 +27,9 @@ let svg: d3.Selection<SVGSVGElement, unknown, null, undefined>;
 
 let backgroundImage = ref(new BackgroundImage());
 
-gardenStore.ready.then(() => {
-  backgroundImage.value.update();
-});
+// gardenStore.ready.then(() => {
+//   backgroundImage.value.update();
+// });
 
 function zoomed(e: D3ZoomEvent<SVGSVGElement, unknown>): void {
   if (

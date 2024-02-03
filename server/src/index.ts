@@ -4,6 +4,7 @@ import { join } from "path";
 import cors from "cors";
 import { config } from "dotenv";
 import { fileURLToPath } from "url";
+import history from "connect-history-api-fallback";
 
 const production = process.env.NODE_ENV === "production";
 const __dirname = fileURLToPath(new URL(".", import.meta.url));
@@ -35,7 +36,7 @@ getDataSource()
     );
 
     const app = express()
-      .use(json(), cors())
+      .use(json(), cors(), history())
       .use(BedRoutes)
       .use(GardenRoutes)
       .use(VarietyRoutes)
