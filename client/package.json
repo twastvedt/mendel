@@ -42,8 +42,7 @@
     "clean": "rimraf dist",
     "build": "vite build",
     "preview": "vite preview",
-    "serve": "vite",
-    "buildProd": "vue build src/index.ts"
+    "serve": "vite"
   },
   "browserslist": [
     "> 1%",
